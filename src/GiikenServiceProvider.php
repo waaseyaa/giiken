@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Giiken;
 
 use Giiken\Entity\Community\Community;
+use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Waaseyaa\Entity\EntityType;
 use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
@@ -22,6 +23,17 @@ final class GiikenServiceProvider extends ServiceProvider
                 'id'    => 'id',
                 'uuid'  => 'uuid',
                 'label' => 'name',
+            ],
+        ));
+
+        $this->entityType(new EntityType(
+            id: 'knowledge_item',
+            label: 'Knowledge Item',
+            class: KnowledgeItem::class,
+            keys: [
+                'id'    => 'id',
+                'uuid'  => 'uuid',
+                'label' => 'title',
             ],
         ));
     }
