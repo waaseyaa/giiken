@@ -4,13 +4,27 @@ declare(strict_types=1);
 
 namespace Giiken;
 
+use Giiken\Entity\Community\Community;
+use Waaseyaa\Entity\EntityType;
 use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
 use Waaseyaa\Routing\WaaseyaaRouter;
 
 final class GiikenServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->entityType(new EntityType(
+            id: 'community',
+            label: 'Community',
+            class: Community::class,
+            keys: [
+                'id'    => 'id',
+                'uuid'  => 'uuid',
+                'label' => 'name',
+            ],
+        ));
+    }
 
     public function routes(WaaseyaaRouter $router, ?EntityTypeManager $entityTypeManager = null): void {}
 }
