@@ -102,6 +102,46 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity
     }
 
     /**
+     * Render this KnowledgeItem as markdown for LLM consumption.
+     *
+     * Optimized for context windows: structured metadata header,
+     * then full content body. No YAML frontmatter (wastes tokens).
+     */
+    public function toMarkdown(): string
+    {
+        $lines = [];
+        $lines[] = "# {$this->getTitle()}";
+        $lines[] = '';
+
+        $metaParts = [];
+
+        $knowledgeType = $this->getKnowledgeType();
+        if ($knowledgeType !== null) {
+            $metaParts[] = '**Type:** ' . ucfirst($knowledgeType->value);
+        }
+
+        $metaParts[] = '**Access:** ' . ucfirst($this->getAccessTier()->value);
+
+        $compiledAt = $this->getCompiledAt();
+        if ($compiledAt !== '') {
+            $metaParts[] = '**Compiled:** ' . $compiledAt;
+        }
+
+        $lines[] = implode(' | ', $metaParts);
+        $lines[] = '';
+        $lines[] = $this->getContent();
+
+        $sourceMediaIds = $this->getSourceMediaIds();
+        if ($sourceMediaIds !== []) {
+            $lines[] = '';
+            $lines[] = '---';
+            $lines[] = 'Sources: ' . implode(', ', $sourceMediaIds);
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
      * @return string[]
      */
     private function decodeJsonArray(mixed $raw): array
