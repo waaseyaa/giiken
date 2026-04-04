@@ -24,8 +24,7 @@ final class GiikenServiceProviderTest extends TestCase
     #[Test]
     public function register_is_callable(): void
     {
-        $provider = $this->createPartialMock(GiikenServiceProvider::class, []);
-        $this->assertTrue(method_exists($provider, 'register'));
+        $this->assertTrue(method_exists(GiikenServiceProvider::class, 'register'));
     }
 
     #[Test]
