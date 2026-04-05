@@ -8,6 +8,7 @@ use Giiken\Entity\Community\Community;
 use Giiken\Ingestion\FileIngestionHandlerInterface;
 use Giiken\Ingestion\IngestionException;
 use Giiken\Ingestion\RawDocument;
+use Symfony\Component\Yaml\Yaml;
 use Waaseyaa\Media\File;
 use Waaseyaa\Media\FileRepositoryInterface;
 
@@ -73,13 +74,9 @@ final class MarkdownIngestionHandler implements FileIngestionHandlerInterface
     /** @return array<string, mixed> */
     private function parseYamlFrontmatter(string $yaml): array
     {
-        $result = [];
-        foreach (explode("\n", $yaml) as $line) {
-            if (preg_match('/^(\w+):\s*"?(.+?)"?\s*$/', $line, $m)) {
-                $result[$m[1]] = $m[2];
-            }
-        }
-        return $result;
+        $parsed = Yaml::parse($yaml);
+
+        return is_array($parsed) ? $parsed : [];
     }
 
     private function convertObsidianCallouts(string $content): string

@@ -11,6 +11,7 @@ use Waaseyaa\AI\Pipeline\StepResult;
 
 final class StructureStep implements PipelineStepInterface
 {
+    private const MAX_RETRIES = 2;
     private const SYSTEM_PROMPT = <<<'PROMPT'
 You are a knowledge structuring assistant. Given a document and its knowledge type,
 extract structured metadata. Respond with ONLY valid JSON, no markdown fences.
@@ -40,23 +41,33 @@ PROMPT;
             : '';
 
         $userPrompt = "{$typeHint}\n\n{$payload->markdownContent}";
-        $response = $this->llm->complete(self::SYSTEM_PROMPT, $userPrompt);
+        $lastException = null;
 
-        try {
-            $data = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            throw PipelineException::fromStep('StructureStep', $e);
+        for ($attempt = 0; $attempt < self::MAX_RETRIES; $attempt++) {
+            $response = $this->llm->complete(self::SYSTEM_PROMPT, $userPrompt);
+
+            try {
+                $data = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException $e) {
+                $lastException = $e;
+                continue;
+            }
+
+            $payload->title = (string) ($data['title'] ?? '');
+            $payload->summary = (string) ($data['summary'] ?? '');
+            $payload->people = array_map('strval', (array) ($data['people'] ?? []));
+            $payload->places = array_map('strval', (array) ($data['places'] ?? []));
+            $payload->topics = array_map('strval', (array) ($data['topics'] ?? []));
+            $payload->keyPassages = array_map('strval', (array) ($data['key_passages'] ?? []));
+            $payload->content = $payload->markdownContent;
+
+            return StepResult::success($input);
         }
 
-        $payload->title = (string) ($data['title'] ?? '');
-        $payload->summary = (string) ($data['summary'] ?? '');
-        $payload->people = array_map('strval', (array) ($data['people'] ?? []));
-        $payload->places = array_map('strval', (array) ($data['places'] ?? []));
-        $payload->topics = array_map('strval', (array) ($data['topics'] ?? []));
-        $payload->keyPassages = array_map('strval', (array) ($data['key_passages'] ?? []));
-        $payload->content = $payload->markdownContent;
-
-        return StepResult::success($input);
+        throw PipelineException::fromStep(
+            'StructureStep',
+            $lastException ?? new \RuntimeException('LLM returned invalid JSON after ' . self::MAX_RETRIES . ' attempts'),
+        );
     }
 
     public function describe(): string

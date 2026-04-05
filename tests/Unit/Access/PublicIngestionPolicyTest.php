@@ -55,6 +55,30 @@ final class PublicIngestionPolicyTest extends TestCase
     }
 
     #[Test]
+    public function anonymous_cannot_update(): void
+    {
+        $result = $this->policy->access(
+            $this->item(),
+            'update',
+            $this->account(id: '0', roles: []),
+        );
+
+        $this->assertTrue($result->isForbidden());
+    }
+
+    #[Test]
+    public function authenticated_user_can_update(): void
+    {
+        $result = $this->policy->access(
+            $this->item(),
+            'update',
+            $this->account(id: '1', roles: []),
+        );
+
+        $this->assertTrue($result->isAllowed());
+    }
+
+    #[Test]
     public function anonymous_cannot_delete(): void
     {
         $result = $this->policy->access(
