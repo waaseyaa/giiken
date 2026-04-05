@@ -9,6 +9,7 @@ use Giiken\Ingestion\Handler\MarkdownIngestionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Waaseyaa\Media\File;
 use Waaseyaa\Media\FileRepositoryInterface;
 
 #[CoversClass(MarkdownIngestionHandler::class)]
@@ -86,13 +87,13 @@ final class MarkdownIngestionHandlerTest extends TestCase
     private function createMockMediaRepo(): FileRepositoryInterface
     {
         return new class implements FileRepositoryInterface {
-            public function save(string $filePath, string $filename, string $ownerId): string
+            public function save(File $file): File
             {
-                return 'mock-media-id';
+                return new File(uri: 'mock-media-id', filename: $file->filename, mimeType: $file->mimeType);
             }
-            public function load(string $mediaId): ?string { return null; }
-            public function delete(string $mediaId): void {}
-            public function findByOwner(string $ownerId): array { return []; }
+            public function load(string $uri): ?File { return null; }
+            public function delete(string $uri): bool { return true; }
+            public function findByOwner(int $ownerId): array { return []; }
         };
     }
 }

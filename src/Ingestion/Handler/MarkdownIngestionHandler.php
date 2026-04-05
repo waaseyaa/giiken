@@ -8,6 +8,7 @@ use Giiken\Entity\Community\Community;
 use Giiken\Ingestion\FileIngestionHandlerInterface;
 use Giiken\Ingestion\IngestionException;
 use Giiken\Ingestion\RawDocument;
+use Waaseyaa\Media\File;
 use Waaseyaa\Media\FileRepositoryInterface;
 
 final class MarkdownIngestionHandler implements FileIngestionHandlerInterface
@@ -47,8 +48,13 @@ final class MarkdownIngestionHandler implements FileIngestionHandlerInterface
 
         $content = $this->convertObsidianCallouts($content);
 
-        $communityId = (string) ($community->get('id') ?? $community->get('uuid') ?? '');
-        $mediaId = $this->mediaRepo->save($filePath, $originalFilename, $communityId);
+        $file = new File(
+            uri: $filePath,
+            filename: $originalFilename,
+            mimeType: $mimeType,
+        );
+        $savedFile = $this->mediaRepo->save($file);
+        $mediaId = $savedFile->uri;
 
         $metadata = [];
         if ($frontmatter !== []) {

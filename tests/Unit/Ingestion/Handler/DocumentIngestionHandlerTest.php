@@ -10,6 +10,7 @@ use Giiken\Ingestion\Handler\DocumentIngestionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Waaseyaa\Media\File;
 use Waaseyaa\Media\FileRepositoryInterface;
 
 #[CoversClass(DocumentIngestionHandler::class)]
@@ -68,10 +69,10 @@ final class DocumentIngestionHandlerTest extends TestCase
         };
 
         $mediaRepo = new class implements FileRepositoryInterface {
-            public function save(string $filePath, string $filename, string $ownerId): string { return 'mock-media-id'; }
-            public function load(string $mediaId): ?string { return null; }
-            public function delete(string $mediaId): void {}
-            public function findByOwner(string $ownerId): array { return []; }
+            public function save(File $file): File { return new File(uri: 'mock-media-id', filename: $file->filename, mimeType: $file->mimeType); }
+            public function load(string $uri): ?File { return null; }
+            public function delete(string $uri): bool { return true; }
+            public function findByOwner(int $ownerId): array { return []; }
         };
 
         return new DocumentIngestionHandler($converter, $mediaRepo);

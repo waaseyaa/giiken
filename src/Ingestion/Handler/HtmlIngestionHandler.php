@@ -9,6 +9,7 @@ use Giiken\Ingestion\Converter\FileConverterInterface;
 use Giiken\Ingestion\FileIngestionHandlerInterface;
 use Giiken\Ingestion\IngestionException;
 use Giiken\Ingestion\RawDocument;
+use Waaseyaa\Media\File;
 use Waaseyaa\Media\FileRepositoryInterface;
 
 final class HtmlIngestionHandler implements FileIngestionHandlerInterface
@@ -33,15 +34,15 @@ final class HtmlIngestionHandler implements FileIngestionHandlerInterface
             throw new IngestionException("File does not exist: {$filePath}");
         }
 
-        $communityId = (string) ($community->get('id') ?? $community->get('uuid') ?? '');
-        $mediaId = $this->mediaRepo->save($filePath, $originalFilename, $communityId);
+        $file = new File(uri: $filePath, filename: $originalFilename, mimeType: $mimeType);
+        $savedFile = $this->mediaRepo->save($file);
         $markdown = $this->converter->toMarkdown($filePath, $mimeType);
 
         return new RawDocument(
             markdownContent: $markdown,
             mimeType: $mimeType,
             originalFilename: $originalFilename,
-            mediaId: $mediaId,
+            mediaId: $savedFile->uri,
         );
     }
 }
