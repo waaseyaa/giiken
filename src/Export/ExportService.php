@@ -11,7 +11,7 @@ use RuntimeException;
 use Waaseyaa\Access\AccountInterface;
 use ZipArchive;
 
-final class ExportService
+final class ExportService implements ExportServiceInterface
 {
     public function __construct(
         private readonly KnowledgeItemRepositoryInterface $itemRepository,

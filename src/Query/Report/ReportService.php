@@ -10,7 +10,7 @@ use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use Giiken\Entity\KnowledgeItem\KnowledgeType;
 use Waaseyaa\Access\AccountInterface;
 
-final class ReportService
+final class ReportService implements ReportServiceInterface
 {
     /** @var array<string, ReportRendererInterface> */
     private array $renderers;

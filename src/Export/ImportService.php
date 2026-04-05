@@ -12,7 +12,7 @@ use RuntimeException;
 use Waaseyaa\Access\AccountInterface;
 use ZipArchive;
 
-final class ImportService
+final class ImportService implements ImportServiceInterface
 {
     public function __construct(
         private readonly CommunityRepositoryInterface $communityRepository,
