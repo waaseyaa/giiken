@@ -68,6 +68,23 @@ final class MarkdownIngestionHandlerTest extends TestCase
     }
 
     #[Test]
+    public function it_parses_complex_yaml_frontmatter(): void
+    {
+        $handler = new MarkdownIngestionHandler($this->createMockMediaRepo());
+        $community = new Community(['name' => 'Test']);
+
+        $result = $handler->handle(
+            $this->fixturesDir . '/sample.md',
+            'text/markdown',
+            'sample.md',
+            $community,
+        );
+
+        $this->assertArrayHasKey('frontmatter', $result->metadata);
+        $this->assertSame(['governance', 'solar'], $result->metadata['frontmatter']['tags']);
+    }
+
+    #[Test]
     public function it_strips_frontmatter_from_content(): void
     {
         $handler = new MarkdownIngestionHandler($this->createMockMediaRepo());

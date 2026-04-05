@@ -5,6 +5,7 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "php": ">=8.4",
+        "symfony/yaml": "^7.4",
         "waaseyaa/access": "^0.1",
         "waaseyaa/admin-surface": "^0.1",
         "waaseyaa/ai-agent": "^0.1",

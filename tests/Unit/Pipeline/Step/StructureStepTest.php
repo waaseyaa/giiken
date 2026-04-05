@@ -48,7 +48,40 @@ final class StructureStepTest extends TestCase
     }
 
     #[Test]
-    public function it_throws_on_invalid_json(): void
+    public function it_retries_on_invalid_json_then_succeeds(): void
+    {
+        $validJson = json_encode([
+            'title' => 'Recovered',
+            'summary' => 'After retry',
+            'people' => [],
+            'places' => [],
+            'topics' => [],
+            'key_passages' => [],
+        ], JSON_THROW_ON_ERROR);
+
+        $llm = new class($validJson) implements LlmProviderInterface {
+            private int $calls = 0;
+            public function __construct(private readonly string $valid) {}
+            public function complete(string $s, string $u): string
+            {
+                return ++$this->calls === 1 ? 'not json' : $this->valid;
+            }
+        };
+
+        $step = new StructureStep($llm);
+        $payload = new CompilationPayload();
+        $payload->markdownContent = 'Content';
+        $payload->knowledgeType = KnowledgeType::Cultural;
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
+
+        $result = $step->process(['payload' => $payload], $context);
+
+        $this->assertTrue($result->success);
+        $this->assertSame('Recovered', $payload->title);
+    }
+
+    #[Test]
+    public function it_throws_after_exhausting_retries(): void
     {
         $llm = new class implements LlmProviderInterface {
             public function complete(string $s, string $u): string { return 'not json'; }

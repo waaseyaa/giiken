@@ -35,6 +35,10 @@ final class PublicIngestionPolicy implements AccessPolicyInterface
             return $this->evaluateDelete($entity, $account);
         }
 
+        if ($operation === 'update' && !$account->isAuthenticated()) {
+            return AccessResult::forbidden('update requires authentication');
+        }
+
         return AccessResult::allowed('public access');
     }
 
