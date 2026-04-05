@@ -7,18 +7,14 @@ namespace Giiken\Export;
 use Giiken\Entity\Community\Community;
 use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
 use RuntimeException;
 use Waaseyaa\Access\AccountInterface;
-use Waaseyaa\Media\FileRepositoryInterface;
 use ZipArchive;
 
 final class ExportService
 {
     public function __construct(
         private readonly KnowledgeItemRepositoryInterface $itemRepository,
-        private readonly EmbeddingProviderInterface $embeddingProvider,
-        private readonly FileRepositoryInterface $fileRepository,
     ) {}
 
     public function export(Community $community, AccountInterface $account): string

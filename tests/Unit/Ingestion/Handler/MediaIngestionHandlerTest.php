@@ -79,8 +79,13 @@ final class MediaIngestionHandlerTest extends TestCase
 
             $dispatchedJobs = [];
             $queue = new class ($dispatchedJobs) implements QueueInterface {
+                /** @var array<int, object> */
+                private array $dispatched;
                 /** @param array<int, object> $dispatched */
-                public function __construct(private array &$dispatched) {}
+                public function __construct(array &$dispatched)
+                {
+                    $this->dispatched = &$dispatched;
+                }
                 public function dispatch(object $message): void
                 {
                     $this->dispatched[] = $message;

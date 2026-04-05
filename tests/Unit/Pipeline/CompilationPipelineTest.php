@@ -48,7 +48,6 @@ final class CompilationPipelineTest extends TestCase
         $repo = new class($savedItems) implements EntityRepositoryInterface {
             /**
              * @param array<EntityInterface> $savedItems
-             * @phpstan-ignore-next-line
              */
             public function __construct(private array &$savedItems) {}
             public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }

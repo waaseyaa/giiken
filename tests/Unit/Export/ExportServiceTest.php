@@ -10,33 +10,25 @@ use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use Giiken\Entity\KnowledgeItem\KnowledgeType;
 use Giiken\Export\ExportService;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Waaseyaa\Access\AccountInterface;
-use Waaseyaa\Media\FileRepositoryInterface;
 use ZipArchive;
 
 #[CoversClass(ExportService::class)]
 final class ExportServiceTest extends TestCase
 {
     private KnowledgeItemRepositoryInterface&MockObject $itemRepository;
-    private EmbeddingProviderInterface&MockObject $embeddingProvider;
-    private FileRepositoryInterface&MockObject $fileRepository;
     private ExportService $service;
 
     protected function setUp(): void
     {
-        $this->itemRepository    = $this->createMock(KnowledgeItemRepositoryInterface::class);
-        $this->embeddingProvider = $this->createMock(EmbeddingProviderInterface::class);
-        $this->fileRepository    = $this->createMock(FileRepositoryInterface::class);
+        $this->itemRepository = $this->createMock(KnowledgeItemRepositoryInterface::class);
 
         $this->service = new ExportService(
             itemRepository: $this->itemRepository,
-            embeddingProvider: $this->embeddingProvider,
-            fileRepository: $this->fileRepository,
         );
     }
 
@@ -61,7 +53,10 @@ final class ExportServiceTest extends TestCase
 
         $names = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
-            $names[] = $zip->getNameIndex($i);
+            $name = $zip->getNameIndex($i);
+            if ($name !== false) {
+                $names[] = $name;
+            }
         }
 
         $zip->close();
@@ -99,10 +94,10 @@ final class ExportServiceTest extends TestCase
         $zip = new ZipArchive();
         $zip->open($zipPath);
 
-        $mdContent = null;
+        $mdContent = false;
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
-            if (str_starts_with((string) $name, 'knowledge-items/') && str_ends_with((string) $name, '.md')) {
+            if (is_string($name) && str_starts_with($name, 'knowledge-items/') && str_ends_with($name, '.md')) {
                 $mdContent = $zip->getFromIndex($i);
                 break;
             }
@@ -111,7 +106,7 @@ final class ExportServiceTest extends TestCase
         $zip->close();
         unlink($zipPath);
 
-        $this->assertNotNull($mdContent, 'No markdown file found in knowledge-items/');
+        $this->assertIsString($mdContent, 'No markdown file found in knowledge-items/');
         $this->assertStringContainsString('title: Sacred Waters', $mdContent);
         $this->assertStringContainsString('knowledge_type:', $mdContent);
         $this->assertStringContainsString('---', $mdContent);

@@ -10,7 +10,6 @@ use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use RuntimeException;
 use Waaseyaa\Access\AccountInterface;
-use Waaseyaa\Media\FileRepositoryInterface;
 use ZipArchive;
 
 final class ImportService
@@ -18,7 +17,6 @@ final class ImportService
     public function __construct(
         private readonly CommunityRepositoryInterface $communityRepository,
         private readonly KnowledgeItemRepositoryInterface $itemRepository,
-        private readonly FileRepositoryInterface $fileRepository,
     ) {}
 
     public function import(string $archivePath, AccountInterface $account): ImportResult

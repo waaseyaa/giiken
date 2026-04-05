@@ -13,25 +13,21 @@ use Giiken\Entity\KnowledgeItem\KnowledgeType;
 use Giiken\Export\ExportService;
 use Giiken\Export\ImportResult;
 use Giiken\Export\ImportService;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Waaseyaa\Access\AccountInterface;
-use Waaseyaa\Media\FileRepositoryInterface;
 
 #[CoversClass(ImportService::class)]
 #[CoversClass(ImportResult::class)]
 final class ImportServiceTest extends TestCase
 {
     private KnowledgeItemRepositoryInterface&MockObject $itemRepository;
-    private FileRepositoryInterface&MockObject $fileRepository;
 
     protected function setUp(): void
     {
         $this->itemRepository = $this->createMock(KnowledgeItemRepositoryInterface::class);
-        $this->fileRepository = $this->createMock(FileRepositoryInterface::class);
     }
 
     #[Test]
@@ -54,9 +50,7 @@ final class ImportServiceTest extends TestCase
         ];
 
         // Real ExportService to create a ZIP
-        $exportItemRepo      = $this->createMock(KnowledgeItemRepositoryInterface::class);
-        $exportEmbedProvider = $this->createMock(EmbeddingProviderInterface::class);
-        $exportFileRepo      = $this->createMock(FileRepositoryInterface::class);
+        $exportItemRepo = $this->createMock(KnowledgeItemRepositoryInterface::class);
 
         $exportItemRepo
             ->method('findByCommunity')
@@ -64,8 +58,6 @@ final class ImportServiceTest extends TestCase
 
         $exportService = new ExportService(
             itemRepository: $exportItemRepo,
-            embeddingProvider: $exportEmbedProvider,
-            fileRepository: $exportFileRepo,
         );
 
         $zipPath = $exportService->export($community, $this->adminAccount($communityId));
@@ -78,12 +70,11 @@ final class ImportServiceTest extends TestCase
         $savedItems = [];
 
         // Anonymous class community repository
-        $communityRepository = new class ($communityId, $savedCommunity) implements CommunityRepositoryInterface {
+        $communityRepository = new class ($communityId) implements CommunityRepositoryInterface {
             public ?Community $captured = null;
 
             public function __construct(
                 private readonly string $communityId,
-                mixed $ignored,
             ) {}
 
             public function find(string $id): ?Community
@@ -114,7 +105,6 @@ final class ImportServiceTest extends TestCase
         $importService = new ImportService(
             communityRepository: $communityRepository,
             itemRepository: $this->itemRepository,
-            fileRepository: $this->fileRepository,
         );
 
         $result = $importService->import($zipPath, $this->adminAccount($communityId));
@@ -152,7 +142,6 @@ final class ImportServiceTest extends TestCase
         $importService = new ImportService(
             communityRepository: $communityRepository,
             itemRepository: $this->itemRepository,
-            fileRepository: $this->fileRepository,
         );
 
         $this->expectException(\RuntimeException::class);

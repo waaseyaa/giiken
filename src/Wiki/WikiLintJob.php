@@ -20,6 +20,7 @@ final class WikiLintJob
 
     public function handle(): void
     {
+        /** @var list<\Giiken\Entity\KnowledgeItem\KnowledgeItem> $items */
         $items = $this->repository->findBy([
             'community_id' => $this->communityId,
         ]);
