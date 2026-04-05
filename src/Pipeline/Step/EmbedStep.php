@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace Giiken\Pipeline\Step;
 
 use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Pipeline\CompilationPayload;
 use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\AiPipeline\PipelineContext;
 use Waaseyaa\AiPipeline\PipelineStepInterface;
@@ -20,8 +19,10 @@ final class EmbedStep implements PipelineStepInterface
     public function process(array $input, PipelineContext $context): StepResult
     {
         $payload = $input['payload'];
+        $entityId = bin2hex(random_bytes(16));
 
         $item = new KnowledgeItem([
+            'uuid'             => $entityId,
             'community_id'     => $payload->communityId,
             'title'            => $payload->title,
             'content'          => $payload->content,
@@ -34,7 +35,6 @@ final class EmbedStep implements PipelineStepInterface
         $this->repository->save($item);
 
         $embeddingText = $item->toMarkdown();
-        $entityId = (string) ($item->get('id') ?? $item->get('uuid') ?? uniqid('ki_', true));
         $this->embeddings->store($entityId, $embeddingText, $payload->communityId);
 
         return StepResult::success($input);

@@ -18,15 +18,17 @@ final class EmbedStepTest extends TestCase
     #[Test]
     public function it_creates_knowledge_item_and_stores_embedding(): void
     {
+        $storedEntityId = null;
         $storedText = null;
         $storedCommunityId = null;
 
-        $embeddings = new class($storedText, $storedCommunityId) implements EmbeddingProviderInterface {
-            public function __construct(private ?string &$storedText, private ?string &$storedCommunityId) {}
+        $embeddings = new class($storedEntityId, $storedText, $storedCommunityId) implements EmbeddingProviderInterface {
+            public function __construct(private ?string &$storedEntityId, private ?string &$storedText, private ?string &$storedCommunityId) {}
             public function embed(string $text): array { return [0.1]; }
             public function search(string $query, string $communityId, int $limit = 5): array { return []; }
             public function store(string $entityId, string $text, string $communityId): void
             {
+                $this->storedEntityId = $entityId;
                 $this->storedText = $text;
                 $this->storedCommunityId = $communityId;
             }
@@ -56,6 +58,10 @@ final class EmbedStepTest extends TestCase
         $this->assertSame('Solar Update', $savedItem->getTitle());
         $this->assertSame('comm-1', $storedCommunityId);
         $this->assertStringContainsString('Solar Update', $storedText);
+
+        // Entity ID used for embedding must match the UUID on the saved item
+        $this->assertNotNull($storedEntityId);
+        $this->assertSame((string) $savedItem->get('uuid'), $storedEntityId);
     }
 
     #[Test]
