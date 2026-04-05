@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Giiken\Entity\Community;
 
 use Waaseyaa\Entity\ContentEntityBase;
+use Giiken\Entity\Community\WikiSchema;
 
 final class Community extends ContentEntityBase
 {
@@ -92,6 +93,11 @@ final class Community extends ContentEntityBase
         } catch (\JsonException) {
             return [];
         }
+    }
+
+    public function getTypedWikiSchema(): WikiSchema
+    {
+        return WikiSchema::fromArray($this->getWikiSchema());
     }
 
     public function getCreatedAt(): string
