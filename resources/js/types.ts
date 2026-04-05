@@ -8,6 +8,9 @@ export interface KnowledgeItem {
   compiledAt: string
   createdAt: string
   updatedAt: string
+  allowedRoles?: string[]
+  allowedUsers?: string[]
+  sourceMediaIds?: string[]
 }
 
 export type KnowledgeType = 'cultural' | 'governance' | 'land' | 'relationship' | 'event'
@@ -20,6 +23,7 @@ export interface Community {
   slug: string
   locale: string
   contactEmail: string
+  sovereigntyProfile: 'local' | 'self_hosted' | 'northops'
 }
 
 export interface SearchResult {
