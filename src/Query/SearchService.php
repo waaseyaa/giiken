@@ -13,7 +13,7 @@ use Waaseyaa\Search\SearchFilters;
 use Waaseyaa\Search\SearchProviderInterface;
 use Waaseyaa\Search\SearchRequest;
 
-final class SearchService
+class SearchService
 {
     private const SEMANTIC_WEIGHT = 0.6;
     private const FTS_WEIGHT      = 0.4;
