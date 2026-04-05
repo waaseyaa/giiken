@@ -6,6 +6,7 @@ namespace Giiken;
 
 use Giiken\Entity\Community\Community;
 use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use Giiken\Wiki\WikiLintReport;
 use Waaseyaa\Entity\EntityType;
 use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
@@ -30,6 +31,17 @@ final class GiikenServiceProvider extends ServiceProvider
             id: 'knowledge_item',
             label: 'Knowledge Item',
             class: KnowledgeItem::class,
+            keys: [
+                'id'    => 'id',
+                'uuid'  => 'uuid',
+                'label' => 'title',
+            ],
+        ));
+
+        $this->entityType(new EntityType(
+            id: 'wiki_lint_report',
+            label: 'Wiki Lint Report',
+            class: WikiLintReport::class,
             keys: [
                 'id'    => 'id',
                 'uuid'  => 'uuid',
