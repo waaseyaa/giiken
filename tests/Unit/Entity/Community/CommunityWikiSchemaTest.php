@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace Giiken\Tests\Unit\Entity\Community;
 
 use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\WikiSchema;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Community::class)]
-#[CoversClass(WikiSchema::class)]
 final class CommunityWikiSchemaTest extends TestCase
 {
     #[Test]
