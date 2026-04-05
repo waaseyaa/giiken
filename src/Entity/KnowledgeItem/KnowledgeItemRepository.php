@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Giiken\Entity\KnowledgeItem;
 
 use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
+use Waaseyaa\Search\SearchIndexerInterface;
 
-final class KnowledgeItemRepository
+final class KnowledgeItemRepository implements KnowledgeItemRepositoryInterface
 {
     public function __construct(
         private readonly EntityRepositoryInterface $repository,
+        private readonly ?SearchIndexerInterface $indexer = null,
     ) {}
 
     public function find(string $id): ?KnowledgeItem
@@ -36,6 +38,7 @@ final class KnowledgeItemRepository
     {
         $item->set('updated_at', date('c'));
         $this->repository->save($item);
+        $this->indexer?->index($item);
     }
 
     public function delete(KnowledgeItem $item): void

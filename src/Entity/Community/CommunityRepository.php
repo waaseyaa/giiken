@@ -6,7 +6,7 @@ namespace Giiken\Entity\Community;
 
 use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
-final class CommunityRepository
+final class CommunityRepository implements CommunityRepositoryInterface
 {
     public function __construct(
         private readonly EntityRepositoryInterface $repository,

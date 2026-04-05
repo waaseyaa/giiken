@@ -6,8 +6,9 @@ namespace Giiken\Entity\KnowledgeItem;
 
 use Giiken\Entity\HasCommunity;
 use Waaseyaa\Entity\ContentEntityBase;
+use Waaseyaa\Search\SearchIndexableInterface;
 
-final class KnowledgeItem extends ContentEntityBase implements HasCommunity
+final class KnowledgeItem extends ContentEntityBase implements HasCommunity, SearchIndexableInterface
 {
     protected string $entityTypeId = 'knowledge_item';
 
@@ -99,6 +100,35 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity
     public function getUpdatedAt(): string
     {
         return (string) ($this->get('updated_at') ?? '');
+    }
+
+    public function getSearchDocumentId(): string
+    {
+        return 'knowledge_item:' . $this->get('id');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function toSearchDocument(): array
+    {
+        return [
+            'title'   => $this->getTitle(),
+            'content' => $this->getContent(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchMetadata(): array
+    {
+        return [
+            'entity_type'    => 'knowledge_item',
+            'community_id'   => $this->getCommunityId(),
+            'knowledge_type' => $this->getKnowledgeType()?->value ?? '',
+            'access_tier'    => $this->getAccessTier()->value,
+        ];
     }
 
     /**

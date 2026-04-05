@@ -52,6 +52,17 @@ final class GiikenServiceProvider extends ServiceProvider
 
     public function routes(WaaseyaaRouter $router, ?EntityTypeManager $entityTypeManager = null): void {}
 
-    // Ingestion handler wiring deferred until Waaseyaa DI container is ready.
+    // Phase 2 ingestion handler wiring deferred until Waaseyaa DI container is ready.
     // See docs/superpowers/plans/2026-04-04-ingestion-pipeline.md Task 7.
+
+    // Phase 3 service wiring — deferred until Waaseyaa DI container is ready:
+    //
+    // SearchService(Fts5SearchProvider, EmbeddingProviderInterface, KnowledgeItemAccessPolicy, KnowledgeItemRepositoryInterface)
+    // QaService(SearchService, LlmProviderInterface)
+    // ReportService([GovernanceSummaryReport, LanguageReport, LandBriefReport], KnowledgeItemRepositoryInterface)
+    // ExportService(KnowledgeItemRepositoryInterface, EmbeddingProviderInterface, FileRepositoryInterface)
+    // ImportService(CommunityRepositoryInterface, KnowledgeItemRepositoryInterface, FileRepositoryInterface)
+    // MediaIngestionHandler(FileRepositoryInterface, QueueInterface) -> register with IngestionHandlerRegistry
+    //
+    // KnowledgeItemRepository takes optional SearchIndexerInterface for FTS indexing on save.
 }
