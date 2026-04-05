@@ -23,6 +23,7 @@ final class EmbedStepTest extends TestCase
         $storedText = null;
         $storedCommunityId = null;
 
+        /** @phpstan-ignore-next-line -- by-reference properties are read outside the anonymous class */
         $embeddings = new class($storedEntityId, $storedText, $storedCommunityId) implements EmbeddingProviderInterface {
             public function __construct(private ?string &$storedEntityId, private ?string &$storedText, private ?string &$storedCommunityId) {}
             public function embed(string $text): array { return [0.1]; }
@@ -36,11 +37,12 @@ final class EmbedStepTest extends TestCase
         };
 
         $savedItem = null;
+        /** @phpstan-ignore-next-line -- by-reference property is read outside the anonymous class */
         $repo = new class($savedItem) implements EntityRepositoryInterface {
             public function __construct(private ?KnowledgeItem &$savedItem) {}
             public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
             public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
-            public function save(EntityInterface $entity, bool $validate = true): int { $this->savedItem = $entity; return 1; }
+            public function save(EntityInterface $entity, bool $validate = true): int { \assert($entity instanceof KnowledgeItem); $this->savedItem = $entity; return 1; }
             public function delete(EntityInterface $entity): void {}
             public function exists(string $id): bool { return false; }
             public function count(array $criteria = []): int { return 0; }

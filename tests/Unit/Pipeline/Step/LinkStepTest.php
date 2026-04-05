@@ -78,9 +78,11 @@ final class LinkStepTest extends TestCase
         $this->assertCount(5, $payload->linkedItemIds);
     }
 
+    /** @param array<array{id: string, score: float}> $results */
     private function createEmbeddingProvider(array $results): EmbeddingProviderInterface
     {
         return new class($results) implements EmbeddingProviderInterface {
+            /** @param array<array{id: string, score: float}> $results */
             public function __construct(private readonly array $results) {}
             public function embed(string $text): array { return [0.1, 0.2]; }
             public function search(string $query, string $communityId, int $limit = 5): array { return $this->results; }
