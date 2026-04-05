@@ -7,7 +7,7 @@ namespace Giiken\Query;
 use Giiken\Pipeline\Provider\LlmProviderInterface;
 use Waaseyaa\Access\AccountInterface;
 
-final class QaService
+final class QaService implements QaServiceInterface
 {
     private const SYSTEM_PROMPT = 'You are a knowledge assistant for an Indigenous community. Answer the question using ONLY the provided context. Cite sources by their item ID in square brackets (e.g., [item-123]). If the context does not contain enough information to answer, say so. Never fabricate information.';
     private const NO_INFO_MSG   = "I don't have enough information in this community's knowledge base to answer that question.";
