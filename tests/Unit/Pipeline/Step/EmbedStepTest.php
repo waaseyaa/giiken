@@ -9,8 +9,9 @@ use Giiken\Pipeline\Step\EmbedStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Waaseyaa\AiPipeline\PipelineContext;
-use Waaseyaa\Entity\EntityRepositoryInterface;
+use Waaseyaa\AI\Pipeline\PipelineContext;
+use Waaseyaa\Entity\EntityInterface;
+use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
 #[CoversClass(EmbedStep::class)]
 final class EmbedStepTest extends TestCase
@@ -37,9 +38,16 @@ final class EmbedStepTest extends TestCase
         $savedItem = null;
         $repo = new class($savedItem) implements EntityRepositoryInterface {
             public function __construct(private ?KnowledgeItem &$savedItem) {}
-            public function save(object $entity): void { $this->savedItem = $entity; }
-            public function load(string $id): ?object { return null; }
-            public function delete(string $id): void {}
+            public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
+            public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
+            public function save(EntityInterface $entity, bool $validate = true): int { $this->savedItem = $entity; return 1; }
+            public function delete(EntityInterface $entity): void {}
+            public function exists(string $id): bool { return false; }
+            public function count(array $criteria = []): int { return 0; }
+            public function loadRevision(string $entityId, int $revisionId): ?EntityInterface { return null; }
+            public function rollback(string $entityId, int $targetRevisionId): EntityInterface { throw new \RuntimeException('Not implemented'); }
+            public function saveMany(array $entities, bool $validate = true): array { return []; }
+            public function deleteMany(array $entities): int { return 0; }
         };
 
         $step = new EmbedStep($embeddings, $repo);
@@ -50,10 +58,10 @@ final class EmbedStepTest extends TestCase
         $payload->summary = 'A summary.';
         $payload->mediaId = 'media-1';
 
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
         $result = $step->process(['payload' => $payload], $context);
 
-        $this->assertTrue($result->isSuccess());
+        $this->assertTrue($result->success);
         $this->assertNotNull($savedItem);
         $this->assertSame('Solar Update', $savedItem->getTitle());
         $this->assertSame('comm-1', $storedCommunityId);
@@ -73,9 +81,16 @@ final class EmbedStepTest extends TestCase
             public function store(string $entityId, string $text, string $communityId): void {}
         };
         $repo = new class implements EntityRepositoryInterface {
-            public function save(object $entity): void {}
-            public function load(string $id): ?object { return null; }
-            public function delete(string $id): void {}
+            public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
+            public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
+            public function save(EntityInterface $entity, bool $validate = true): int { return 1; }
+            public function delete(EntityInterface $entity): void {}
+            public function exists(string $id): bool { return false; }
+            public function count(array $criteria = []): int { return 0; }
+            public function loadRevision(string $entityId, int $revisionId): ?EntityInterface { return null; }
+            public function rollback(string $entityId, int $targetRevisionId): EntityInterface { throw new \RuntimeException('Not implemented'); }
+            public function saveMany(array $entities, bool $validate = true): array { return []; }
+            public function deleteMany(array $entities): int { return 0; }
         };
 
         $step = new EmbedStep($embeddings, $repo);

@@ -4,10 +4,10 @@ namespace Giiken\Pipeline\Step;
 
 use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Waaseyaa\AiPipeline\PipelineContext;
-use Waaseyaa\AiPipeline\PipelineStepInterface;
-use Waaseyaa\AiPipeline\StepResult;
-use Waaseyaa\Entity\EntityRepositoryInterface;
+use Waaseyaa\AI\Pipeline\PipelineContext;
+use Waaseyaa\AI\Pipeline\PipelineStepInterface;
+use Waaseyaa\AI\Pipeline\StepResult;
+use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
 final class EmbedStep implements PipelineStepInterface
 {

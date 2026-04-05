@@ -10,7 +10,7 @@ use Giiken\Pipeline\Step\ClassifyStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Waaseyaa\AiPipeline\PipelineContext;
+use Waaseyaa\AI\Pipeline\PipelineContext;
 
 #[CoversClass(ClassifyStep::class)]
 final class ClassifyStepTest extends TestCase
@@ -23,10 +23,10 @@ final class ClassifyStepTest extends TestCase
         $payload = new CompilationPayload();
         $payload->markdownContent = '# Council Meeting Minutes';
 
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
         $result = $step->process(['payload' => $payload], $context);
 
-        $this->assertTrue($result->isSuccess());
+        $this->assertTrue($result->success);
         $this->assertSame(KnowledgeType::Governance, $payload->knowledgeType);
     }
 
@@ -38,7 +38,7 @@ final class ClassifyStepTest extends TestCase
         $payload = new CompilationPayload();
         $payload->markdownContent = '# Environmental Assessment';
 
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
         $step->process(['payload' => $payload], $context);
 
         $this->assertSame(KnowledgeType::Land, $payload->knowledgeType);
@@ -57,7 +57,7 @@ final class ClassifyStepTest extends TestCase
         $step = new ClassifyStep($llm);
         $payload = new CompilationPayload();
         $payload->markdownContent = 'Some content';
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
 
         $this->expectException(PipelineException::class);
         $this->expectExceptionMessage('ClassifyStep');

@@ -10,9 +10,9 @@ use Giiken\Pipeline\Step\EmbedStep;
 use Giiken\Pipeline\Step\LinkStep;
 use Giiken\Pipeline\Step\StructureStep;
 use Giiken\Pipeline\Step\TranscribeStep;
-use Waaseyaa\AiPipeline\PipelineContext;
-use Waaseyaa\AiPipeline\PipelineStepInterface;
-use Waaseyaa\Entity\EntityRepositoryInterface;
+use Waaseyaa\AI\Pipeline\PipelineContext;
+use Waaseyaa\AI\Pipeline\PipelineStepInterface;
+use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
 final class CompilationPipeline
 {
@@ -32,18 +32,21 @@ final class CompilationPipeline
         $payload->sourceUrl = $document->metadata['frontmatter']['source'] ?? null;
 
         $steps = $this->buildSteps();
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'compilation', startedAt: time());
         $input = ['payload' => $payload];
 
         foreach ($steps as $step) {
             $result = $step->process($input, $context);
-            if (!$result->isSuccess()) {
+            if (!$result->success) {
                 throw PipelineException::fromStep(
                     $step->describe(),
-                    new \RuntimeException('Step returned failure'),
+                    new \RuntimeException($result->message ?: 'Step returned failure'),
                 );
             }
-            $input = $result->getOutput();
+            if ($result->stopPipeline) {
+                break;
+            }
+            $input = $result->output;
         }
     }
 

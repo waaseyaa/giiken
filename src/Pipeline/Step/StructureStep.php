@@ -5,9 +5,9 @@ namespace Giiken\Pipeline\Step;
 use Giiken\Pipeline\CompilationPayload;
 use Giiken\Pipeline\PipelineException;
 use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Waaseyaa\AiPipeline\PipelineContext;
-use Waaseyaa\AiPipeline\PipelineStepInterface;
-use Waaseyaa\AiPipeline\StepResult;
+use Waaseyaa\AI\Pipeline\PipelineContext;
+use Waaseyaa\AI\Pipeline\PipelineStepInterface;
+use Waaseyaa\AI\Pipeline\StepResult;
 
 final class StructureStep implements PipelineStepInterface
 {

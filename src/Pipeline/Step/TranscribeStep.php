@@ -2,9 +2,9 @@
 declare(strict_types=1);
 namespace Giiken\Pipeline\Step;
 
-use Waaseyaa\AiPipeline\PipelineContext;
-use Waaseyaa\AiPipeline\PipelineStepInterface;
-use Waaseyaa\AiPipeline\StepResult;
+use Waaseyaa\AI\Pipeline\PipelineContext;
+use Waaseyaa\AI\Pipeline\PipelineStepInterface;
+use Waaseyaa\AI\Pipeline\StepResult;
 
 final class TranscribeStep implements PipelineStepInterface
 {

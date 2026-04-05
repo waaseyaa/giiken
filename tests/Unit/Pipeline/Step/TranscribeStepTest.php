@@ -7,7 +7,7 @@ use Giiken\Pipeline\Step\TranscribeStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Waaseyaa\AiPipeline\PipelineContext;
+use Waaseyaa\AI\Pipeline\PipelineContext;
 
 #[CoversClass(TranscribeStep::class)]
 final class TranscribeStepTest extends TestCase
@@ -19,10 +19,10 @@ final class TranscribeStepTest extends TestCase
         $payload = new CompilationPayload();
         $payload->markdownContent = '# Existing Content';
 
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
         $result = $step->process(['payload' => $payload], $context);
 
-        $this->assertTrue($result->isSuccess());
+        $this->assertTrue($result->success);
         $this->assertSame('# Existing Content', $payload->markdownContent);
     }
 

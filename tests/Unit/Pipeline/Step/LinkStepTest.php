@@ -8,7 +8,7 @@ use Giiken\Pipeline\Step\LinkStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Waaseyaa\AiPipeline\PipelineContext;
+use Waaseyaa\AI\Pipeline\PipelineContext;
 
 #[CoversClass(LinkStep::class)]
 final class LinkStepTest extends TestCase
@@ -30,10 +30,10 @@ final class LinkStepTest extends TestCase
         $payload->topics = ['solar', 'council'];
         $payload->communityId = 'comm-1';
 
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
         $result = $step->process(['payload' => $payload], $context);
 
-        $this->assertTrue($result->isSuccess());
+        $this->assertTrue($result->success);
         $this->assertSame(['item-1', 'item-2', 'item-3'], $payload->linkedItemIds);
     }
 
@@ -52,7 +52,7 @@ final class LinkStepTest extends TestCase
         $payload->topics = [];
         $payload->communityId = 'comm-1';
 
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
         $step->process(['payload' => $payload], $context);
         $this->assertSame([], $payload->linkedItemIds);
     }
@@ -73,7 +73,7 @@ final class LinkStepTest extends TestCase
         $payload->topics = [];
         $payload->communityId = 'comm-1';
 
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
         $step->process(['payload' => $payload], $context);
         $this->assertCount(5, $payload->linkedItemIds);
     }

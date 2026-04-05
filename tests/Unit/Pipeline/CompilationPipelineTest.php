@@ -11,7 +11,8 @@ use Giiken\Pipeline\Provider\LlmProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Waaseyaa\Entity\EntityRepositoryInterface;
+use Waaseyaa\Entity\EntityInterface;
+use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
 #[CoversClass(CompilationPipeline::class)]
 final class CompilationPipelineTest extends TestCase
@@ -46,9 +47,16 @@ final class CompilationPipelineTest extends TestCase
         $savedItems = [];
         $repo = new class($savedItems) implements EntityRepositoryInterface {
             public function __construct(private array &$savedItems) {}
-            public function save(object $entity): void { $this->savedItems[] = $entity; }
-            public function load(string $id): ?object { return null; }
-            public function delete(string $id): void {}
+            public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
+            public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
+            public function save(EntityInterface $entity, bool $validate = true): int { $this->savedItems[] = $entity; return 1; }
+            public function delete(EntityInterface $entity): void {}
+            public function exists(string $id): bool { return false; }
+            public function count(array $criteria = []): int { return 0; }
+            public function loadRevision(string $entityId, int $revisionId): ?EntityInterface { return null; }
+            public function rollback(string $entityId, int $targetRevisionId): EntityInterface { throw new \RuntimeException('Not implemented'); }
+            public function saveMany(array $entities, bool $validate = true): array { return []; }
+            public function deleteMany(array $entities): int { return 0; }
         };
 
         $embeddings = new class implements EmbeddingProviderInterface {
@@ -79,9 +87,16 @@ final class CompilationPipelineTest extends TestCase
             public function complete(string $s, string $u): string { return 'invalid_type'; }
         };
         $repo = new class implements EntityRepositoryInterface {
-            public function save(object $entity): void {}
-            public function load(string $id): ?object { return null; }
-            public function delete(string $id): void {}
+            public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
+            public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
+            public function save(EntityInterface $entity, bool $validate = true): int { return 1; }
+            public function delete(EntityInterface $entity): void {}
+            public function exists(string $id): bool { return false; }
+            public function count(array $criteria = []): int { return 0; }
+            public function loadRevision(string $entityId, int $revisionId): ?EntityInterface { return null; }
+            public function rollback(string $entityId, int $targetRevisionId): EntityInterface { throw new \RuntimeException('Not implemented'); }
+            public function saveMany(array $entities, bool $validate = true): array { return []; }
+            public function deleteMany(array $entities): int { return 0; }
         };
         $embeddings = new class implements EmbeddingProviderInterface {
             public function embed(string $text): array { return []; }

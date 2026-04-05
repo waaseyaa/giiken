@@ -10,7 +10,7 @@ use Giiken\Pipeline\Step\StructureStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Waaseyaa\AiPipeline\PipelineContext;
+use Waaseyaa\AI\Pipeline\PipelineContext;
 
 #[CoversClass(StructureStep::class)]
 final class StructureStepTest extends TestCase
@@ -37,10 +37,10 @@ final class StructureStepTest extends TestCase
         $payload->markdownContent = '# Council meeting content...';
         $payload->knowledgeType = KnowledgeType::Governance;
 
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
         $result = $step->process(['payload' => $payload], $context);
 
-        $this->assertTrue($result->isSuccess());
+        $this->assertTrue($result->success);
         $this->assertSame('Council Meeting — Solar Project Discussion', $payload->title);
         $this->assertSame(['Mayor Smith', 'Councillor Jones'], $payload->people);
         $this->assertSame(['Massey', 'Highway 17 corridor'], $payload->places);
@@ -58,7 +58,7 @@ final class StructureStepTest extends TestCase
         $payload = new CompilationPayload();
         $payload->markdownContent = 'Content';
         $payload->knowledgeType = KnowledgeType::Cultural;
-        $context = new PipelineContext(['payload' => $payload]);
+        $context = new PipelineContext(pipelineId: 'test', startedAt: time());
 
         $this->expectException(PipelineException::class);
         $this->expectExceptionMessage('StructureStep');
