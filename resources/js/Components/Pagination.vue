@@ -1,0 +1,31 @@
+<script setup lang="ts">
+import { Link } from '@inertiajs/vue3'
+
+const props = defineProps<{
+  currentPage: number
+  totalPages: number
+  baseUrl: string
+  query?: string
+}>()
+
+function pageUrl(page: number): string {
+  const params = new URLSearchParams()
+  if (props.query) params.set('q', props.query)
+  params.set('page', String(page))
+  return `${props.baseUrl}?${params.toString()}`
+}
+</script>
+
+<template>
+  <nav v-if="totalPages > 1" class="flex gap-2 justify-center mt-6">
+    <Link
+      v-for="page in totalPages"
+      :key="page"
+      :href="pageUrl(page)"
+      class="px-3 py-1.5 rounded text-sm"
+      :class="page === currentPage ? 'bg-indigo text-white' : 'bg-indigo-light text-indigo hover:bg-indigo hover:text-white'"
+    >
+      {{ page }}
+    </Link>
+  </nav>
+</template>
