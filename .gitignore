@@ -1,3 +1,14 @@
 /vendor/
 /.phpunit.cache/
 /phpstan/
+
+# Node / frontend
+/node_modules/
+/node-compile-cache/
+/public/build/
+
+# Local runtime
+/storage/
+
+# Background sync tool stray working dirs
+/waaseyaa-sync-*/
