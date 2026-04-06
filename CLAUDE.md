@@ -8,18 +8,28 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 
 **PHP:** 8.4+ | **License:** GPL-2.0-or-later | **Namespace:** `Giiken\` (PSR-4)
 
-## Boot-to-browser status (as of 2026-04-06)
+## Boot-to-browser status (as of 2026-04-06, second probe)
 
-`vendor/bin/waaseyaa serve` starts, but a `GET /{community-slug}` request cannot yet reach the controller. There is a prerequisite chain that must land in order:
+`vendor/bin/waaseyaa serve` starts, but a `GET /{community-slug}` request cannot yet reach the controller. Each step was discovered by running the next and letting the next failure name the next gap. Do not skip levels.
 
-1. **Framework release** — waaseyaa/framework#1125 bundles 4 framework fixes (cli bin entrypoint, `app.url` default, `[Class, method]` array-controller normalization). Committed on waaseyaa's local main, push blocked by waaseyaa/framework#1126 (spec-drift + phpunit pre-push hooks). Not yet a tagged alpha.
-2. **Giiken service registrations** — #42: `GiikenServiceProvider::register()` does not bind `SearchService`, `QaServiceInterface`, `CommunityRepositoryInterface`, or `KnowledgeItemRepositoryInterface`. `SsrPageHandler::resolveControllerInstance()` throws when reflecting `DiscoveryController`'s constructor.
-3. **Entity schema migration** — #43: no migration materializes `community`, `knowledge_item`, `wiki_lint_report` tables. `vendor/bin/waaseyaa migrate` reports "Nothing to migrate".
-4. **Seed command** — #44: `vendor/bin/waaseyaa giiken:seed:test-community` does not exist.
-5. **Real LLM providers** — #40: `GiikenServiceProvider` wires `NullLlmAdapter` + `FakeEmbeddingAdapter`; `/ask` returns null and semantic ranking is meaningless.
-6. **Session auth** — #41: `HttpKernel` already has the `_account` pipeline machinery and `waaseyaa/auth` ships `LoginController`, but giiken has no login page, no test users seeded with community roles, and no integration tests covering the anonymous/member/staff tiers.
+### Framework prerequisites (waaseyaa repo)
 
-Do not try to skip levels. Each step was discovered by running the next and letting the next failure name the next gap.
+1. ✅ **alpha.107** released — bundles cli bin entrypoint, `app.url` default, `[Class, method]` array-controller normalization (waaseyaa/framework#1125).
+2. 🟡 **foundation→ssr dependency** — waaseyaa/framework#1127. `composer update waaseyaa/*` removes `vendor/waaseyaa/ssr` because foundation never declared it, but `HttpKernel` directly references `Waaseyaa\SSR\RenderCache`. Fix committed locally on framework `main` (`5001c5d1`), needs alpha.108 cut.
+3. 🟡 **EntityRepository factory** — waaseyaa/framework#1128. The framework provides no `EntityTypeManager::getRepository(string $id)` accessor. Building a working `Waaseyaa\EntityStorage\EntityRepository` requires manually assembling 3-7 dependencies. This is the architectural blocker for #42 below.
+4. 🟡 **Hook discipline** — waaseyaa/framework#1126 (spec-drift + phpunit pre-push hooks) is the meta-blocker for cutting alpha.108.
+
+### Giiken-side prerequisites (this repo)
+
+5. 🔴 **Service registrations** — #42, blocked on framework#1128. `GiikenServiceProvider::register()` does not bind `SearchService`, `QaServiceInterface`, `CommunityRepositoryInterface`, or `KnowledgeItemRepositoryInterface`. `SsrPageHandler::resolveControllerInstance()` throws when reflecting `DiscoveryController`'s constructor. Wiring requires `EntityRepository` factory machinery that doesn't exist yet.
+6. 🔴 **Entity schema migration** — #43. No migration materializes `community`, `knowledge_item`, `wiki_lint_report` tables. `vendor/bin/waaseyaa migrate` reports "Nothing to migrate".
+7. 🔴 **Seed command** — #44. `vendor/bin/waaseyaa giiken:seed:test-community` does not exist.
+8. 🔴 **Real LLM providers** — #40. Comments in `GiikenServiceProvider` say `NullLlmAdapter`/`FakeEmbeddingAdapter` should wire `Waaseyaa\AI\Agent\Provider\NullLlmProvider`, but **that framework class does not exist** (`find packages/ai-agent -name 'NullLlm*'` is empty). #40 needs either a giiken-local null impl or a small framework precursor before it can land.
+9. 🔴 **Session auth** — #41. `HttpKernel` already has the `_account` pipeline machinery and `waaseyaa/auth` ships `LoginController`/`LogoutController`/`AuthenticateMiddleware`. The real gap is no login page, no test users seeded with community roles, no integration tests covering anonymous/member/staff tiers. The framing of "kernel passes null" in the original issue is partially outdated.
+
+### Two giiken-local interfaces have no concrete implementations
+
+`Giiken\Pipeline\Provider\LlmProviderInterface` and `Giiken\Pipeline\Provider\EmbeddingProviderInterface` exist with no production implementations — only anonymous classes inside test fixtures (`tests/Unit/Pipeline/Step/*Test.php`). #40 should also create concrete null implementations as a starting point.
 
 ## Commands
 
