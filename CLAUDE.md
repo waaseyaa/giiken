@@ -15,7 +15,7 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 ### Framework prerequisites (waaseyaa repo)
 
 1. ✅ **alpha.107** released — bundles cli bin entrypoint, `app.url` default, `[Class, method]` array-controller normalization (waaseyaa/framework#1125).
-2. 🟡 **foundation→ssr dependency** — waaseyaa/framework#1127. `composer update waaseyaa/*` removes `vendor/waaseyaa/ssr` because foundation never declared it, but `HttpKernel` directly references `Waaseyaa\SSR\RenderCache`. Fix committed locally on framework `main` (`5001c5d1`), needs alpha.108 cut.
+2. ✅ **foundation→ssr dependency** — waaseyaa/framework#1127, **closed**. `composer update waaseyaa/*` was removing `vendor/waaseyaa/ssr` because foundation never declared it. Resolved upstream.
 3. 🟡 **EntityRepository factory** — waaseyaa/framework#1128. The framework provides no `EntityTypeManager::getRepository(string $id)` accessor. Building a working `Waaseyaa\EntityStorage\EntityRepository` requires manually assembling 3-7 dependencies. This is the architectural blocker for #42 below.
 4. 🟡 **Hook discipline** — waaseyaa/framework#1126 (spec-drift + phpunit pre-push hooks) is the meta-blocker for cutting alpha.108.
 
