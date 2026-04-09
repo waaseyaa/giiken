@@ -45,6 +45,8 @@ The first Giiken app-level class in normal boot is `Giiken\GiikenServiceProvider
 
 - `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
 - `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `Giiken\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
+- `register()` re-binds `InertiaFullPageRendererInterface` with a project-root-based `ViteAssetManager` (`public/build` manifest or `VITE_DEV_SERVER`), sets `Inertia::setVersion('giiken')`, and refreshes `Inertia::setRenderer(...)` so asset paths do not depend on `getcwd()`
+- Frontend bundle: Vite entry `resources/js/app.ts`, production output under `public/build` (`npm run build`); set `VITE_DEV_SERVER` (e.g. `http://127.0.0.1:5173`) when using `npm run dev` for HMR
 - `commands()` contributes CLI commands (`giiken:seed:test-community`)
 - `routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `GET` `/logout`)
 
@@ -77,6 +79,7 @@ After boot, `HttpKernel::serveHttpRequest()` executes:
 
 App routes are added through `GiikenServiceProvider::routes(...)`, including:
 
+- Public landing (Inertia): `GET` `/` → `Discover` page (`HomeController::discover`)
 - Session HTML auth (public): `GET`/`POST` `/login`, `GET` `/logout`
 - Discovery:
   - `/{communitySlug}`
