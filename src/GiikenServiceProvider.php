@@ -15,6 +15,7 @@ use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use Giiken\Export\ExportService;
 use Giiken\Export\ExportServiceInterface;
 use Giiken\Http\Controller\DiscoveryController;
+use Giiken\Http\Controller\HomeController;
 use Giiken\Http\Controller\ManagementController;
 use Giiken\Http\Controller\QueryApiController;
 use Giiken\Http\Controller\WebLoginController;
@@ -39,11 +40,14 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDi
 use Waaseyaa\Database\DatabaseInterface;
 use Waaseyaa\Entity\EntityType;
 use Waaseyaa\Entity\EntityTypeManager;
+use Waaseyaa\Foundation\Asset\ViteAssetManager;
+use Waaseyaa\Foundation\Http\Inertia\InertiaFullPageRendererInterface;
 use Waaseyaa\EntityStorage\Connection\SingleConnectionResolver;
 use Waaseyaa\EntityStorage\Driver\SqlStorageDriver;
 use Waaseyaa\EntityStorage\EntityRepository as WaaseyaaEntityRepository;
-use Waaseyaa\Foundation\Http\Inertia\InertiaFullPageRendererInterface;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
+use Waaseyaa\Inertia\Inertia;
+use Waaseyaa\Inertia\RootTemplateRenderer;
 use Waaseyaa\Routing\RouteBuilder;
 use Waaseyaa\Routing\WaaseyaaRouter;
 use Waaseyaa\Search\SearchIndexerInterface;
@@ -187,6 +191,28 @@ final class GiikenServiceProvider extends ServiceProvider
                 $this->resolve(KnowledgeItemAccessPolicy::class),
             );
         });
+
+        $this->registerInertiaViteRenderer();
+    }
+
+    /**
+     * Use project-root-based Vite paths (not getcwd()) so assets resolve under PHPUnit and CLI.
+     */
+    private function registerInertiaViteRenderer(): void
+    {
+        $projectRoot = dirname(__DIR__);
+        $rawDev = $_ENV['VITE_DEV_SERVER'] ?? getenv('VITE_DEV_SERVER');
+        $devServerUrl = is_string($rawDev) && $rawDev !== '' ? $rawDev : null;
+
+        $assetManager = new ViteAssetManager(
+            basePath: $projectRoot . '/public',
+            baseUrl: '',
+            devServerUrl: $devServerUrl,
+        );
+        $renderer = new RootTemplateRenderer(assetManager: $assetManager);
+        Inertia::setRenderer($renderer);
+        Inertia::setVersion('giiken');
+        $this->singleton(InertiaFullPageRendererInterface::class, static fn (): InertiaFullPageRendererInterface => $renderer);
     }
 
     public function commands(
@@ -205,6 +231,16 @@ final class GiikenServiceProvider extends ServiceProvider
 
     public function routes(WaaseyaaRouter $router, ?EntityTypeManager $entityTypeManager = null): void
     {
+        $router->addRoute(
+            'giiken.home',
+            RouteBuilder::create('/')
+                ->controller(HomeController::class . '::discover')
+                ->methods('GET')
+                ->allowAll()
+                ->render()
+                ->build(),
+        );
+
         $router->addRoute(
             'giiken.login',
             RouteBuilder::create('/login')

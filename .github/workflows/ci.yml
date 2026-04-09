@@ -23,6 +23,15 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install npm dependencies and build frontend
+        run: npm ci && npm run build
+
       - name: Check lifecycle documentation drift
         run: ./scripts/check-lifecycle-drift.sh
 
