@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Giiken\Query\Report;
 
 use Giiken\Access\CommunityRole;
+use Giiken\Access\KnowledgeItemAccessPolicy;
 use Giiken\Entity\Community\Community;
+use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use Giiken\Entity\KnowledgeItem\KnowledgeType;
 use Waaseyaa\Access\AccountInterface;
@@ -38,8 +40,11 @@ final class ReportService implements ReportServiceInterface
     ];
 
     /** @param ReportRendererInterface[] $renderers */
-    public function __construct(array $renderers, private readonly KnowledgeItemRepositoryInterface $repository)
-    {
+    public function __construct(
+        array $renderers,
+        private readonly KnowledgeItemRepositoryInterface $repository,
+        private readonly KnowledgeItemAccessPolicy $accessPolicy,
+    ) {
         foreach ($renderers as $renderer) {
             $this->renderers[$renderer->getType()] = $renderer;
         }
@@ -51,14 +56,32 @@ final class ReportService implements ReportServiceInterface
         DateRange $dateRange,
         AccountInterface $account,
     ): string {
-        // 1. Resolve renderer
+        $result = $this->generateFromRequest(
+            $community,
+            new ReportRequest(
+                reportType: $reportType,
+                dateFromIso: $dateRange->from->format('Y-m-d'),
+                dateToIso: $dateRange->to->format('Y-m-d'),
+            ),
+            $account,
+        );
+
+        return $result->markdown;
+    }
+
+    public function generateFromRequest(
+        Community $community,
+        ReportRequest $request,
+        AccountInterface $account,
+    ): ReportResult {
+        $reportType = $request->reportType;
+
         if (!isset($this->renderers[$reportType])) {
             throw new \InvalidArgumentException("Unknown report type: {$reportType}");
         }
 
         $renderer = $this->renderers[$reportType];
 
-        // 2. Check access
         $requiredRole = self::REQUIRED_ROLES[$reportType] ?? CommunityRole::Admin;
         $accountRole  = $this->resolveRole($account, (string) $community->get('id'));
 
@@ -68,40 +91,89 @@ final class ReportService implements ReportServiceInterface
             );
         }
 
-        // 3. Load items
+        try {
+            $from = new \DateTimeImmutable($request->dateFromIso);
+            $to   = new \DateTimeImmutable($request->dateToIso);
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException('Invalid date range: ' . $e->getMessage(), 0, $e);
+        }
+
+        $dateRange = new DateRange(from: $from, to: $to);
+
         $communityId = (string) $community->get('id');
         $allItems    = $this->repository->findByCommunity($communityId);
 
-        // 4. Filter by knowledge type
+        $allItems = array_values(array_filter(
+            $allItems,
+            fn (KnowledgeItem $item): bool => $this->accessPolicy->access($item, 'view', $account)->isAllowed(),
+        ));
+
         $typeFilter = self::TYPE_FILTERS[$reportType] ?? null;
-        if ($typeFilter !== null) {
+        if ($request->knowledgeTypeValues !== []) {
+            $allowedTypes = [];
+            foreach ($request->knowledgeTypeValues as $raw) {
+                $kt = KnowledgeType::tryFrom((string) $raw);
+                if ($kt !== null) {
+                    $allowedTypes[$kt->value] = $kt;
+                }
+            }
+            if ($allowedTypes === []) {
+                throw new \InvalidArgumentException('knowledgeTypes contained no valid knowledge type values.');
+            }
             $allItems = array_values(array_filter(
                 $allItems,
-                static fn ($item) => $item->getKnowledgeType() === $typeFilter,
+                static fn (KnowledgeItem $item): bool =>
+                    $item->getKnowledgeType() !== null
+                    && isset($allowedTypes[$item->getKnowledgeType()->value]),
+            ));
+        } elseif ($typeFilter !== null) {
+            $allItems = array_values(array_filter(
+                $allItems,
+                static fn (KnowledgeItem $item): bool => $item->getKnowledgeType() === $typeFilter,
             ));
         }
 
-        // 5. Filter by date range
         $filtered = array_values(array_filter(
             $allItems,
-            static function ($item) use ($dateRange): bool {
-                $createdAt = $item->getCreatedAt();
-                if ($createdAt === '') {
-                    return false;
-                }
-
-                try {
-                    $date = new \DateTimeImmutable($createdAt);
-                } catch (\Exception) {
-                    return false;
-                }
-
-                return $dateRange->contains($date);
-            },
+            fn (KnowledgeItem $item): bool => $this->itemTimestampInRange($item, $dateRange),
         ));
 
-        // 6. Render and return
-        return $renderer->render($community, $filtered, $dateRange);
+        $markdown = $renderer->render($community, $filtered, $dateRange);
+
+        return new ReportResult(markdown: $markdown, includedItemCount: count($filtered));
+    }
+
+    private function itemTimestampInRange(KnowledgeItem $item, DateRange $dateRange): bool
+    {
+        $ts = $this->itemReportTimestamp($item);
+        if ($ts === null) {
+            return false;
+        }
+
+        return $dateRange->contains($ts);
+    }
+
+    private function itemReportTimestamp(KnowledgeItem $item): ?\DateTimeImmutable
+    {
+        $compiled = $item->getCompiledAt();
+        if ($compiled !== '') {
+            try {
+                return new \DateTimeImmutable($compiled);
+            } catch (\Exception) {
+                // fall through to created_at
+            }
+        }
+
+        $createdAt = $item->getCreatedAt();
+        if ($createdAt === '') {
+            return null;
+        }
+
+        try {
+            return new \DateTimeImmutable($createdAt);
+        } catch (\Exception) {
+            return null;
+        }
     }
 
     private function resolveRole(AccountInterface $account, string $communityId): CommunityRole

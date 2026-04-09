@@ -11,4 +11,6 @@ enum KnowledgeType: string
     case Land         = 'land';
     case Relationship = 'relationship';
     case Event        = 'event';
+    /** Q&A or compiled synthesis saved back to the wiki (Phase 3). */
+    case Synthesis = 'synthesis';
 }

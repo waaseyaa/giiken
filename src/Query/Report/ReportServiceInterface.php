@@ -15,4 +15,10 @@ interface ReportServiceInterface
         DateRange $dateRange,
         AccountInterface $account,
     ): string;
+
+    public function generateFromRequest(
+        Community $community,
+        ReportRequest $request,
+        AccountInterface $account,
+    ): ReportResult;
 }

@@ -12,8 +12,11 @@ use Giiken\Entity\Community\CommunityRepositoryInterface;
 use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use Giiken\Export\ExportService;
+use Giiken\Export\ExportServiceInterface;
 use Giiken\Http\Controller\DiscoveryController;
 use Giiken\Http\Controller\ManagementController;
+use Giiken\Http\Controller\QueryApiController;
 use Giiken\Http\Controller\WebLoginController;
 use Giiken\Http\Controller\WebLogoutController;
 use Giiken\Http\Inertia\InertiaHttpResponder;
@@ -23,7 +26,13 @@ use Giiken\Pipeline\Provider\NullEmbeddingProvider;
 use Giiken\Pipeline\Provider\NullLlmProvider;
 use Giiken\Query\QaService;
 use Giiken\Query\QaServiceInterface;
+use Giiken\Query\Report\GovernanceSummaryReport;
+use Giiken\Query\Report\LandBriefReport;
+use Giiken\Query\Report\LanguageReport;
+use Giiken\Query\Report\ReportService;
+use Giiken\Query\Report\ReportServiceInterface;
 use Giiken\Query\SearchService;
+use Giiken\Query\SynthesisService;
 use Giiken\Wiki\WikiLintReport;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherContract;
@@ -155,6 +164,29 @@ final class GiikenServiceProvider extends ServiceProvider
                 $this->resolve(LlmProviderInterface::class),
             );
         });
+
+        $this->singleton(ReportServiceInterface::class, function (): ReportServiceInterface {
+            return new ReportService(
+                [
+                    new GovernanceSummaryReport(),
+                    new LanguageReport(),
+                    new LandBriefReport(),
+                ],
+                $this->resolve(KnowledgeItemRepositoryInterface::class),
+                $this->resolve(KnowledgeItemAccessPolicy::class),
+            );
+        });
+
+        $this->singleton(ExportServiceInterface::class, function (): ExportServiceInterface {
+            return new ExportService($this->resolve(KnowledgeItemRepositoryInterface::class));
+        });
+
+        $this->singleton(SynthesisService::class, function (): SynthesisService {
+            return new SynthesisService(
+                $this->resolve(KnowledgeItemRepositoryInterface::class),
+                $this->resolve(KnowledgeItemAccessPolicy::class),
+            );
+        });
     }
 
     public function commands(
@@ -249,6 +281,39 @@ final class GiikenServiceProvider extends ServiceProvider
                 ->build(),
         );
 
+        $router->addRoute(
+            'giiken.api.v1.ask',
+            RouteBuilder::create('/api/v1/ask')
+                ->controller(QueryApiController::class . '::ask')
+                ->methods('POST')
+                ->jsonApi()
+                ->csrfExempt()
+                ->allowAll()
+                ->build(),
+        );
+
+        $router->addRoute(
+            'giiken.api.v1.report',
+            RouteBuilder::create('/api/v1/report')
+                ->controller(QueryApiController::class . '::report')
+                ->methods('POST')
+                ->jsonApi()
+                ->csrfExempt()
+                ->requireAuthentication()
+                ->build(),
+        );
+
+        $router->addRoute(
+            'giiken.api.v1.synthesis',
+            RouteBuilder::create('/api/v1/synthesis')
+                ->controller(QueryApiController::class . '::saveSynthesis')
+                ->methods('POST')
+                ->jsonApi()
+                ->csrfExempt()
+                ->requireAuthentication()
+                ->build(),
+        );
+
         // Management routes (session-authenticated)
         $router->addRoute(
             'giiken.management.dashboard',
@@ -291,6 +356,16 @@ final class GiikenServiceProvider extends ServiceProvider
                 ->methods('GET')
                 ->requireAuthentication()
                 ->render()
+                ->build(),
+        );
+
+        $router->addRoute(
+            'giiken.management.export.download',
+            RouteBuilder::create('/{communitySlug}/manage/export/download')
+                ->controller(ManagementController::class . '::exportDownload')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->requireAuthentication()
                 ->build(),
         );
 

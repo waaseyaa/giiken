@@ -44,7 +44,7 @@ Inside `HttpKernel::handle()` -> `AbstractKernel::boot()`:
 The first Giiken app-level class in normal boot is `Giiken\GiikenServiceProvider`:
 
 - `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
-- `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `Giiken\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
+- `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `Giiken\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
 - `commands()` contributes CLI commands (`giiken:seed:test-community`)
 - `routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `GET` `/logout`)
 
@@ -83,12 +83,17 @@ App routes are added through `GiikenServiceProvider::routes(...)`, including:
   - `/{communitySlug}/search`
   - `/{communitySlug}/ask`
   - `/{communitySlug}/item/{itemId}`
+- Query API (JSON, CSRF-exempt; `POST` bodies are JSON):
+  - `POST /api/v1/ask` (`_public`) — Q&A + structured citations
+  - `POST /api/v1/report` (`_authenticated`) — markdown report + item count
+  - `POST /api/v1/synthesis` (`_authenticated`) — save Q&A answer as `knowledge_type: synthesis` with capped access
 - Management (`_authenticated`):
   - `/{communitySlug}/manage`
   - `/{communitySlug}/manage/reports`
   - `/{communitySlug}/manage/users`
   - `/{communitySlug}/manage/ingestion`
-  - `/{communitySlug}/manage/export`
+  - `/{communitySlug}/manage/export` (Inertia)
+  - `GET /{communitySlug}/manage/export/download` — ZIP export (admin-only; enforced in `ExportService`)
 
 ### 2.3 Controller Dispatch Contract
 
