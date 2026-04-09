@@ -22,10 +22,33 @@ WATCH_PATTERNS=(
   "^src/Pipeline/.*\\.php$"
 )
 
+# Prefer ripgrep when available; otherwise use POSIX grep (no extra CI dependency).
+if command -v rg >/dev/null 2>&1; then
+  matches_pattern() {
+    echo "${CHANGED_FILES}" | rg -q "$1"
+  }
+else
+  matches_pattern() {
+    echo "${CHANGED_FILES}" | grep -qE "$1"
+  }
+fi
+
 if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
   BASE_REF="${GITHUB_BASE_REF:-main}"
-  git fetch --no-tags --depth=1 origin "${BASE_REF}"
-  CHANGED_FILES="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
+  if git remote get-url origin >/dev/null 2>&1; then
+    if ! git fetch --no-tags --depth=1 origin "${BASE_REF}"; then
+      echo "FAIL: Could not git fetch origin ${BASE_REF}. Check network, credentials, and that the remote ref exists." >&2
+      exit 2
+    fi
+    CHANGED_FILES="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
+  else
+    echo "WARN: Git remote 'origin' not configured; using HEAD~1..HEAD for lifecycle drift (PR context)." >&2
+    if git rev-parse HEAD~1 >/dev/null 2>&1; then
+      CHANGED_FILES="$(git diff --name-only HEAD~1..HEAD)"
+    else
+      CHANGED_FILES=""
+    fi
+  fi
 else
   if git rev-parse HEAD~1 >/dev/null 2>&1; then
     CHANGED_FILES="$(git diff --name-only HEAD~1..HEAD)"
@@ -40,13 +63,13 @@ if [[ -z "${CHANGED_FILES}" ]]; then
 fi
 
 DOC_UPDATED=0
-if echo "${CHANGED_FILES}" | rg -q "^${LIFECYCLE_DOC}$"; then
+if matches_pattern "^${LIFECYCLE_DOC}$"; then
   DOC_UPDATED=1
 fi
 
 WATCH_HIT=0
 for pattern in "${WATCH_PATTERNS[@]}"; do
-  if echo "${CHANGED_FILES}" | rg -q "${pattern}"; then
+  if matches_pattern "${pattern}"; then
     WATCH_HIT=1
     break
   fi

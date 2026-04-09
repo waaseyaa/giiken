@@ -8,6 +8,7 @@ use Giiken\Entity\Community\Community;
 use Giiken\Entity\Community\CommunityRepositoryInterface;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Waaseyaa\Access\AccountInterface;
+use Waaseyaa\Foundation\Http\Inbound\InboundHttpRequest;
 use Waaseyaa\Inertia\Inertia;
 use Waaseyaa\Inertia\InertiaResponse;
 
@@ -30,7 +31,8 @@ final class ManagementController
             ]);
         }
 
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Dashboard', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
@@ -52,7 +54,8 @@ final class ManagementController
             ]);
         }
 
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Reports', [
             'community'   => $community !== null ? $this->serializeCommunity($community) : null,
@@ -74,7 +77,8 @@ final class ManagementController
             ]);
         }
 
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Users', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
@@ -95,7 +99,8 @@ final class ManagementController
             ]);
         }
 
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Ingestion', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
@@ -116,7 +121,8 @@ final class ManagementController
             ]);
         }
 
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Export', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,

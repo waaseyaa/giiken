@@ -13,6 +13,7 @@ use Giiken\Query\SearchResultSet;
 use Giiken\Query\SearchService;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Waaseyaa\Access\AccountInterface;
+use Waaseyaa\Foundation\Http\Inbound\InboundHttpRequest;
 use Waaseyaa\Inertia\Inertia;
 use Waaseyaa\Inertia\InertiaResponse;
 
@@ -31,7 +32,8 @@ final class DiscoveryController
      */
     public function index(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
 
         if ($this->searchService === null || $this->communityRepo === null) {
             return Inertia::render('Discovery/Index', [
@@ -41,7 +43,10 @@ final class DiscoveryController
             ]);
         }
 
-        $community = $this->communityRepo->findBySlug($communitySlug);
+        $searchService = $this->searchService;
+        $communityRepo = $this->communityRepo;
+
+        $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
             return Inertia::render('Discovery/Index', [
                 'community' => null,
@@ -49,7 +54,7 @@ final class DiscoveryController
             ]);
         }
 
-        $recent = $this->searchService->search(
+        $recent = $searchService->search(
             new SearchQuery(query: '', communityId: (string) $community->get('id')),
             $account,
         );
@@ -70,11 +75,10 @@ final class DiscoveryController
         AccountInterface $account,
         HttpRequest $httpRequest,
     ): InertiaResponse {
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
-        $searchQuery = (string) ($query['query'] ?? '');
-        $page = max(1, (int) ($query['page'] ?? 1));
-
         if ($this->searchService === null || $this->communityRepo === null) {
+            $searchQuery = (string) ($query['query'] ?? '');
+            $page = max(1, (int) ($query['page'] ?? 1));
+
             return Inertia::render('Discovery/Search', [
                 'community' => null,
                 'query' => $searchQuery,
@@ -84,7 +88,15 @@ final class DiscoveryController
             ]);
         }
 
-        $community = $this->communityRepo->findBySlug($communitySlug);
+        $searchService = $this->searchService;
+        $communityRepo = $this->communityRepo;
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
+        $searchQuery = (string) $inbound->queryParam('query', '');
+        $page = max(1, (int) $inbound->queryParam('page', 1));
+
+        $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
             return Inertia::render('Discovery/Search', [
                 'community' => null,
@@ -94,7 +106,7 @@ final class DiscoveryController
             ]);
         }
 
-        $results = $this->searchService->search(
+        $results = $searchService->search(
             new SearchQuery(
                 query: $searchQuery,
                 communityId: (string) $community->get('id'),
@@ -117,10 +129,9 @@ final class DiscoveryController
      */
     public function ask(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
-        $question = (string) ($query['question'] ?? '');
-
         if ($this->searchService === null || $this->qaService === null || $this->communityRepo === null) {
+            $question = (string) ($query['question'] ?? '');
+
             return Inertia::render('Discovery/Ask', [
                 'community' => null,
                 'question' => $question,
@@ -132,7 +143,15 @@ final class DiscoveryController
             ]);
         }
 
-        $community = $this->communityRepo->findBySlug($communitySlug);
+        $searchService = $this->searchService;
+        $qaService = $this->qaService;
+        $communityRepo = $this->communityRepo;
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
+        $question = (string) $inbound->queryParam('question', '');
+
+        $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
             return Inertia::render('Discovery/Ask', [
                 'community' => null,
@@ -145,9 +164,9 @@ final class DiscoveryController
         }
         $communityId = (string) $community->get('id');
 
-        $qaResponse = $this->qaService->ask($question, $communityId, $account);
+        $qaResponse = $qaService->ask($question, $communityId, $account);
 
-        $related = $this->searchService->search(
+        $related = $searchService->search(
             new SearchQuery(query: $question, communityId: $communityId, pageSize: 5),
             $account,
         );
@@ -168,9 +187,6 @@ final class DiscoveryController
      */
     public function show(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
-        $communitySlug = (string) ($params['communitySlug'] ?? '');
-        $itemId = (string) ($params['itemId'] ?? '');
-
         if ($this->communityRepo === null || $this->itemRepo === null) {
             return Inertia::render('Discovery/Show', [
                 'community' => null,
@@ -179,8 +195,15 @@ final class DiscoveryController
             ]);
         }
 
-        $community = $this->communityRepo->findBySlug($communitySlug);
-        $item = $this->itemRepo->find($itemId);
+        $communityRepo = $this->communityRepo;
+        $itemRepo = $this->itemRepo;
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
+        $itemId = (string) $inbound->routeParam('itemId', '');
+
+        $community = $communityRepo->findBySlug($communitySlug);
+        $item = $itemRepo->find($itemId);
         if ($community === null || $item === null) {
             return Inertia::render('Discovery/Show', [
                 'community' => $community !== null ? $this->serializeCommunity($community) : null,

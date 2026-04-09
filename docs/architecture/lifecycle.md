@@ -89,7 +89,14 @@ Current app controllers use the SSR dispatch signature:
 public function action(array $params, array $query, AccountInterface $account, HttpRequest $request): InertiaResponse
 ```
 
-Controllers should guard optional services explicitly and return `bootError` props when required service wiring is missing.
+Symfony `HttpRequest` remains the dispatcher’s fourth argument. Inside the handler, build
+`Waaseyaa\Foundation\Http\Inbound\InboundHttpRequest::fromSymfonyRequest($request, $params, $query)` when passing a read-only HTTP view into application code—do not thread Symfony types deeper than the controller layer.
+
+Controllers should guard optional services explicitly and return `bootError` props when required service wiring is missing. After a null guard, assign dependencies to locals (e.g. `$searchService = $this->searchService`) so downstream calls are clearly non-null for readers and static analysis.
+
+### 2.4 Lifecycle drift guard
+
+`scripts/check-lifecycle-drift.sh` enforces that edits under watched paths (including `src/Http/Controller/`, `src/Pipeline/`, and the script itself) either update `docs/architecture/lifecycle.md` or are paired with an explicit doc note. The script uses `grep` when `rg` is unavailable so CI does not require ripgrep.
 
 ## 3. Data Lifecycle
 

@@ -11,6 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Path-resolve waaseyaa/foundation from monorepo until Packagist has a tag with Http\Inbound types.
+      # After the framework PR lands on default branch, set ref to that branch (e.g. main).
+      - uses: actions/checkout@v4
+        with:
+          repository: waaseyaa/framework
+          ref: claude/ssr-app-name-render-fallback-20260409
+          path: waaseyaa-framework
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -18,7 +26,10 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: |
+          composer install --no-interaction --prefer-dist
+          composer config repositories.foundation-local path waaseyaa-framework/packages/foundation
+          composer update waaseyaa/foundation --no-interaction
 
       - name: Check lifecycle documentation drift
         run: ./scripts/check-lifecycle-drift.sh
