@@ -31,12 +31,12 @@ final class KnowledgeItemSearchIndexableTest extends TestCase
     }
 
     #[Test]
-    public function to_search_document_returns_title_and_content(): void
+    public function to_search_document_returns_title_and_body_for_fts(): void
     {
         $item = $this->item();
         $doc = $item->toSearchDocument();
         $this->assertSame('Solar Panel Debate', $doc['title']);
-        $this->assertSame('Discussion about solar panels in Massey.', $doc['content']);
+        $this->assertSame('Discussion about solar panels in Massey.', $doc['body']);
     }
 
     #[Test]

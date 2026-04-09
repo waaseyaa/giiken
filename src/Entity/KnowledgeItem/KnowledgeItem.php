@@ -113,8 +113,8 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Sea
     public function toSearchDocument(): array
     {
         return [
-            'title'   => $this->getTitle(),
-            'content' => $this->getContent(),
+            'title' => $this->getTitle(),
+            'body'  => $this->getContent(),
         ];
     }
 
