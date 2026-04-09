@@ -5,6 +5,7 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "php": ">=8.4",
+        "symfony/dotenv": "^7.4",
         "symfony/yaml": "^7.4",
         "waaseyaa/access": "^0.1",
         "waaseyaa/admin-surface": "^0.1",
@@ -31,6 +32,7 @@
         "waaseyaa/queue": "^0.1",
         "waaseyaa/routing": "^0.1",
         "waaseyaa/search": "^0.1",
+        "waaseyaa/ssr": "^0.1",
         "waaseyaa/state": "^0.1",
         "waaseyaa/taxonomy": "^0.1",
         "waaseyaa/testing": "^0.1",
@@ -47,6 +49,11 @@
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true
+    },
+    "scripts": {
+        "analyse": "./vendor/bin/phpstan analyse src tests --level=8 --no-progress",
+        "dev": "php bin/waaseyaa serve",
+        "test": "./vendor/bin/phpunit"
     },
     "extra": {
         "waaseyaa": {

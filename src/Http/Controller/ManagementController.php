@@ -6,62 +6,133 @@ namespace Giiken\Http\Controller;
 
 use Giiken\Entity\Community\Community;
 use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Export\ExportServiceInterface;
-use Giiken\Export\ImportServiceInterface;
-use Giiken\Query\Report\ReportServiceInterface;
+use Symfony\Component\HttpFoundation\Request as HttpRequest;
+use Waaseyaa\Access\AccountInterface;
+use Waaseyaa\Foundation\Http\Inbound\InboundHttpRequest;
 use Waaseyaa\Inertia\Inertia;
 use Waaseyaa\Inertia\InertiaResponse;
 
 final class ManagementController
 {
     public function __construct(
-        private readonly CommunityRepositoryInterface $communityRepo,
-        private readonly ReportServiceInterface $reportService,
-        private readonly ExportServiceInterface $exportService,
-        private readonly ImportServiceInterface $importService,
+        private readonly ?CommunityRepositoryInterface $communityRepo = null,
     ) {}
 
-    public function dashboard(string $communitySlug): InertiaResponse
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function dashboard(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
+        if ($this->communityRepo === null) {
+            return Inertia::render('Management/Dashboard', [
+                'community' => null,
+                'bootError' => 'Management services are not configured yet.',
+            ]);
+        }
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Dashboard', [
-            'community' => $this->serializeCommunity($community),
+            'community' => $community !== null ? $this->serializeCommunity($community) : null,
+            'bootError' => null,
         ]);
     }
 
-    public function reports(string $communitySlug): InertiaResponse
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function reports(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
+        if ($this->communityRepo === null) {
+            return Inertia::render('Management/Reports', [
+                'community' => null,
+                'reportTypes' => ['governance_summary', 'language_report', 'land_brief'],
+                'bootError' => 'Report services are not configured yet.',
+            ]);
+        }
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Reports', [
-            'community'   => $this->serializeCommunity($community),
+            'community'   => $community !== null ? $this->serializeCommunity($community) : null,
             'reportTypes' => ['governance_summary', 'language_report', 'land_brief'],
+            'bootError' => null,
         ]);
     }
 
-    public function users(string $communitySlug): InertiaResponse
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function users(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
+        if ($this->communityRepo === null) {
+            return Inertia::render('Management/Users', [
+                'community' => null,
+                'bootError' => 'User services are not configured yet.',
+            ]);
+        }
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Users', [
-            'community' => $this->serializeCommunity($community),
+            'community' => $community !== null ? $this->serializeCommunity($community) : null,
+            'bootError' => null,
         ]);
     }
 
-    public function ingestion(string $communitySlug): InertiaResponse
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function ingestion(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
+        if ($this->communityRepo === null) {
+            return Inertia::render('Management/Ingestion', [
+                'community' => null,
+                'bootError' => 'Ingestion services are not configured yet.',
+            ]);
+        }
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Ingestion', [
-            'community' => $this->serializeCommunity($community),
+            'community' => $community !== null ? $this->serializeCommunity($community) : null,
+            'bootError' => null,
         ]);
     }
 
-    public function exportPage(string $communitySlug): InertiaResponse
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function exportPage(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
+        if ($this->communityRepo === null) {
+            return Inertia::render('Management/Export', [
+                'community' => null,
+                'bootError' => 'Export/import services are not configured yet.',
+            ]);
+        }
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
         return Inertia::render('Management/Export', [
-            'community' => $this->serializeCommunity($community),
+            'community' => $community !== null ? $this->serializeCommunity($community) : null,
+            'bootError' => null,
         ]);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function serializeCommunity(Community $community): array
     {
         return [

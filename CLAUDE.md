@@ -19,6 +19,14 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 3. 🟡 **EntityRepository factory** — waaseyaa/framework#1128. The framework provides no `EntityTypeManager::getRepository(string $id)` accessor. Building a working `Waaseyaa\EntityStorage\EntityRepository` requires manually assembling 3-7 dependencies. This is the architectural blocker for #42 below.
 4. 🟡 **Hook discipline** — waaseyaa/framework#1126 (spec-drift + phpunit pre-push hooks) is the meta-blocker for cutting alpha.108.
 
+### Upgrade note (2026-04-09)
+
+- Giiken dependency lock is now on the current Waaseyaa alpha line (`v0.1.0-alpha.113` for most packages; `waaseyaa/core` at `v0.1.0-alpha.110`).
+- `waaseyaa/ssr` had to be re-added as an explicit app dependency to satisfy `Waaseyaa\User\UserServiceProvider` runtime wiring after `composer update "waaseyaa/*"`.
+- `public/index.php` now emits responses (`$response = $kernel->handle(); $response->send();`) to avoid zero-byte `200` responses.
+- Unit and full PHPUnit suites pass after updating controller/test signatures for the current SSR app-controller calling convention (`($params, $query, $account, $httpRequest)`).
+- Current runtime blocker: `GET /{community-slug}` still returns `500` (`<h1>Internal Server Error</h1>`) under `php -S`, despite dependency and signature fixes. This requires follow-up debugging in SSR dispatch/runtime error reporting.
+
 ### Giiken-side prerequisites (this repo)
 
 5. 🔴 **Service registrations** — #42, blocked on framework#1128. `GiikenServiceProvider::register()` does not bind `SearchService`, `QaServiceInterface`, `CommunityRepositoryInterface`, or `KnowledgeItemRepositoryInterface`. `SsrPageHandler::resolveControllerInstance()` throws when reflecting `DiscoveryController`'s constructor. Wiring requires `EntityRepository` factory machinery that doesn't exist yet.
@@ -37,6 +45,14 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 # Dependencies
 composer install
 
+# Common scripts
+composer run dev
+composer run test
+composer run analyse
+
+# Install git hooks
+lefthook install
+
 # Run all tests
 ./vendor/bin/phpunit
 
@@ -48,6 +64,10 @@ composer install
 
 # Static analysis
 ./vendor/bin/phpstan analyse src/
+
+# Run hooks manually
+lefthook run pre-commit
+lefthook run pre-push
 ```
 
 ## Architecture
@@ -114,6 +134,12 @@ Built-in checks: `BrokenLinkCheck`, `OrphanPageCheck`.
 ### Service Provider
 
 `GiikenServiceProvider` registers entity types with `EntityTypeManager` and defines routes via `WaaseyaaRouter`. This is the entry point for adding new entity types or wiring new ingestion handlers.
+
+### Lifecycle Documentation Governance
+
+- Canonical runtime flow doc: `docs/architecture/lifecycle.md`
+- CI enforces drift checks via `scripts/check-lifecycle-drift.sh`
+- If lifecycle-impacting files change (`public/index.php`, `src/GiikenServiceProvider.php`, HTTP controllers/middleware, entities/query/pipeline code), update `docs/architecture/lifecycle.md` in the same PR.
 
 ## Testing Conventions
 

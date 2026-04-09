@@ -1,14 +1,16 @@
 /vendor/
+/storage/framework/
+/files/*
+!/files/.gitkeep
+*.sqlite
+.env
+
+# Giiken — not shipped in skeleton (Node/Vite, caches, local storage root, tool scratch)
+.env.local
 /.phpunit.cache/
 /phpstan/
-
-# Node / frontend
 /node_modules/
 /node-compile-cache/
 /public/build/
-
-# Local runtime
 /storage/
-
-# Background sync tool stray working dirs
 /waaseyaa-sync-*/

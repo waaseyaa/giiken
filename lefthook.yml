@@ -1,0 +1,15 @@
+pre-commit:
+  parallel: true
+  commands:
+    lifecycle-drift:
+      run: ./scripts/check-lifecycle-drift.sh
+
+pre-push:
+  parallel: true
+  commands:
+    lifecycle-drift:
+      run: ./scripts/check-lifecycle-drift.sh
+    phpunit:
+      run: ./vendor/bin/phpunit
+    phpstan:
+      run: ./vendor/bin/phpstan analyse src tests --level=8 --no-progress
