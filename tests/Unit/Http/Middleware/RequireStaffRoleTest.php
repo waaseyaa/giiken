@@ -47,9 +47,15 @@ final class RequireStaffRoleTest extends TestCase
         self::assertFalse((new RequireStaffRole())->check(null, 'comm-1'));
     }
 
+    /**
+     * @param array<int, string> $roles
+     */
     private function makeAccount(array $roles): AccountInterface
     {
         return new class($roles) implements AccountInterface {
+            /**
+             * @param array<int, string> $roles
+             */
             public function __construct(private readonly array $roles) {}
             public function id(): int|string { return '1'; }
             public function getRoles(): array { return $this->roles; }

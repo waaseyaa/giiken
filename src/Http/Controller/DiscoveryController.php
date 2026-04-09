@@ -11,6 +11,7 @@ use Giiken\Query\QaServiceInterface;
 use Giiken\Query\SearchQuery;
 use Giiken\Query\SearchResultSet;
 use Giiken\Query\SearchService;
+use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Inertia\Inertia;
 use Waaseyaa\Inertia\InertiaResponse;
@@ -18,15 +19,35 @@ use Waaseyaa\Inertia\InertiaResponse;
 final class DiscoveryController
 {
     public function __construct(
-        private readonly SearchService $searchService,
-        private readonly QaServiceInterface $qaService,
-        private readonly CommunityRepositoryInterface $communityRepo,
-        private readonly KnowledgeItemRepositoryInterface $itemRepo,
+        private readonly ?SearchService $searchService = null,
+        private readonly ?QaServiceInterface $qaService = null,
+        private readonly ?CommunityRepositoryInterface $communityRepo = null,
+        private readonly ?KnowledgeItemRepositoryInterface $itemRepo = null,
     ) {}
 
-    public function index(string $communitySlug, ?AccountInterface $account): InertiaResponse
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function index(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
+        $communitySlug = (string) ($params['communitySlug'] ?? '');
+
+        if ($this->searchService === null || $this->communityRepo === null) {
+            return Inertia::render('Discovery/Index', [
+                'community' => null,
+                'recentItems' => $this->emptyResultSet(),
+                'bootError' => 'Discovery services are not configured yet.',
+            ]);
+        }
+
         $community = $this->communityRepo->findBySlug($communitySlug);
+        if ($community === null) {
+            return Inertia::render('Discovery/Index', [
+                'community' => null,
+                'recentItems' => $this->emptyResultSet(),
+            ]);
+        }
 
         $recent = $this->searchService->search(
             new SearchQuery(query: '', communityId: (string) $community->get('id')),
@@ -39,17 +60,43 @@ final class DiscoveryController
         ]);
     }
 
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
     public function search(
-        string $communitySlug,
-        string $query,
-        int $page,
-        ?AccountInterface $account,
+        array $params,
+        array $query,
+        AccountInterface $account,
+        HttpRequest $httpRequest,
     ): InertiaResponse {
+        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $searchQuery = (string) ($query['query'] ?? '');
+        $page = max(1, (int) ($query['page'] ?? 1));
+
+        if ($this->searchService === null || $this->communityRepo === null) {
+            return Inertia::render('Discovery/Search', [
+                'community' => null,
+                'query' => $searchQuery,
+                'results' => $this->emptyResultSet(),
+                'page' => $page,
+                'bootError' => 'Search services are not configured yet.',
+            ]);
+        }
+
         $community = $this->communityRepo->findBySlug($communitySlug);
+        if ($community === null) {
+            return Inertia::render('Discovery/Search', [
+                'community' => null,
+                'query' => $searchQuery,
+                'results' => $this->emptyResultSet(),
+                'page' => $page,
+            ]);
+        }
 
         $results = $this->searchService->search(
             new SearchQuery(
-                query: $query,
+                query: $searchQuery,
                 communityId: (string) $community->get('id'),
                 page: $page,
             ),
@@ -58,15 +105,44 @@ final class DiscoveryController
 
         return Inertia::render('Discovery/Search', [
             'community' => $this->serializeCommunity($community),
-            'query' => $query,
+            'query' => $searchQuery,
             'results' => $this->serializeResultSet($results),
             'page' => $page,
         ]);
     }
 
-    public function ask(string $communitySlug, string $question, ?AccountInterface $account): InertiaResponse
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function ask(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
+        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $question = (string) ($query['question'] ?? '');
+
+        if ($this->searchService === null || $this->qaService === null || $this->communityRepo === null) {
+            return Inertia::render('Discovery/Ask', [
+                'community' => null,
+                'question' => $question,
+                'answer' => '',
+                'citedItemIds' => [],
+                'noRelevantItems' => true,
+                'relatedItems' => $this->emptyResultSet(),
+                'bootError' => 'Q&A services are not configured yet.',
+            ]);
+        }
+
         $community = $this->communityRepo->findBySlug($communitySlug);
+        if ($community === null) {
+            return Inertia::render('Discovery/Ask', [
+                'community' => null,
+                'question' => $question,
+                'answer' => '',
+                'citedItemIds' => [],
+                'noRelevantItems' => true,
+                'relatedItems' => $this->emptyResultSet(),
+            ]);
+        }
         $communityId = (string) $community->get('id');
 
         $qaResponse = $this->qaService->ask($question, $communityId, $account);
@@ -86,10 +162,31 @@ final class DiscoveryController
         ]);
     }
 
-    public function show(string $communitySlug, string $itemId, ?AccountInterface $account): InertiaResponse
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function show(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
     {
+        $communitySlug = (string) ($params['communitySlug'] ?? '');
+        $itemId = (string) ($params['itemId'] ?? '');
+
+        if ($this->communityRepo === null || $this->itemRepo === null) {
+            return Inertia::render('Discovery/Show', [
+                'community' => null,
+                'item' => null,
+                'bootError' => 'Knowledge item services are not configured yet.',
+            ]);
+        }
+
         $community = $this->communityRepo->findBySlug($communitySlug);
         $item = $this->itemRepo->find($itemId);
+        if ($community === null || $item === null) {
+            return Inertia::render('Discovery/Show', [
+                'community' => $community !== null ? $this->serializeCommunity($community) : null,
+                'item' => null,
+            ]);
+        }
 
         return Inertia::render('Discovery/Show', [
             'community' => $this->serializeCommunity($community),
@@ -134,6 +231,18 @@ final class DiscoveryController
             ], $resultSet->items),
             'totalHits' => $resultSet->totalHits,
             'totalPages' => $resultSet->totalPages,
+        ];
+    }
+
+    /**
+     * @return array{items: array<array<string, mixed>>, totalHits: int, totalPages: int}
+     */
+    private function emptyResultSet(): array
+    {
+        return [
+            'items' => [],
+            'totalHits' => 0,
+            'totalPages' => 0,
         ];
     }
 }

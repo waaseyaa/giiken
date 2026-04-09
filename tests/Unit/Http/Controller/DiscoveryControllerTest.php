@@ -18,7 +18,9 @@ use Giiken\Query\SearchResultSet;
 use Giiken\Query\SearchService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Inertia\InertiaResponse;
 
@@ -26,10 +28,15 @@ use Waaseyaa\Inertia\InertiaResponse;
 final class DiscoveryControllerTest extends TestCase
 {
     private DiscoveryController $controller;
+    /** @var SearchService&MockObject */
     private SearchService $searchService;
+    /** @var QaServiceInterface&MockObject */
     private QaServiceInterface $qaService;
+    /** @var CommunityRepositoryInterface&MockObject */
     private CommunityRepositoryInterface $communityRepo;
+    /** @var KnowledgeItemRepositoryInterface&MockObject */
     private KnowledgeItemRepositoryInterface $itemRepo;
+    private AccountInterface $account;
 
     protected function setUp(): void
     {
@@ -37,6 +44,7 @@ final class DiscoveryControllerTest extends TestCase
         $this->qaService = $this->createMock(QaServiceInterface::class);
         $this->communityRepo = $this->createMock(CommunityRepositoryInterface::class);
         $this->itemRepo = $this->createMock(KnowledgeItemRepositoryInterface::class);
+        $this->account = $this->createMock(AccountInterface::class);
 
         $this->controller = new DiscoveryController(
             $this->searchService,
@@ -53,7 +61,12 @@ final class DiscoveryControllerTest extends TestCase
         $this->communityRepo->method('findBySlug')->willReturn($community);
         $this->searchService->method('search')->willReturn(SearchResultSet::empty());
 
-        $response = $this->controller->index('test-community', null);
+        $response = $this->controller->index(
+            ['communitySlug' => 'test-community'],
+            [],
+            $this->account,
+            new HttpRequest(),
+        );
 
         self::assertInstanceOf(InertiaResponse::class, $response);
     }
@@ -71,7 +84,12 @@ final class DiscoveryControllerTest extends TestCase
         );
         $this->searchService->method('search')->willReturn($resultSet);
 
-        $response = $this->controller->search('test-community', 'test query', 1, null);
+        $response = $this->controller->search(
+            ['communitySlug' => 'test-community'],
+            ['query' => 'test query', 'page' => 1],
+            $this->account,
+            new HttpRequest(),
+        );
 
         self::assertInstanceOf(InertiaResponse::class, $response);
     }
@@ -86,7 +104,12 @@ final class DiscoveryControllerTest extends TestCase
         $this->qaService->method('ask')->willReturn($qaResponse);
         $this->searchService->method('search')->willReturn(SearchResultSet::empty());
 
-        $response = $this->controller->ask('test-community', 'What is this?', null);
+        $response = $this->controller->ask(
+            ['communitySlug' => 'test-community'],
+            ['question' => 'What is this?'],
+            $this->account,
+            new HttpRequest(),
+        );
 
         self::assertInstanceOf(InertiaResponse::class, $response);
     }
@@ -107,7 +130,12 @@ final class DiscoveryControllerTest extends TestCase
         ]);
         $this->itemRepo->method('find')->willReturn($item);
 
-        $response = $this->controller->show('test-community', '1', null);
+        $response = $this->controller->show(
+            ['communitySlug' => 'test-community', 'itemId' => '1'],
+            [],
+            $this->account,
+            new HttpRequest(),
+        );
 
         self::assertInstanceOf(InertiaResponse::class, $response);
     }

@@ -52,6 +52,7 @@ final class CompilationPipelineTest extends TestCase
              */
             public function __construct(private array &$savedItems) {}
             public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
+            public function findMany(array $ids, ?string $langcode = null, bool $fallback = false): array { return []; }
             public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
             public function save(EntityInterface $entity, bool $validate = true): int { $this->savedItems[] = $entity; return 1; }
             public function delete(EntityInterface $entity): void {}
@@ -92,6 +93,7 @@ final class CompilationPipelineTest extends TestCase
         };
         $repo = new class implements EntityRepositoryInterface {
             public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
+            public function findMany(array $ids, ?string $langcode = null, bool $fallback = false): array { return []; }
             public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
             public function save(EntityInterface $entity, bool $validate = true): int { return 1; }
             public function delete(EntityInterface $entity): void {}
