@@ -7,15 +7,16 @@ namespace Giiken\Http\Controller;
 use Giiken\Entity\Community\Community;
 use Giiken\Entity\Community\CommunityRepositoryInterface;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use Giiken\Http\Inertia\InertiaHttpResponder;
 use Giiken\Query\QaServiceInterface;
 use Giiken\Query\SearchQuery;
 use Giiken\Query\SearchResultSet;
 use Giiken\Query\SearchService;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
+use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Foundation\Http\Inbound\InboundHttpRequest;
 use Waaseyaa\Inertia\Inertia;
-use Waaseyaa\Inertia\InertiaResponse;
 
 final class DiscoveryController
 {
@@ -24,23 +25,24 @@ final class DiscoveryController
         private readonly ?QaServiceInterface $qaService = null,
         private readonly ?CommunityRepositoryInterface $communityRepo = null,
         private readonly ?KnowledgeItemRepositoryInterface $itemRepo = null,
+        private readonly ?InertiaHttpResponder $inertiaHttp = null,
     ) {}
 
     /**
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function index(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
+    public function index(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
 
         if ($this->searchService === null || $this->communityRepo === null) {
-            return Inertia::render('Discovery/Index', [
+            return $this->page('Discovery/Index', [
                 'community' => null,
                 'recentItems' => $this->emptyResultSet(),
                 'bootError' => 'Discovery services are not configured yet.',
-            ]);
+            ], $httpRequest, $account);
         }
 
         $searchService = $this->searchService;
@@ -48,10 +50,10 @@ final class DiscoveryController
 
         $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
-            return Inertia::render('Discovery/Index', [
+            return $this->page('Discovery/Index', [
                 'community' => null,
                 'recentItems' => $this->emptyResultSet(),
-            ]);
+            ], $httpRequest, $account);
         }
 
         $recent = $searchService->search(
@@ -59,10 +61,10 @@ final class DiscoveryController
             $account,
         );
 
-        return Inertia::render('Discovery/Index', [
+        return $this->page('Discovery/Index', [
             'community' => $this->serializeCommunity($community),
             'recentItems' => $this->serializeResultSet($recent),
-        ]);
+        ], $httpRequest, $account);
     }
 
     /**
@@ -74,18 +76,18 @@ final class DiscoveryController
         array $query,
         AccountInterface $account,
         HttpRequest $httpRequest,
-    ): InertiaResponse {
+    ): Response {
         if ($this->searchService === null || $this->communityRepo === null) {
             $searchQuery = (string) ($query['query'] ?? '');
             $page = max(1, (int) ($query['page'] ?? 1));
 
-            return Inertia::render('Discovery/Search', [
+            return $this->page('Discovery/Search', [
                 'community' => null,
                 'query' => $searchQuery,
                 'results' => $this->emptyResultSet(),
                 'page' => $page,
                 'bootError' => 'Search services are not configured yet.',
-            ]);
+            ], $httpRequest, $account);
         }
 
         $searchService = $this->searchService;
@@ -98,12 +100,12 @@ final class DiscoveryController
 
         $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
-            return Inertia::render('Discovery/Search', [
+            return $this->page('Discovery/Search', [
                 'community' => null,
                 'query' => $searchQuery,
                 'results' => $this->emptyResultSet(),
                 'page' => $page,
-            ]);
+            ], $httpRequest, $account);
         }
 
         $results = $searchService->search(
@@ -115,24 +117,24 @@ final class DiscoveryController
             $account,
         );
 
-        return Inertia::render('Discovery/Search', [
+        return $this->page('Discovery/Search', [
             'community' => $this->serializeCommunity($community),
             'query' => $searchQuery,
             'results' => $this->serializeResultSet($results),
             'page' => $page,
-        ]);
+        ], $httpRequest, $account);
     }
 
     /**
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function ask(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
+    public function ask(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->searchService === null || $this->qaService === null || $this->communityRepo === null) {
             $question = (string) ($query['question'] ?? '');
 
-            return Inertia::render('Discovery/Ask', [
+            return $this->page('Discovery/Ask', [
                 'community' => null,
                 'question' => $question,
                 'answer' => '',
@@ -140,7 +142,7 @@ final class DiscoveryController
                 'noRelevantItems' => true,
                 'relatedItems' => $this->emptyResultSet(),
                 'bootError' => 'Q&A services are not configured yet.',
-            ]);
+            ], $httpRequest, $account);
         }
 
         $searchService = $this->searchService;
@@ -153,14 +155,14 @@ final class DiscoveryController
 
         $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
-            return Inertia::render('Discovery/Ask', [
+            return $this->page('Discovery/Ask', [
                 'community' => null,
                 'question' => $question,
                 'answer' => '',
                 'citedItemIds' => [],
                 'noRelevantItems' => true,
                 'relatedItems' => $this->emptyResultSet(),
-            ]);
+            ], $httpRequest, $account);
         }
         $communityId = (string) $community->get('id');
 
@@ -171,28 +173,28 @@ final class DiscoveryController
             $account,
         );
 
-        return Inertia::render('Discovery/Ask', [
+        return $this->page('Discovery/Ask', [
             'community' => $this->serializeCommunity($community),
             'question' => $question,
             'answer' => $qaResponse->answer,
             'citedItemIds' => $qaResponse->citedItemIds,
             'noRelevantItems' => $qaResponse->noRelevantItems,
             'relatedItems' => $this->serializeResultSet($related),
-        ]);
+        ], $httpRequest, $account);
     }
 
     /**
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function show(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): InertiaResponse
+    public function show(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->communityRepo === null || $this->itemRepo === null) {
-            return Inertia::render('Discovery/Show', [
+            return $this->page('Discovery/Show', [
                 'community' => null,
                 'item' => null,
                 'bootError' => 'Knowledge item services are not configured yet.',
-            ]);
+            ], $httpRequest, $account);
         }
 
         $communityRepo = $this->communityRepo;
@@ -205,13 +207,13 @@ final class DiscoveryController
         $community = $communityRepo->findBySlug($communitySlug);
         $item = $itemRepo->find($itemId);
         if ($community === null || $item === null) {
-            return Inertia::render('Discovery/Show', [
+            return $this->page('Discovery/Show', [
                 'community' => $community !== null ? $this->serializeCommunity($community) : null,
                 'item' => null,
-            ]);
+            ], $httpRequest, $account);
         }
 
-        return Inertia::render('Discovery/Show', [
+        return $this->page('Discovery/Show', [
             'community' => $this->serializeCommunity($community),
             'item' => [
                 'id' => $item->get('id'),
@@ -223,7 +225,25 @@ final class DiscoveryController
                 'createdAt' => $item->getCreatedAt(),
                 'updatedAt' => $item->getUpdatedAt(),
             ],
-        ]);
+        ], $httpRequest, $account);
+    }
+
+    /**
+     * @param array<string, mixed> $props
+     */
+    private function page(string $component, array $props, HttpRequest $httpRequest, AccountInterface $account): Response
+    {
+        if ($this->inertiaHttp === null) {
+            return new Response('Giiken: InertiaHttpResponder is not registered.', 500, [
+                'Content-Type' => 'text/plain; charset=UTF-8',
+            ]);
+        }
+
+        return $this->inertiaHttp->toResponse(
+            Inertia::render($component, $props),
+            $httpRequest,
+            $account,
+        );
     }
 
     /**
