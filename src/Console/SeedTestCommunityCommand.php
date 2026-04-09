@@ -1,0 +1,112 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Giiken\Console;
+
+use Giiken\Entity\Community\Community;
+use Giiken\Entity\Community\CommunityRepositoryInterface;
+use Giiken\Entity\Community\WikiSchema;
+use Giiken\Entity\KnowledgeItem\AccessTier;
+use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Uid\Uuid;
+
+#[AsCommand(
+    name: 'giiken:seed:test-community',
+    description: 'Seed a demo community (slug test-community) with sample public knowledge items',
+)]
+final class SeedTestCommunityCommand extends Command
+{
+    public function __construct(
+        private readonly CommunityRepositoryInterface $communityRepo,
+        private readonly KnowledgeItemRepositoryInterface $itemRepo,
+    ) {
+        parent::__construct();
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $existing = $this->communityRepo->findBySlug('test-community');
+        if ($existing !== null) {
+            $output->writeln('<comment>Community "test-community" already exists. Ensuring sample items only.</comment>');
+            $community = $existing;
+        } else {
+            $wiki = new WikiSchema(
+                defaultLanguage: 'en',
+                knowledgeTypes: array_map(
+                    static fn (KnowledgeType $t): string => $t->value,
+                    KnowledgeType::cases(),
+                ),
+                llmInstructions: 'Preserve community voice; cite sources; flag uncertainty.',
+            );
+
+            $community = new Community([
+                'uuid'          => Uuid::v4()->toRfc4122(),
+                'name'          => 'Test Community',
+                'bundle'        => 'community',
+                'slug'          => 'test-community',
+                'wiki_schema'   => json_encode($wiki->toArray(), JSON_THROW_ON_ERROR),
+            ]);
+            $community->enforceIsNew(true);
+            $this->communityRepo->save($community);
+
+            $community = $this->communityRepo->findBySlug('test-community');
+            if ($community === null) {
+                $output->writeln('<error>Failed to load community after save.</error>');
+
+                return Command::FAILURE;
+            }
+            $output->writeln('<info>Created community "test-community".</info>');
+        }
+
+        $communityId = (string) $community->get('id');
+        $items       = $this->itemRepo->findByCommunity($communityId);
+        if ($items !== []) {
+            $output->writeln(sprintf('<comment>Community already has %d knowledge items. Skip seeding items.</comment>', count($items)));
+
+            return Command::SUCCESS;
+        }
+
+        $samples = [
+            [
+                'title'   => 'Welcome to Giiken',
+                'content' => 'This is a seeded knowledge item for local development. Replace with real community knowledge.',
+                'type'    => KnowledgeType::Cultural,
+            ],
+            [
+                'title'   => 'Governance overview',
+                'content' => 'Sample governance note. Public tier so it appears for anonymous visitors in development.',
+                'type'    => KnowledgeType::Governance,
+            ],
+            [
+                'title'   => 'Land and territory',
+                'content' => 'Sample land reference. Use the ingestion pipeline to import real documents.',
+                'type'    => KnowledgeType::Land,
+            ],
+        ];
+
+        foreach ($samples as $row) {
+            $item = new KnowledgeItem([
+                'uuid'          => Uuid::v4()->toRfc4122(),
+                'title'         => $row['title'],
+                'bundle'        => 'knowledge_item',
+                'content'       => $row['content'],
+                'community_id'  => $communityId,
+                'knowledge_type'=> $row['type']->value,
+                'access_tier'   => AccessTier::Public->value,
+            ]);
+            $item->enforceIsNew(true);
+            $this->itemRepo->save($item);
+        }
+
+        $output->writeln(sprintf('<info>Seeded %d sample knowledge items.</info>', count($samples)));
+
+        return Command::SUCCESS;
+    }
+}

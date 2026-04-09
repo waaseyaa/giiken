@@ -44,7 +44,14 @@ Inside `HttpKernel::handle()` -> `AbstractKernel::boot()`:
 The first Giiken app-level class in normal boot is `Giiken\GiikenServiceProvider`:
 
 - `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
+- `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction)
+- `commands()` contributes CLI commands (`giiken:seed:test-community`)
 - `routes()` contributes app HTTP routes
+
+### 1.4 Schema and local data
+
+- App SQL migrations live in `migrations/` and run via `bin/waaseyaa migrate` during bootstrap when pending.
+- Tables `community`, `knowledge_item`, and `wiki_lint_report` must exist before repository saves; optional demo data: `bin/waaseyaa giiken:seed:test-community` after migrate.
 
 ## 2. Request Lifecycle
 
@@ -106,11 +113,11 @@ Entity types are declared in `GiikenServiceProvider::register()` and attached to
 
 ### 3.2 Repository Access
 
-App repositories (community, knowledge items) wrap framework repository/storage APIs:
+App repositories (community, knowledge items) wrap `Waaseyaa\EntityStorage\EntityRepository` with `SqlStorageDriver` on the app database connection:
 
 - load entities
 - filter by community/slug
-- save/delete with timestamp conventions
+- save/delete with timestamp conventions; `KnowledgeItemRepository` optionally triggers `SearchIndexerInterface` (FTS) on save
 
 ### 3.3 Query + Pipeline Flow
 
@@ -163,7 +170,8 @@ Keep these true during refactoring:
 | Area | Likely Impact | Verify With |
 |---|---|---|
 | `public/index.php` | global boot and response emission | smoke test `/`, non-zero body |
-| `src/GiikenServiceProvider.php` | route/entity discovery | route smoke tests + boot |
+| `src/GiikenServiceProvider.php` | routes, entity types, DI bindings, CLI commands | route smoke tests + boot + `waaseyaa list` / migrate + seed |
+| `migrations/*.php` | SQLite schema for app entities | `bin/waaseyaa migrate` + repository integration |
 | `src/Http/Controller/*` | SSR dispatch and Inertia props | unit tests + route smoke tests |
 | `src/Entity/*` and repositories | data shape, persistence behavior | unit tests + integration tests |
 | `src/Query/*`, `src/Pipeline/*` | search/qa/compile behavior | unit tests for services and steps |
