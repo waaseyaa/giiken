@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
 LIFECYCLE_DOC="docs/architecture/lifecycle.md"
+# Anchor path as literals in ERE: unescaped "." would match any character.
+LIFECYCLE_DOC_PATTERN="^${LIFECYCLE_DOC//./\\.}$"
 
 if [[ ! -f "$LIFECYCLE_DOC" ]]; then
   echo "FAIL: $LIFECYCLE_DOC is missing."
@@ -63,7 +65,7 @@ if [[ -z "${CHANGED_FILES}" ]]; then
 fi
 
 DOC_UPDATED=0
-if matches_pattern "^${LIFECYCLE_DOC}$"; then
+if matches_pattern "${LIFECYCLE_DOC_PATTERN}"; then
   DOC_UPDATED=1
 fi
 
