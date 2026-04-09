@@ -10,6 +10,7 @@ use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use Giiken\Entity\KnowledgeItem\KnowledgeType;
 use Giiken\Http\Controller\DiscoveryController;
+use Giiken\Http\Inertia\InertiaHttpResponder;
 use Giiken\Query\QaResponse;
 use Giiken\Query\QaServiceInterface;
 use Giiken\Query\SearchQuery;
@@ -21,8 +22,9 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
+use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
-use Waaseyaa\Inertia\InertiaResponse;
+use Waaseyaa\Foundation\Http\Inertia\InertiaFullPageRendererInterface;
 
 #[CoversClass(DiscoveryController::class)]
 final class DiscoveryControllerTest extends TestCase
@@ -51,7 +53,31 @@ final class DiscoveryControllerTest extends TestCase
             $this->qaService,
             $this->communityRepo,
             $this->itemRepo,
+            $this->createInertiaResponder(),
         );
+    }
+
+    private function createInertiaResponder(): InertiaHttpResponder
+    {
+        $renderer = $this->createStub(InertiaFullPageRendererInterface::class);
+        $renderer->method('render')->willReturnCallback(
+            static fn (array $pageObject): string => json_encode($pageObject, JSON_THROW_ON_ERROR),
+        );
+
+        return new InertiaHttpResponder($renderer, []);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function decodePage(Response $response): array
+    {
+        $raw = $response->getContent();
+        self::assertIsString($raw);
+        $data = json_decode($raw, true, flags: JSON_THROW_ON_ERROR);
+        self::assertIsArray($data);
+
+        return $data;
     }
 
     #[Test]
@@ -68,7 +94,10 @@ final class DiscoveryControllerTest extends TestCase
             new HttpRequest(),
         );
 
-        self::assertInstanceOf(InertiaResponse::class, $response);
+        self::assertInstanceOf(Response::class, $response);
+        $page = $this->decodePage($response);
+        self::assertSame('Discovery/Index', $page['component']);
+        self::assertIsArray($page['props']['community'] ?? null);
     }
 
     #[Test]
@@ -91,7 +120,10 @@ final class DiscoveryControllerTest extends TestCase
             new HttpRequest(),
         );
 
-        self::assertInstanceOf(InertiaResponse::class, $response);
+        self::assertInstanceOf(Response::class, $response);
+        $page = $this->decodePage($response);
+        self::assertSame('Discovery/Search', $page['component']);
+        self::assertSame(1, $page['props']['results']['totalHits'] ?? null);
     }
 
     #[Test]
@@ -111,7 +143,10 @@ final class DiscoveryControllerTest extends TestCase
             new HttpRequest(),
         );
 
-        self::assertInstanceOf(InertiaResponse::class, $response);
+        self::assertInstanceOf(Response::class, $response);
+        $page = $this->decodePage($response);
+        self::assertSame('Discovery/Ask', $page['component']);
+        self::assertSame('The answer', $page['props']['answer'] ?? null);
     }
 
     #[Test]
@@ -137,7 +172,10 @@ final class DiscoveryControllerTest extends TestCase
             new HttpRequest(),
         );
 
-        self::assertInstanceOf(InertiaResponse::class, $response);
+        self::assertInstanceOf(Response::class, $response);
+        $page = $this->decodePage($response);
+        self::assertSame('Discovery/Show', $page['component']);
+        self::assertSame('Test Item', $page['props']['item']['title'] ?? null);
     }
 
     private function makeCommunity(): Community

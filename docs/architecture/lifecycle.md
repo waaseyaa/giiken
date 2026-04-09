@@ -44,14 +44,14 @@ Inside `HttpKernel::handle()` -> `AbstractKernel::boot()`:
 The first Giiken app-level class in normal boot is `Giiken\GiikenServiceProvider`:
 
 - `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
-- `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction)
+- `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `Giiken\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
 - `commands()` contributes CLI commands (`giiken:seed:test-community`)
-- `routes()` contributes app HTTP routes
+- `routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `GET` `/logout`)
 
 ### 1.4 Schema and local data
 
 - App SQL migrations live in `migrations/` and run via `bin/waaseyaa migrate` during bootstrap when pending.
-- Tables `community`, `knowledge_item`, and `wiki_lint_report` must exist before repository saves; optional demo data: `bin/waaseyaa giiken:seed:test-community` after migrate.
+- Tables `community`, `knowledge_item`, and `wiki_lint_report` must exist before repository saves; optional demo data: `bin/waaseyaa giiken:seed:test-community` after migrate (also ensures demo `giiken_staff` user and community staff role when `EntityTypeManager` is available).
 
 ## 2. Request Lifecycle
 
@@ -70,18 +70,20 @@ After boot, `HttpKernel::serveHttpRequest()` executes:
    - debug headers (if debug mode)
    - provider middleware
 5. Account resolution (`_account` request attribute)
-6. Router dispatch (`ControllerDispatcher`)
+6. If the middleware pipeline returns a response whose status is **not** **200** (for example **302** login redirect or **401** JSON from `AuthorizationMiddleware`), the kernel returns it immediately and does not dispatch controllers. (Shipped in `waaseyaa/foundation` as of [framework#1180](https://github.com/waaseyaa/framework/pull/1180); bump Giiken’s lockfile after that release.)
+7. Router dispatch (`ControllerDispatcher`)
 
 ### 2.2 App Route Registration
 
 App routes are added through `GiikenServiceProvider::routes(...)`, including:
 
+- Session HTML auth (public): `GET`/`POST` `/login`, `GET` `/logout`
 - Discovery:
   - `/{communitySlug}`
   - `/{communitySlug}/search`
   - `/{communitySlug}/ask`
   - `/{communitySlug}/item/{itemId}`
-- Management:
+- Management (`_authenticated`):
   - `/{communitySlug}/manage`
   - `/{communitySlug}/manage/reports`
   - `/{communitySlug}/manage/users`
@@ -90,10 +92,10 @@ App routes are added through `GiikenServiceProvider::routes(...)`, including:
 
 ### 2.3 Controller Dispatch Contract
 
-Current app controllers use the SSR dispatch signature:
+SSR app controllers use the four-argument dispatch shape; they return **`Symfony\Component\HttpFoundation\Response`**, not raw `InertiaResponse`, so `SsrPageHandler` can emit HTML or JSON. Internally they call `Inertia::render(...)` and pass the result through `InertiaHttpResponder::toResponse()`.
 
 ```php
-public function action(array $params, array $query, AccountInterface $account, HttpRequest $request): InertiaResponse
+public function action(array $params, array $query, AccountInterface $account, HttpRequest $request): Response
 ```
 
 Symfony `HttpRequest` remains the dispatcher’s fourth argument. Inside the handler, build
@@ -160,7 +162,7 @@ Primary extension points for app work:
 Keep these true during refactoring:
 
 1. `public/index.php` always sends the response (`$response->send()`).
-2. Controllers keep the active dispatch signature expected by SSR dispatch.
+2. Controllers keep the active SSR dispatch signature (`array $params`, `array $query`, `AccountInterface`, `HttpRequest`) and return `Response`.
 3. Optional service dependencies are handled with explicit guard returns (no implicit null behavior).
 4. `GiikenServiceProvider` remains the single source of app route/entity registration.
 5. Boot-time failures remain deterministic and observable (log + stable error response path).

@@ -12,6 +12,8 @@ use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use Giiken\Entity\KnowledgeItem\KnowledgeType;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Waaseyaa\Entity\EntityTypeManager;
+use Waaseyaa\User\User;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -26,6 +28,7 @@ final class SeedTestCommunityCommand extends Command
     public function __construct(
         private readonly CommunityRepositoryInterface $communityRepo,
         private readonly KnowledgeItemRepositoryInterface $itemRepo,
+        private readonly EntityTypeManager $entityTypeManager,
     ) {
         parent::__construct();
     }
@@ -66,7 +69,9 @@ final class SeedTestCommunityCommand extends Command
         }
 
         $communityId = (string) $community->get('id');
-        $items       = $this->itemRepo->findByCommunity($communityId);
+        $this->ensureStaffUser($communityId, $output);
+
+        $items = $this->itemRepo->findByCommunity($communityId);
         if ($items !== []) {
             $output->writeln(sprintf('<comment>Community already has %d knowledge items. Skip seeding items.</comment>', count($items)));
 
@@ -108,5 +113,48 @@ final class SeedTestCommunityCommand extends Command
         $output->writeln(sprintf('<info>Seeded %d sample knowledge items.</info>', count($samples)));
 
         return Command::SUCCESS;
+    }
+
+    private function ensureStaffUser(string $communityId, OutputInterface $output): void
+    {
+        $storage = $this->entityTypeManager->getStorage('user');
+        $role = 'giiken.community.' . $communityId . '.staff';
+        $password = getenv('GIIKEN_SEED_STAFF_PASSWORD');
+        if (!\is_string($password) || $password === '') {
+            $password = 'giiken-dev';
+        }
+
+        $ids = $storage->getQuery()
+            ->condition('name', 'giiken_staff')
+            ->range(0, 1)
+            ->execute();
+
+        if ($ids !== []) {
+            $loaded = $storage->load(reset($ids));
+            if (!$loaded instanceof User) {
+                return;
+            }
+            if (!\in_array($role, $loaded->getRoles(), true)) {
+                $loaded->addRole($role);
+                $storage->save($loaded);
+                $output->writeln('<info>Added community staff role to user "giiken_staff".</info>');
+            }
+
+            return;
+        }
+
+        $user = new User([
+            'name'           => 'giiken_staff',
+            'mail'           => 'staff@giiken.local',
+            'status'         => 1,
+            'email_verified' => 1,
+            'roles'          => ['authenticated', $role],
+        ]);
+        $user->setRawPassword($password);
+        $user->enforceIsNew();
+        $storage->save($user);
+
+        $output->writeln('<info>Created user "giiken_staff" with community staff role.</info>');
+        $output->writeln('<comment>Password: GIIKEN_SEED_STAFF_PASSWORD env or default "giiken-dev".</comment>');
     }
 }

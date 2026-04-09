@@ -2,6 +2,17 @@
 
 declare(strict_types=1);
 
+$projectRoot = dirname(__DIR__);
+$dbEnv = getenv('WAASEYAA_DB');
+$database = null;
+if (\is_string($dbEnv) && $dbEnv !== '') {
+    if (str_starts_with($dbEnv, '/') || str_starts_with($dbEnv, ':')) {
+        $database = $dbEnv;
+    } else {
+        $database = $projectRoot . '/' . ltrim($dbEnv, './');
+    }
+}
+
 return [
     'debug' => filter_var(getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN),
 
@@ -9,7 +20,7 @@ return [
 
     'environment' => getenv('APP_ENV') ?: 'production',
 
-    'database' => null,
+    'database' => $database,
 
     'config_dir' => getenv('WAASEYAA_CONFIG_DIR') ?: __DIR__ . '/sync',
 

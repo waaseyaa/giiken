@@ -14,6 +14,9 @@ use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use Giiken\Http\Controller\DiscoveryController;
 use Giiken\Http\Controller\ManagementController;
+use Giiken\Http\Controller\WebLoginController;
+use Giiken\Http\Controller\WebLogoutController;
+use Giiken\Http\Inertia\InertiaHttpResponder;
 use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
 use Giiken\Pipeline\Provider\LlmProviderInterface;
 use Giiken\Pipeline\Provider\NullEmbeddingProvider;
@@ -23,7 +26,6 @@ use Giiken\Query\QaServiceInterface;
 use Giiken\Query\SearchService;
 use Giiken\Wiki\WikiLintReport;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
-use Symfony\Component\Routing\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherContract;
 use Waaseyaa\Database\DatabaseInterface;
 use Waaseyaa\Entity\EntityType;
@@ -31,18 +33,32 @@ use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\EntityStorage\Connection\SingleConnectionResolver;
 use Waaseyaa\EntityStorage\Driver\SqlStorageDriver;
 use Waaseyaa\EntityStorage\EntityRepository as WaaseyaaEntityRepository;
+use Waaseyaa\Foundation\Http\Inertia\InertiaFullPageRendererInterface;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
+use Waaseyaa\Routing\RouteBuilder;
 use Waaseyaa\Routing\WaaseyaaRouter;
 use Waaseyaa\Search\SearchIndexerInterface;
 use Waaseyaa\Search\SearchProviderInterface;
 
 final class GiikenServiceProvider extends ServiceProvider
 {
-    /** Single-segment paths that must not be treated as community slugs (framework routes, APIs). */
-    private const string COMMUNITY_SLUG_REQUIREMENT = '(?!admin$)(?!api$)[a-z0-9-]+';
+    /**
+     * Single-segment paths that must not be treated as community slugs (framework routes, APIs, auth).
+     */
+    private const string COMMUNITY_SLUG_REQUIREMENT = '(?!admin$)(?!api$)(?!login$)(?!logout$)[a-z0-9-]+';
 
     public function register(): void
     {
+        $this->singleton(InertiaHttpResponder::class, function (): InertiaHttpResponder {
+            try {
+                $renderer = $this->resolve(InertiaFullPageRendererInterface::class);
+            } catch (\Throwable) {
+                $renderer = null;
+            }
+
+            return new InertiaHttpResponder($renderer, $this->config);
+        });
+
         $this->entityType(new EntityType(
             id: 'community',
             label: 'Community',
@@ -150,66 +166,143 @@ final class GiikenServiceProvider extends ServiceProvider
             new SeedTestCommunityCommand(
                 $this->resolve(CommunityRepositoryInterface::class),
                 $this->resolve(KnowledgeItemRepositoryInterface::class),
+                $entityTypeManager,
             ),
         ];
     }
 
     public function routes(WaaseyaaRouter $router, ?EntityTypeManager $entityTypeManager = null): void
     {
-        // Discovery routes
-        $router->addRoute('giiken.discovery.index', new Route(
-            '/{communitySlug}',
-            ['_controller' => [DiscoveryController::class, 'index']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT],
-        ));
+        $router->addRoute(
+            'giiken.login',
+            RouteBuilder::create('/login')
+                ->controller(WebLoginController::class . '::showForm')
+                ->methods('GET')
+                ->allowAll()
+                ->render()
+                ->build(),
+        );
 
-        $router->addRoute('giiken.discovery.search', new Route(
-            '/{communitySlug}/search',
-            ['_controller' => [DiscoveryController::class, 'search']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT],
-        ));
+        $router->addRoute(
+            'giiken.login.submit',
+            RouteBuilder::create('/login')
+                ->controller(WebLoginController::class . '::submit')
+                ->methods('POST')
+                ->allowAll()
+                ->render()
+                ->build(),
+        );
 
-        $router->addRoute('giiken.discovery.ask', new Route(
-            '/{communitySlug}/ask',
-            ['_controller' => [DiscoveryController::class, 'ask']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT],
-        ));
+        $router->addRoute(
+            'giiken.logout',
+            RouteBuilder::create('/logout')
+                ->controller(WebLogoutController::class . '::logout')
+                ->methods('GET')
+                ->allowAll()
+                ->render()
+                ->build(),
+        );
 
-        $router->addRoute('giiken.discovery.show', new Route(
-            '/{communitySlug}/item/{itemId}',
-            ['_controller' => [DiscoveryController::class, 'show']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT, 'itemId' => '.+'],
-        ));
+        // Discovery routes (public)
+        $router->addRoute(
+            'giiken.discovery.index',
+            RouteBuilder::create('/{communitySlug}')
+                ->controller(DiscoveryController::class . '::index')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->allowAll()
+                ->render()
+                ->build(),
+        );
 
-        // Management routes
-        $router->addRoute('giiken.management.dashboard', new Route(
-            '/{communitySlug}/manage',
-            ['_controller' => [ManagementController::class, 'dashboard']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT],
-        ));
+        $router->addRoute(
+            'giiken.discovery.search',
+            RouteBuilder::create('/{communitySlug}/search')
+                ->controller(DiscoveryController::class . '::search')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->allowAll()
+                ->render()
+                ->build(),
+        );
 
-        $router->addRoute('giiken.management.reports', new Route(
-            '/{communitySlug}/manage/reports',
-            ['_controller' => [ManagementController::class, 'reports']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT],
-        ));
+        $router->addRoute(
+            'giiken.discovery.ask',
+            RouteBuilder::create('/{communitySlug}/ask')
+                ->controller(DiscoveryController::class . '::ask')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->allowAll()
+                ->render()
+                ->build(),
+        );
 
-        $router->addRoute('giiken.management.users', new Route(
-            '/{communitySlug}/manage/users',
-            ['_controller' => [ManagementController::class, 'users']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT],
-        ));
+        $router->addRoute(
+            'giiken.discovery.show',
+            RouteBuilder::create('/{communitySlug}/item/{itemId}')
+                ->controller(DiscoveryController::class . '::show')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->requirement('itemId', '.+')
+                ->methods('GET')
+                ->allowAll()
+                ->render()
+                ->build(),
+        );
 
-        $router->addRoute('giiken.management.ingestion', new Route(
-            '/{communitySlug}/manage/ingestion',
-            ['_controller' => [ManagementController::class, 'ingestion']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT],
-        ));
+        // Management routes (session-authenticated)
+        $router->addRoute(
+            'giiken.management.dashboard',
+            RouteBuilder::create('/{communitySlug}/manage')
+                ->controller(ManagementController::class . '::dashboard')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->requireAuthentication()
+                ->render()
+                ->build(),
+        );
 
-        $router->addRoute('giiken.management.export', new Route(
-            '/{communitySlug}/manage/export',
-            ['_controller' => [ManagementController::class, 'exportPage']],
-            ['communitySlug' => self::COMMUNITY_SLUG_REQUIREMENT],
-        ));
+        $router->addRoute(
+            'giiken.management.reports',
+            RouteBuilder::create('/{communitySlug}/manage/reports')
+                ->controller(ManagementController::class . '::reports')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->requireAuthentication()
+                ->render()
+                ->build(),
+        );
+
+        $router->addRoute(
+            'giiken.management.users',
+            RouteBuilder::create('/{communitySlug}/manage/users')
+                ->controller(ManagementController::class . '::users')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->requireAuthentication()
+                ->render()
+                ->build(),
+        );
+
+        $router->addRoute(
+            'giiken.management.ingestion',
+            RouteBuilder::create('/{communitySlug}/manage/ingestion')
+                ->controller(ManagementController::class . '::ingestion')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->requireAuthentication()
+                ->render()
+                ->build(),
+        );
+
+        $router->addRoute(
+            'giiken.management.export',
+            RouteBuilder::create('/{communitySlug}/manage/export')
+                ->controller(ManagementController::class . '::exportPage')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('GET')
+                ->requireAuthentication()
+                ->render()
+                ->build(),
+        );
     }
 }
