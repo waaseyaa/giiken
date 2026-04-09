@@ -6,7 +6,9 @@ namespace Giiken\Http\Controller;
 
 use Giiken\Entity\Community\Community;
 use Giiken\Entity\Community\CommunityRepositoryInterface;
+use Giiken\Export\ExportServiceInterface;
 use Giiken\Http\Inertia\InertiaHttpResponder;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
@@ -18,6 +20,7 @@ final class ManagementController
     public function __construct(
         private readonly ?CommunityRepositoryInterface $communityRepo = null,
         private readonly ?InertiaHttpResponder $inertiaHttp = null,
+        private readonly ?ExportServiceInterface $exportService = null,
     ) {}
 
     /**
@@ -135,6 +138,42 @@ final class ManagementController
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
             'bootError' => null,
         ], $httpRequest, $account);
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function exportDownload(
+        array $params,
+        array $query,
+        AccountInterface $account,
+        HttpRequest $httpRequest,
+    ): Response {
+        if ($this->communityRepo === null || $this->exportService === null) {
+            return new Response('Export service is not configured.', 503, [
+                'Content-Type' => 'text/plain; charset=UTF-8',
+            ]);
+        }
+
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
+        $community     = $this->communityRepo->findBySlug($communitySlug);
+        if ($community === null) {
+            return new Response('Community not found.', 404);
+        }
+
+        try {
+            $zipPath = $this->exportService->export($community, $account);
+        } catch (\RuntimeException $e) {
+            return new Response($e->getMessage(), 403);
+        }
+
+        $response = new BinaryFileResponse($zipPath);
+        $response->setContentDisposition('attachment', 'giiken-export-' . $community->getSlug() . '.zip');
+        $response->deleteFileAfterSend(true);
+
+        return $response;
     }
 
     /**

@@ -139,6 +139,7 @@ final class DiscoveryController
                 'question' => $question,
                 'answer' => '',
                 'citedItemIds' => [],
+                'citations' => [],
                 'noRelevantItems' => true,
                 'relatedItems' => $this->emptyResultSet(),
                 'bootError' => 'Q&A services are not configured yet.',
@@ -160,6 +161,7 @@ final class DiscoveryController
                 'question' => $question,
                 'answer' => '',
                 'citedItemIds' => [],
+                'citations' => [],
                 'noRelevantItems' => true,
                 'relatedItems' => $this->emptyResultSet(),
             ], $httpRequest, $account);
@@ -178,6 +180,11 @@ final class DiscoveryController
             'question' => $question,
             'answer' => $qaResponse->answer,
             'citedItemIds' => $qaResponse->citedItemIds,
+            'citations' => array_map(static fn ($c): array => [
+                'itemId' => $c->itemId,
+                'title' => $c->title,
+                'excerpt' => $c->excerpt,
+            ], $qaResponse->citations),
             'noRelevantItems' => $qaResponse->noRelevantItems,
             'relatedItems' => $this->serializeResultSet($related),
         ], $httpRequest, $account);

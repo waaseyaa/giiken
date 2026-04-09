@@ -147,6 +147,7 @@ final class DiscoveryControllerTest extends TestCase
         $page = $this->decodePage($response);
         self::assertSame('Discovery/Ask', $page['component']);
         self::assertSame('The answer', $page['props']['answer'] ?? null);
+        self::assertSame([], $page['props']['citations'] ?? null);
     }
 
     #[Test]

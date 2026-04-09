@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Giiken\Tests\Unit\Query\Report;
 
 use Giiken\Entity\Community\Community;
+use Giiken\Access\KnowledgeItemAccessPolicy;
 use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use Giiken\Entity\KnowledgeItem\KnowledgeType;
@@ -48,6 +49,7 @@ final class ReportServiceTest extends TestCase
                 new LandBriefReport(),
             ],
             $this->repository,
+            new KnowledgeItemAccessPolicy(),
         );
     }
 
@@ -110,7 +112,7 @@ final class ReportServiceTest extends TestCase
     }
 
     #[Test]
-    public function filters_by_date_range(): void
+    public function filters_by_date_range_using_created_at_when_compiled_at_empty(): void
     {
         $inRange  = $this->item(KnowledgeType::Governance, '2025-06-15');
         $outRange = $this->item(KnowledgeType::Governance, '2024-12-31');
@@ -118,6 +120,23 @@ final class ReportServiceTest extends TestCase
         $this->repository
             ->method('findByCommunity')
             ->willReturn([$inRange, $outRange]);
+
+        $account = $this->account(['giiken.community.' . self::COMMUNITY_ID . '.staff']);
+
+        $output = $this->service->generate('governance_summary', $this->community, $this->dateRange, $account);
+
+        $this->assertStringContainsString('1 governance item(s)', $output);
+    }
+
+    #[Test]
+    public function filters_by_compiled_at_when_set(): void
+    {
+        $inRange = $this->item(KnowledgeType::Governance, '2020-01-01', '2025-06-15');
+        $ignoredCreated = $this->item(KnowledgeType::Governance, '2025-08-01', '2024-06-01');
+
+        $this->repository
+            ->method('findByCommunity')
+            ->willReturn([$inRange, $ignoredCreated]);
 
         $account = $this->account(['giiken.community.' . self::COMMUNITY_ID . '.staff']);
 
@@ -140,15 +159,20 @@ final class ReportServiceTest extends TestCase
     // Helpers
     // ------------------------------------------------------------------
 
-    private function item(KnowledgeType $type, string $createdAt): KnowledgeItem
+    private function item(KnowledgeType $type, string $createdAt, string $compiledAt = ''): KnowledgeItem
     {
-        return new KnowledgeItem([
+        $values = [
             'title'          => 'Item ' . $type->value,
             'content'        => 'Body for ' . $type->value,
             'knowledge_type' => $type->value,
             'community_id'   => self::COMMUNITY_ID,
             'created_at'     => $createdAt,
-        ]);
+        ];
+        if ($compiledAt !== '') {
+            $values['compiled_at'] = $compiledAt;
+        }
+
+        return new KnowledgeItem($values);
     }
 
     /**
