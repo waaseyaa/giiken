@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Giiken\Entity\Community;
 
+use Carbon\CarbonImmutable;
 use Waaseyaa\Entity\ContentEntityBase;
-use Giiken\Entity\Community\WikiSchema;
+use Waaseyaa\Entity\Hydration\HydratableFromStorageInterface;
+use Waaseyaa\Entity\Hydration\HydrationContext;
 
-final class Community extends ContentEntityBase
+final class Community extends ContentEntityBase implements HydratableFromStorageInterface
 {
-    public const SOVEREIGNTY_PROFILES = ['local', 'self_hosted', 'northops'];
-
     protected string $entityTypeId = 'community';
 
     protected array $entityKeys = [
@@ -20,93 +20,127 @@ final class Community extends ContentEntityBase
     ];
 
     /**
+     * @var array<string, string|array<string, mixed>>
+     */
+    protected array $casts = [
+        'wiki_schema' => 'array',
+        'created_at'  => ['type' => 'datetime_immutable', 'domain' => 'carbon_immutable'],
+        'updated_at'  => ['type' => 'datetime_immutable', 'domain' => 'carbon_immutable'],
+        'sovereignty_profile' => SovereigntyProfile::class,
+    ];
+
+    /**
+     * @param array<string, mixed> $extra
+     */
+    public function __construct(
+        string $name,
+        string $slug,
+        SovereigntyProfile $sovereigntyProfile = SovereigntyProfile::Local,
+        string $locale = 'en',
+        ?CarbonImmutable $createdAt = null,
+        ?CarbonImmutable $updatedAt = null,
+        array $extra = [],
+    ) {
+        parent::__construct([
+            'name' => $name,
+            'slug' => $slug,
+            'locale' => $locale,
+            'sovereignty_profile' => $sovereigntyProfile->value,
+            'created_at' => ($createdAt ?? CarbonImmutable::now())->toIso8601String(),
+            'updated_at' => $updatedAt?->toIso8601String(),
+            ...$extra,
+        ], $this->entityTypeId, $this->entityKeys);
+    }
+
+    public static function fromStorage(array $values, HydrationContext $context): static
+    {
+        return self::make($values);
+    }
+
+    /**
      * @param array<string, mixed> $values
      */
-    public function __construct(array $values = [])
+    public static function make(array $values): self
     {
-        if (!isset($values['locale'])) {
-            $values['locale'] = 'en';
-        }
-
-        if (!isset($values['created_at'])) {
-            $values['created_at'] = date('c');
-        }
-
-        parent::__construct($values, $this->entityTypeId, $this->entityKeys);
+        return new self(
+            name: (string) ($values['name'] ?? ''),
+            slug: (string) ($values['slug'] ?? ''),
+            sovereigntyProfile: SovereigntyProfile::tryFrom((string) ($values['sovereignty_profile'] ?? 'local'))
+                ?? SovereigntyProfile::Local,
+            locale: (string) ($values['locale'] ?? 'en'),
+            createdAt: isset($values['created_at'])
+                ? CarbonImmutable::parse($values['created_at'])
+                : null,
+            updatedAt: isset($values['updated_at'])
+                ? CarbonImmutable::parse($values['updated_at'])
+                : null,
+            extra: $values,
+        );
     }
 
-    public function getName(): string
+    protected function duplicateInstance(array $values): static
     {
-        return (string) ($this->get('name') ?? '');
+        return static::fromStorage($values, new HydrationContext(
+            entityTypeId: $this->entityTypeId,
+            entityKeys: $this->entityKeys,
+        ));
     }
 
-    public function getSlug(): string
+    public function name(): string
     {
-        return (string) ($this->get('slug') ?? '');
+        return (string) $this->get('name');
     }
 
-    public function getSovereigntyProfile(): string
+    public function slug(): string
     {
-        $value = (string) ($this->get('sovereignty_profile') ?? 'local');
-
-        if (!in_array($value, self::SOVEREIGNTY_PROFILES, true)) {
-            return 'local';
-        }
-
-        return $value;
+        return (string) $this->get('slug');
     }
 
-    public function getLocale(): string
+    public function sovereigntyProfile(): SovereigntyProfile
+    {
+        return SovereigntyProfile::tryFrom((string) ($this->values['sovereignty_profile'] ?? 'local'))
+            ?? SovereigntyProfile::Local;
+    }
+
+    public function locale(): string
     {
         return (string) ($this->get('locale') ?? 'en');
     }
 
-    public function getContactEmail(): string
+    public function contactEmail(): string
     {
         return (string) ($this->get('contact_email') ?? '');
     }
 
-    /**
-     * Returns the community's wiki schema as a decoded array, or an empty
-     * array if none has been set. The schema is the per-community CLAUDE.md
-     * equivalent — it governs how the LLM maintains this community's wiki.
-     *
-     * @return array<string, mixed>
-     */
-    public function getWikiSchema(): array
+    public function wikiSchema(): WikiSchema
     {
+        /** @var array<string, mixed>|null $raw */
         $raw = $this->get('wiki_schema');
 
-        if ($raw === null || $raw === '') {
-            return [];
-        }
-
-        if (is_array($raw)) {
-            return $raw;
-        }
-
-        try {
-            /** @var array<string, mixed> $decoded */
-            $decoded = json_decode((string) $raw, true, 512, JSON_THROW_ON_ERROR);
-
-            return $decoded;
-        } catch (\JsonException) {
-            return [];
-        }
+        return WikiSchema::fromArray(is_array($raw) ? $raw : []);
     }
 
-    public function getTypedWikiSchema(): WikiSchema
+    public function createdAt(): CarbonImmutable
     {
-        return WikiSchema::fromArray($this->getWikiSchema());
+        $v = $this->get('created_at');
+        if ($v instanceof CarbonImmutable) {
+            return $v;
+        }
+
+        return CarbonImmutable::parse((string) $v);
     }
 
-    public function getCreatedAt(): string
+    public function updatedAt(): ?CarbonImmutable
     {
-        return (string) ($this->get('created_at') ?? '');
-    }
+        $v = $this->get('updated_at');
+        if ($v === null || $v === '') {
+            return null;
+        }
 
-    public function getUpdatedAt(): string
-    {
-        return (string) ($this->get('updated_at') ?? '');
+        if ($v instanceof CarbonImmutable) {
+            return $v;
+        }
+
+        return CarbonImmutable::parse((string) $v);
     }
 }

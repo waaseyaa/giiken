@@ -130,7 +130,7 @@ final class ExportServiceTest extends TestCase
 
     private function community(string $id, string $name): Community
     {
-        return new Community([
+        return Community::make([
             'id'                  => $id,
             'uuid'                => $id . '-uuid',
             'name'                => $name,

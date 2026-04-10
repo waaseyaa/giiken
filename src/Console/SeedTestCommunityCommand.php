@@ -49,12 +49,12 @@ final class SeedTestCommunityCommand extends Command
                 llmInstructions: 'Preserve community voice; cite sources; flag uncertainty.',
             );
 
-            $community = new Community([
-                'uuid'          => Uuid::v4()->toRfc4122(),
-                'name'          => 'Test Community',
-                'bundle'        => 'community',
-                'slug'          => 'test-community',
-                'wiki_schema'   => json_encode($wiki->toArray(), JSON_THROW_ON_ERROR),
+            $community = Community::make([
+                'uuid'        => Uuid::v4()->toRfc4122(),
+                'name'        => 'Test Community',
+                'bundle'      => 'community',
+                'slug'        => 'test-community',
+                'wiki_schema' => $wiki->toArray(),
             ]);
             $community->enforceIsNew(true);
             $this->communityRepo->save($community);

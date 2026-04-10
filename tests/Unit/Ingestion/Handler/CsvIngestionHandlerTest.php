@@ -28,7 +28,7 @@ final class CsvIngestionHandlerTest extends TestCase
     public function it_converts_csv_to_markdown_table(): void
     {
         $handler = $this->createHandler("| Name | Role |\n|---|---|\n| Jane | Mayor |");
-        $community = new Community(['name' => 'Test']);
+        $community = Community::make(['name' => 'Test', 'slug' => 'test']);
 
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmpFile, "Name,Role\nJane,Mayor");

@@ -181,7 +181,7 @@ final class DiscoveryControllerTest extends TestCase
 
     private function makeCommunity(): Community
     {
-        return new Community([
+        return Community::make([
             'id' => 'comm-1',
             'name' => 'Test Community',
             'slug' => 'test-community',

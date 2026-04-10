@@ -203,7 +203,7 @@ final class ImportService implements ImportServiceInterface
         $community = $slug !== '' ? $this->communityRepository->findBySlug($slug) : null;
 
         if ($community === null) {
-            $community = new Community([
+            $community = Community::make([
                 'name'                => (string) ($data['name'] ?? ''),
                 'slug'                => $slug,
                 'locale'              => (string) ($data['locale'] ?? 'en'),
@@ -211,8 +211,8 @@ final class ImportService implements ImportServiceInterface
                 'contact_email'       => (string) ($data['contact_email'] ?? ''),
             ]);
         } else {
-            $community->set('name', (string) ($data['name'] ?? $community->getName()));
-            $community->set('locale', (string) ($data['locale'] ?? $community->getLocale()));
+            $community->set('name', (string) ($data['name'] ?? $community->name()));
+            $community->set('locale', (string) ($data['locale'] ?? $community->locale()));
         }
 
         $this->communityRepository->save($community);

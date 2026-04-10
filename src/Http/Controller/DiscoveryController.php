@@ -260,9 +260,9 @@ final class DiscoveryController
     {
         return [
             'id' => $community->get('id'),
-            'name' => $community->getName(),
-            'slug' => $community->getSlug(),
-            'locale' => $community->getLocale(),
+            'name' => $community->name(),
+            'slug' => $community->slug(),
+            'locale' => $community->locale(),
         ];
     }
 

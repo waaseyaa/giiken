@@ -18,7 +18,7 @@ final class LandBriefReport implements ReportRendererInterface
     public function render(Community $community, array $knowledgeItems, DateRange $dateRange): string
     {
         $lines = [];
-        $lines[] = '# Land Brief: ' . $community->getName();
+        $lines[] = '# Land Brief: ' . $community->name();
         $lines[] = '';
         $lines[] = '**Period:** ' . $dateRange->from->format('Y-m-d') . ' to ' . $dateRange->to->format('Y-m-d');
         $lines[] = '';

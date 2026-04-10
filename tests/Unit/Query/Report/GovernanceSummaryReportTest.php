@@ -24,7 +24,7 @@ final class GovernanceSummaryReportTest extends TestCase
     protected function setUp(): void
     {
         $this->renderer  = new GovernanceSummaryReport();
-        $this->community = new Community(['name' => 'Massey', 'slug' => 'massey']);
+        $this->community = Community::make(['name' => 'Massey', 'slug' => 'massey']);
         $this->dateRange = new DateRange(
             from: new \DateTimeImmutable('2025-01-01'),
             to: new \DateTimeImmutable('2025-03-31'),

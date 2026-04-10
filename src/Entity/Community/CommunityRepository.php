@@ -29,11 +29,7 @@ final class CommunityRepository implements CommunityRepositoryInterface
 
     public function save(Community $community): void
     {
-        if ($community->getUpdatedAt() === '') {
-            $community->set('updated_at', date('c'));
-        } else {
-            $community->set('updated_at', date('c'));
-        }
+        $community->set('updated_at', date('c'));
 
         $this->repository->save($community);
     }

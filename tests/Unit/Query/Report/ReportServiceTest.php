@@ -35,7 +35,7 @@ final class ReportServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->community = new Community(['id' => self::COMMUNITY_ID, 'name' => 'Test Nation', 'slug' => 'test-nation']);
+        $this->community = Community::make(['id' => self::COMMUNITY_ID, 'name' => 'Test Nation', 'slug' => 'test-nation']);
         $this->dateRange = new DateRange(
             from: new \DateTimeImmutable('2025-01-01'),
             to: new \DateTimeImmutable('2025-12-31'),

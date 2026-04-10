@@ -34,7 +34,7 @@ final class ImportServiceTest extends TestCase
     public function round_trip_preserves_community_and_items(): void
     {
         $communityId = 'comm-round-trip';
-        $community   = new Community([
+        $community   = Community::make([
             'id'                  => $communityId,
             'uuid'                => $communityId . '-uuid',
             'name'                => 'Round Trip Nation',
@@ -113,7 +113,7 @@ final class ImportServiceTest extends TestCase
 
         // Community name survives round-trip
         $this->assertNotNull($communityRepository->captured);
-        $this->assertSame('Round Trip Nation', $communityRepository->captured->getName());
+        $this->assertSame('Round Trip Nation', $communityRepository->captured->name());
 
         // Both items were imported
         $this->assertSame(2, $result->itemsImported);

@@ -41,7 +41,7 @@ final class DocumentIngestionHandlerTest extends TestCase
     public function it_converts_file_via_converter_and_returns_raw_document(): void
     {
         $handler = $this->createHandler("# Meeting Minutes\n\nCouncil discussed solar project.");
-        $community = new Community(['name' => 'Test']);
+        $community = Community::make(['name' => 'Test', 'slug' => 'test']);
 
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmpFile, 'fake pdf bytes');
