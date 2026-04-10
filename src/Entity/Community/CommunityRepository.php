@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Giiken\Entity\Community;
 
+use Carbon\CarbonImmutable;
 use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
 final class CommunityRepository implements CommunityRepositoryInterface
@@ -29,7 +30,7 @@ final class CommunityRepository implements CommunityRepositoryInterface
 
     public function save(Community $community): void
     {
-        $community->set('updated_at', date('c'));
+        $community->set('updated_at', CarbonImmutable::now()->toIso8601String());
 
         $this->repository->save($community);
     }

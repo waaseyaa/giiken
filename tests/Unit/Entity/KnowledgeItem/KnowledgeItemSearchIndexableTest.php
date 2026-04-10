@@ -52,7 +52,7 @@ final class KnowledgeItemSearchIndexableTest extends TestCase
 
     private function item(): KnowledgeItem
     {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'id'             => '1',
             'community_id'   => 'comm-1',
             'title'          => 'Solar Panel Debate',

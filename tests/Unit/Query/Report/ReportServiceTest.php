@@ -172,7 +172,7 @@ final class ReportServiceTest extends TestCase
             $values['compiled_at'] = $compiledAt;
         }
 
-        return new KnowledgeItem($values);
+        return KnowledgeItem::make($values);
     }
 
     /**

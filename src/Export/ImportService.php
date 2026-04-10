@@ -236,7 +236,7 @@ final class ImportService implements ImportServiceInterface
             }
         }
 
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'id'             => (string) ($frontmatter['id'] ?? ''),
             'community_id'   => $communityId,
             'title'          => (string) ($frontmatter['title'] ?? ''),

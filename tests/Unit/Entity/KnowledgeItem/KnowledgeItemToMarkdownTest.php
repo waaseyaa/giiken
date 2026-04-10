@@ -15,7 +15,7 @@ final class KnowledgeItemToMarkdownTest extends TestCase
     #[Test]
     public function it_renders_full_item_with_all_fields(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id'     => 'comm-1',
             'title'            => 'Council Meeting Minutes',
             'content'          => "## Agenda\n\nDiscussion of solar project.",
@@ -38,7 +38,7 @@ final class KnowledgeItemToMarkdownTest extends TestCase
     #[Test]
     public function it_omits_null_knowledge_type(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id' => 'comm-1',
             'title'        => 'Untitled',
             'content'      => 'Some content.',
@@ -54,7 +54,7 @@ final class KnowledgeItemToMarkdownTest extends TestCase
     #[Test]
     public function it_omits_empty_source_media_ids(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id' => 'comm-1',
             'title'        => 'No Sources',
             'content'      => 'Content.',
@@ -68,7 +68,7 @@ final class KnowledgeItemToMarkdownTest extends TestCase
     #[Test]
     public function it_omits_empty_compiled_at(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id' => 'comm-1',
             'title'        => 'Uncompiled',
             'content'      => 'Draft.',

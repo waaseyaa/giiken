@@ -129,14 +129,28 @@ App repositories (community, knowledge items) wrap `Waaseyaa\EntityStorage\Entit
 - filter by community/slug
 - save/delete with timestamp conventions; `KnowledgeItemRepository` optionally triggers `SearchIndexerInterface` (FTS) on save
 
-### 3.2.1 `Community` entity (Waaseyaa alpha.119+)
+### 3.2.1 Framework pin (Waaseyaa alpha.120+)
 
-Giiken pins `waaseyaa/*` to **v0.1.0-alpha.119** or newer and adds `nesbot/carbon` so datetime fields can use the framework’s `carbon_immutable` cast domain.
+Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetime fields can use the framework’s `datetime_immutable` cast with `domain: carbon_immutable`. Default **storage** shape for that cast (no explicit `storage: unix`) is **ISO-8601 strings** (`DateTimeInterface::ATOM`). Repositories set `updated_at` with `CarbonImmutable::now()->toIso8601String()` so values round-trip through casts and `EntityRepository::save()`.
 
-- **Hydration:** `Community` implements `HydratableFromStorageInterface`. Rows are rebuilt with `Community::fromStorage()` / `Community::make()`; storage code must not rely on `new Community(values: …)` alone.
-- **Constructor:** Domain-shaped `(name, slug, …)` plus `$extra` for identity/JSON blob fields (`id`, `uuid`, `wiki_schema`, etc.). Seeds and import use `Community::make([...])`.
-- **Casts:** `wiki_schema` → `array`; `created_at` / `updated_at` → `datetime_immutable` with `domain: carbon_immutable`; `sovereignty_profile` → `SovereigntyProfile` backed enum for `get()` / `set()`. For **reads** that must tolerate invalid legacy strings, use `sovereigntyProfile()`, which falls back to `Local` via raw `$this->values`.
-- **Enum:** `Giiken\Entity\Community\SovereigntyProfile` (`local`, `self_hosted`, `northops`) replaces the former `Community::SOVEREIGNTY_PROFILES` constant list.
+### 3.2.2 `Community` entity
+
+- **Hydration:** `Community` implements `HydratableFromStorageInterface`. Rows are rebuilt with `Community::fromStorage()` / `Community::make()`; do not hand-roll `new Community(...)` from storage rows.
+- **Constructor bag merge:** The domain constructor spreads `$extra` first, then overlays normalized `name`, `slug`, `locale`, `sovereignty_profile`, and timestamps so an import bag cannot overwrite coerced sovereignty or parsed dates with invalid raw strings.
+- **Casts:** `wiki_schema` → `array`; `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `sovereignty_profile` → `SovereigntyProfile` backed enum.
+- **Reads:** `sovereigntyProfile()` uses `get('sovereignty_profile')` (enum cast) and `tryFrom` fallback to `Local`. Invalid strings in an import bag are normalized before they reach storage via `make()` / constructor overlay.
+
+### 3.2.3 `KnowledgeItem` entity
+
+- **Hydration:** Implements `HydratableFromStorageInterface` with `fromStorage()`, `make()`, and `duplicateInstance()` delegating to `fromStorage()` + `HydrationContext` (matches `ContentEntityBase` four-argument construction and avoids `ArgumentCountError` on `duplicate()` / `with()`).
+- **Constructor:** Widened to `(array $values = [], string $entityTypeId = '', array $entityKeys = [], array $fieldDefinitions = [])` and forwards to `parent::__construct`.
+- **Casts:** `created_at`, `updated_at`, `compiled_at` → `datetime_immutable` + `carbon_immutable`; `knowledge_type` → `KnowledgeType`; `access_tier` → `AccessTier`; JSON-backed lists → `array`. **Sanitization** in `make`/constructor coerces unknown `access_tier` to members, drops invalid `knowledge_type` strings, replaces corrupt JSON list strings with `[]` so `array` casts do not throw on legacy rows.
+- **Call sites:** Application and test code should construct instances with `KnowledgeItem::make([...])`, not `new KnowledgeItem([...])`. Use `fromStorage()` only where integration tests simulate `EntityInstantiator` / DB hydration.
+
+### 3.2.4 `WikiLintReport` entity
+
+- Same hydratable pattern as `KnowledgeItem`: widened constructor, `make()`, `fromStorage()`, `duplicateInstance()` via `HydrationContext`.
+- **Casts:** `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `findings` → `array`. Jobs and callers build rows with `WikiLintReport::make([...])`.
 
 ### 3.3 Query + Pipeline Flow
 

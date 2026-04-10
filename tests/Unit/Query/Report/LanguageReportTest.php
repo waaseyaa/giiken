@@ -41,7 +41,7 @@ final class LanguageReportTest extends TestCase
     public function renders_markdown_with_items(): void
     {
         $items = [
-            new KnowledgeItem([
+            KnowledgeItem::make([
                 'title'          => 'Ojibwe Greetings',
                 'content'        => 'Boozhoo means hello.',
                 'knowledge_type' => KnowledgeType::Cultural->value,

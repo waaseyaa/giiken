@@ -193,7 +193,7 @@ final class KnowledgeItemAccessPolicyTest extends TestCase
     #[Test]
     public function community_a_knowledge_keeper_cannot_access_community_b_restricted(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id'  => self::COMMUNITY_B,
             'title'         => 'Community B secret',
             'content'       => 'Body',
@@ -225,7 +225,7 @@ final class KnowledgeItemAccessPolicyTest extends TestCase
         array $allowedRoles = [],
         array $allowedUsers = [],
     ): KnowledgeItem {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'community_id'  => self::COMMUNITY_A,
             'title'         => 'Test Item',
             'content'       => 'Body',

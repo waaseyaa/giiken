@@ -41,7 +41,7 @@ final class LandBriefReportTest extends TestCase
     public function renders_markdown_with_items(): void
     {
         $items = [
-            new KnowledgeItem([
+            KnowledgeItem::make([
                 'title'          => 'Treaty 9 Territory',
                 'content'        => 'Historical land use description.',
                 'knowledge_type' => KnowledgeType::Land->value,

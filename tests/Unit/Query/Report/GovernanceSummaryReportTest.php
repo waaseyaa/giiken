@@ -41,7 +41,7 @@ final class GovernanceSummaryReportTest extends TestCase
     public function renders_markdown_with_items(): void
     {
         $items = [
-            new KnowledgeItem([
+            KnowledgeItem::make([
                 'title'          => 'Council Minutes',
                 'content'        => 'Quorum was reached.',
                 'knowledge_type' => KnowledgeType::Governance->value,

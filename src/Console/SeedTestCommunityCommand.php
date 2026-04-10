@@ -97,7 +97,7 @@ final class SeedTestCommunityCommand extends Command
         ];
 
         foreach ($samples as $row) {
-            $item = new KnowledgeItem([
+            $item = KnowledgeItem::make([
                 'uuid'          => Uuid::v4()->toRfc4122(),
                 'title'         => $row['title'],
                 'bundle'        => 'knowledge_item',

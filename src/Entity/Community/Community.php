@@ -41,14 +41,16 @@ final class Community extends ContentEntityBase implements HydratableFromStorage
         ?CarbonImmutable $updatedAt = null,
         array $extra = [],
     ) {
+        // Spread $extra first so constructor-normalized fields (e.g. sovereignty_profile) are not
+        // overwritten by a raw import bag that may contain invalid legacy strings.
         parent::__construct([
+            ...$extra,
             'name' => $name,
             'slug' => $slug,
             'locale' => $locale,
             'sovereignty_profile' => $sovereigntyProfile->value,
             'created_at' => ($createdAt ?? CarbonImmutable::now())->toIso8601String(),
             'updated_at' => $updatedAt?->toIso8601String(),
-            ...$extra,
         ], $this->entityTypeId, $this->entityKeys);
     }
 
@@ -62,20 +64,76 @@ final class Community extends ContentEntityBase implements HydratableFromStorage
      */
     public static function make(array $values): self
     {
+        $values = self::sanitizeUnparseableTimestamps($values);
+
         return new self(
             name: (string) ($values['name'] ?? ''),
             slug: (string) ($values['slug'] ?? ''),
             sovereigntyProfile: SovereigntyProfile::tryFrom((string) ($values['sovereignty_profile'] ?? 'local'))
                 ?? SovereigntyProfile::Local,
             locale: (string) ($values['locale'] ?? 'en'),
-            createdAt: isset($values['created_at'])
-                ? CarbonImmutable::parse($values['created_at'])
-                : null,
-            updatedAt: isset($values['updated_at'])
-                ? CarbonImmutable::parse($values['updated_at'])
+            createdAt: self::parseCarbonOrNull($values['created_at'] ?? null),
+            updatedAt: array_key_exists('updated_at', $values)
+                ? self::parseCarbonOrNull($values['updated_at'])
                 : null,
             extra: $values,
         );
+    }
+
+    /**
+     * Replace timestamps that cannot be parsed so hydration and {@see $casts} never throw on corrupt rows.
+     *
+     * @param array<string, mixed> $values
+     *
+     * @return array<string, mixed>
+     */
+    private static function sanitizeUnparseableTimestamps(array $values): array
+    {
+        foreach (['created_at', 'updated_at'] as $key) {
+            if (!array_key_exists($key, $values)) {
+                continue;
+            }
+            $raw = $values[$key];
+            if ($raw === null || $raw === '') {
+                continue;
+            }
+            if (self::parseCarbonOrNull($raw) !== null) {
+                continue;
+            }
+            $values[$key] = $key === 'created_at'
+                ? self::fallbackTimestamp()->toIso8601String()
+                : null;
+        }
+
+        return $values;
+    }
+
+    private static function fallbackTimestamp(): CarbonImmutable
+    {
+        return CarbonImmutable::createFromTimestampUTC(0);
+    }
+
+    private static function parseCarbonOrNull(mixed $value): ?CarbonImmutable
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        if ($value instanceof CarbonImmutable) {
+            return $value;
+        }
+        if ($value instanceof \DateTimeInterface) {
+            return CarbonImmutable::instance($value);
+        }
+        try {
+            return CarbonImmutable::parse($value);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private static function parseCarbonOrFallback(mixed $value): CarbonImmutable
+    {
+        return self::parseCarbonOrNull($value) ?? self::fallbackTimestamp();
     }
 
     protected function duplicateInstance(array $values): static
@@ -98,8 +156,13 @@ final class Community extends ContentEntityBase implements HydratableFromStorage
 
     public function sovereigntyProfile(): SovereigntyProfile
     {
-        return SovereigntyProfile::tryFrom((string) ($this->values['sovereignty_profile'] ?? 'local'))
-            ?? SovereigntyProfile::Local;
+        $value = $this->get('sovereignty_profile');
+
+        if ($value instanceof SovereigntyProfile) {
+            return $value;
+        }
+
+        return SovereigntyProfile::tryFrom((string) ($value ?? 'local')) ?? SovereigntyProfile::Local;
     }
 
     public function locale(): string
@@ -127,7 +190,7 @@ final class Community extends ContentEntityBase implements HydratableFromStorage
             return $v;
         }
 
-        return CarbonImmutable::parse((string) $v);
+        return self::parseCarbonOrFallback($v);
     }
 
     public function updatedAt(): ?CarbonImmutable
@@ -141,6 +204,6 @@ final class Community extends ContentEntityBase implements HydratableFromStorage
             return $v;
         }
 
-        return CarbonImmutable::parse((string) $v);
+        return self::parseCarbonOrNull($v);
     }
 }

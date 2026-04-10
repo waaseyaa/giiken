@@ -100,4 +100,34 @@ final class CommunityTest extends TestCase
         ]);
         $community->get('wiki_schema');
     }
+
+    #[Test]
+    public function make_does_not_throw_when_created_at_is_unparseable(): void
+    {
+        $community = Community::make([
+            'name'        => 'Test',
+            'slug'        => 'test',
+            'created_at'  => 'not-a-real-datetime',
+        ]);
+
+        $this->assertSame(
+            0,
+            $community->createdAt()->getTimestamp(),
+            'Corrupt created_at is coerced to Unix epoch so hydration and casts succeed.',
+        );
+        $community->get('created_at');
+    }
+
+    #[Test]
+    public function make_does_not_throw_when_updated_at_is_unparseable(): void
+    {
+        $community = Community::make([
+            'name'       => 'Test',
+            'slug'       => 'test',
+            'updated_at' => '%%%invalid%%%',
+        ]);
+
+        $this->assertNull($community->updatedAt());
+        $this->assertNull($community->get('updated_at'));
+    }
 }

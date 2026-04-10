@@ -34,7 +34,7 @@ final class WikiLintJob
             }
         }
 
-        $report = new WikiLintReport([
+        $report = WikiLintReport::make([
             'id' => 'lint-report-' . $this->communityId . '-' . time(),
             'title' => 'Wiki Lint Report — ' . date('Y-m-d H:i'),
             'community_id' => $this->communityId,

@@ -19,9 +19,9 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 3. 🟡 **EntityRepository factory** — waaseyaa/framework#1128. The framework provides no `EntityTypeManager::getRepository(string $id)` accessor. Building a working `Waaseyaa\EntityStorage\EntityRepository` requires manually assembling 3-7 dependencies. This is the architectural blocker for #42 below.
 4. 🟡 **Hook discipline** — waaseyaa/framework#1126 (spec-drift + phpunit pre-push hooks) is the meta-blocker for cutting alpha.108.
 
-### Upgrade note (2026-04-09)
+### Upgrade note (2026-04-10)
 
-- Giiken dependency lock is now on the current Waaseyaa alpha line (`v0.1.0-alpha.113` for most packages; `waaseyaa/core` at `v0.1.0-alpha.110`).
+- Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** (see `docs/architecture/lifecycle.md` for `HydratableFromStorageInterface`, `$casts`, and `::make()` patterns on `Community`, `KnowledgeItem`, and `WikiLintReport`).
 - `waaseyaa/ssr` had to be re-added as an explicit app dependency to satisfy `Waaseyaa\User\UserServiceProvider` runtime wiring after `composer update "waaseyaa/*"`.
 - `public/index.php` now emits responses (`$response = $kernel->handle(); $response->send();`) to avoid zero-byte `200` responses.
 - Unit and full PHPUnit suites pass after updating controller/test signatures for the current SSR app-controller calling convention (`($params, $query, $account, $httpRequest)`).
@@ -85,7 +85,7 @@ Waaseyaa is a modular PHP framework split into 30+ packages (`waaseyaa/*`). Key 
 
 ### Entity Pattern
 
-All domain objects extend `ContentEntityBase`. Properties are accessed via `$this->get('key')` — define typed getter methods on top of that. Repositories wrap `EntityRepositoryInterface` with typed query methods and set `updated_at` automatically on save.
+All domain objects extend `ContentEntityBase`. Properties are accessed via `$this->get('key')` (with `$casts` for enums, datetimes, and JSON lists) — define typed getter methods on top of that. Construct app/test instances with `EntityClass::make([...])` (or the domain constructor for `Community`); use `fromStorage()` when simulating `EntityInstantiator` / SQL hydration. Repositories wrap `EntityRepositoryInterface` with typed query methods and set `updated_at` (ISO-8601) on save.
 
 Three entity types are registered in `GiikenServiceProvider`:
 - `community` → `Entity\Community\Community` (multi-tenant container, owns a `WikiSchema`)

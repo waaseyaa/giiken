@@ -147,7 +147,7 @@ final class ExportServiceTest extends TestCase
         string $title,
         string $content = 'Default content.',
     ): KnowledgeItem {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'id'             => $uuid,
             'uuid'           => $uuid,
             'community_id'   => $communityId,
