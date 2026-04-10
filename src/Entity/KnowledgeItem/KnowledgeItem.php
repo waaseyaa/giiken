@@ -62,12 +62,15 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
 
     public static function fromStorage(array $values, HydrationContext $context): static
     {
-        return new self(
+        $entity = new self(
             values: $values,
             entityTypeId: $context->entityTypeId,
             entityKeys: $context->entityKeys,
             fieldDefinitions: [],
         );
+        self::reifyJsonListCastsForStorage($entity);
+
+        return $entity;
     }
 
     /**
@@ -75,7 +78,27 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
      */
     public static function make(array $values): self
     {
-        return new self($values);
+        $entity = new self($values);
+        self::reifyJsonListCastsForStorage($entity);
+
+        return $entity;
+    }
+
+    /**
+     * After {@see ContentEntityBase} construction, internal {@see $values} may hold domain-shaped PHP
+     * arrays while SQL drivers expect JSON strings for cast {@code array} fields.
+     */
+    private static function reifyJsonListCastsForStorage(self $entity): void
+    {
+        foreach (['allowed_roles', 'allowed_users', 'source_media_ids'] as $key) {
+            if (!array_key_exists($key, $entity->toArray())) {
+                continue;
+            }
+            $domain = $entity->get($key);
+            if (is_array($domain)) {
+                $entity->set($key, $domain);
+            }
+        }
     }
 
     protected function duplicateInstance(array $values): static
@@ -121,6 +144,12 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
         if (isset($values['knowledge_type']) && $values['knowledge_type'] !== null && $values['knowledge_type'] !== '') {
             if (KnowledgeType::tryFrom((string) $values['knowledge_type']) === null) {
                 unset($values['knowledge_type']);
+            }
+        }
+
+        foreach (['updated_at'] as $key) {
+            if (($values[$key] ?? null) === '') {
+                unset($values[$key]);
             }
         }
 
@@ -247,6 +276,34 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
         }
 
         return (string) $v;
+    }
+
+    public function createdAt(): CarbonImmutable
+    {
+        $v = $this->get('created_at');
+        if ($v instanceof CarbonImmutable) {
+            return $v;
+        }
+
+        if ($v === null || $v === '') {
+            return CarbonImmutable::now();
+        }
+
+        return CarbonImmutable::parse((string) $v);
+    }
+
+    public function updatedAt(): ?CarbonImmutable
+    {
+        $v = $this->get('updated_at');
+        if ($v === null || $v === '') {
+            return null;
+        }
+
+        if ($v instanceof CarbonImmutable) {
+            return $v;
+        }
+
+        return CarbonImmutable::parse((string) $v);
     }
 
     public function getSearchDocumentId(): string

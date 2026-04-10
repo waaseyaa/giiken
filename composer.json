@@ -47,6 +47,11 @@
             "Giiken\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Giiken\\Tests\\": "tests/"
+        }
+    },
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true

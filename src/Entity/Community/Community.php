@@ -65,8 +65,9 @@ final class Community extends ContentEntityBase implements HydratableFromStorage
     public static function make(array $values): self
     {
         $values = self::sanitizeUnparseableTimestamps($values);
+        $wikiSchema = $values['wiki_schema'] ?? null;
 
-        return new self(
+        $entity = new self(
             name: (string) ($values['name'] ?? ''),
             slug: (string) ($values['slug'] ?? ''),
             sovereigntyProfile: SovereigntyProfile::tryFrom((string) ($values['sovereignty_profile'] ?? 'local'))
@@ -78,6 +79,12 @@ final class Community extends ContentEntityBase implements HydratableFromStorage
                 : null,
             extra: $values,
         );
+
+        if (is_array($wikiSchema)) {
+            $entity->set('wiki_schema', $wikiSchema);
+        }
+
+        return $entity;
     }
 
     /**

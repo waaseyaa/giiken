@@ -150,7 +150,17 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetim
 ### 3.2.4 `WikiLintReport` entity
 
 - Same hydratable pattern as `KnowledgeItem`: widened constructor, `make()`, `fromStorage()`, `duplicateInstance()` via `HydrationContext`.
-- **Casts:** `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `findings` → `array`. Jobs and callers build rows with `WikiLintReport::make([...])`.
+- **Casts:** `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `findings` → `array`. Jobs and callers build rows with `WikiLintReport::make([...])`. Only fields with real SQL columns are persisted; there is no `knowledge_type` column on `wiki_lint_report` (do not put stray keys into `toArray()` for save).
+
+### 3.2.5 `EntityRepository` + Giiken SQLite tables
+
+- `Waaseyaa\EntityStorage\EntityRepository` with `SqlStorageDriver` writes **`$entity->toArray()` keys as table columns**. Unlike `SqlEntityStorage`, this path does **not** pack unknown keys into `_data`; migrations must declare every persisted field (including `20260410_122000` JSON list columns: `knowledge_item.allowed_roles`, `allowed_users`, `source_media_ids`, `wiki_lint_report.findings`).
+- **New-row id:** after `save()` on an insert, the entity object is **not** updated with the auto-increment primary key. Callers that need the numeric id should reload (e.g. `EntityRepository::findBy(['uuid' => $uuid], limit: 1)`) or extend the save path upstream.
+- **Storage-normalization:** `Community::make()`, `KnowledgeItem::make()` / `fromStorage()`, and `WikiLintReport::make()` / `fromStorage()` coerce cast fields (e.g. `wiki_schema`, JSON list casts) into the canonical shapes SQLite expects so loads do not hit `CastException` on corrupt JSON or empty datetime strings.
+
+### 3.2.6 Integration tests
+
+- `tests/Integration/` boots `HttpKernel` with `WAASEYAA_DB=:memory:`, runs app migrations, and asserts real repository hydration, casts, and round-trips (`ContentEntitySqlIntegrationTest`, `GiikenKernelIntegrationTestCase`). Composer **`autoload-dev`** maps `Giiken\Tests\` → `tests/` for PHPUnit.
 
 ### 3.3 Query + Pipeline Flow
 

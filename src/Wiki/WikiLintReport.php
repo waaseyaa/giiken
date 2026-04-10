@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Giiken\Wiki;
 
+use Carbon\CarbonImmutable;
 use Waaseyaa\Entity\ContentEntityBase;
 use Waaseyaa\Entity\Hydration\HydratableFromStorageInterface;
 use Waaseyaa\Entity\Hydration\HydrationContext;
@@ -36,12 +37,10 @@ final class WikiLintReport extends ContentEntityBase implements HydratableFromSt
         array $entityKeys = [],
         array $fieldDefinitions = [],
     ) {
+        $values = self::sanitizeFindingsForCasts($values);
+
         if (!array_key_exists('created_at', $values) || $values['created_at'] === null || $values['created_at'] === '') {
             $values['created_at'] = date('c');
-        }
-
-        if (!array_key_exists('knowledge_type', $values)) {
-            $values['knowledge_type'] = 'lint_report';
         }
 
         $entityTypeId = $entityTypeId !== '' ? $entityTypeId : $this->entityTypeId;
@@ -52,12 +51,15 @@ final class WikiLintReport extends ContentEntityBase implements HydratableFromSt
 
     public static function fromStorage(array $values, HydrationContext $context): static
     {
-        return new self(
+        $entity = new self(
             values: $values,
             entityTypeId: $context->entityTypeId,
             entityKeys: $context->entityKeys,
             fieldDefinitions: [],
         );
+        self::reifyFindingsCastForStorage($entity);
+
+        return $entity;
     }
 
     /**
@@ -65,7 +67,21 @@ final class WikiLintReport extends ContentEntityBase implements HydratableFromSt
      */
     public static function make(array $values): self
     {
-        return new self($values);
+        $entity = new self($values);
+        self::reifyFindingsCastForStorage($entity);
+
+        return $entity;
+    }
+
+    private static function reifyFindingsCastForStorage(self $entity): void
+    {
+        if (!array_key_exists('findings', $entity->toArray())) {
+            return;
+        }
+        $findings = $entity->get('findings');
+        if (is_array($findings)) {
+            $entity->set('findings', $findings);
+        }
     }
 
     protected function duplicateInstance(array $values): static
@@ -74,6 +90,62 @@ final class WikiLintReport extends ContentEntityBase implements HydratableFromSt
             entityTypeId: $this->entityTypeId,
             entityKeys: $this->entityKeys,
         ));
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     *
+     * @return array<string, mixed>
+     */
+    private static function sanitizeFindingsForCasts(array $values): array
+    {
+        if (!array_key_exists('findings', $values)) {
+            return $values;
+        }
+        $raw = $values['findings'];
+        if ($raw === null || is_array($raw)) {
+            return $values;
+        }
+        if (!is_string($raw) || $raw === '') {
+            $values['findings'] = [];
+
+            return $values;
+        }
+        try {
+            json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            $values['findings'] = [];
+        }
+
+        return $values;
+    }
+
+    public function createdAt(): CarbonImmutable
+    {
+        $v = $this->get('created_at');
+        if ($v instanceof CarbonImmutable) {
+            return $v;
+        }
+
+        if ($v === null || $v === '') {
+            return CarbonImmutable::now();
+        }
+
+        return CarbonImmutable::parse((string) $v);
+    }
+
+    public function updatedAt(): ?CarbonImmutable
+    {
+        $v = $this->get('updated_at');
+        if ($v === null || $v === '') {
+            return null;
+        }
+
+        if ($v instanceof CarbonImmutable) {
+            return $v;
+        }
+
+        return CarbonImmutable::parse((string) $v);
     }
 
     public function getCommunityId(): string
