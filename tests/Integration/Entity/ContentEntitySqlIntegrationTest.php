@@ -58,6 +58,10 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
             self::assertSame(['default_language' => 'en'], $loaded->get('wiki_schema'));
         });
 
+        $fmt = self::formatTimeElementFromApiIso($loaded->createdAt()->toIso8601String());
+        self::assertStringContainsString('datetime="', $fmt['html']);
+        self::assertStringContainsString($fmt['datetime'], $fmt['html']);
+
         $instantiator = new EntityInstantiator(self::entityDefinition('community'));
         $again = $instantiator->instantiate(Community::class, $loaded->toArray());
         self::assertInstanceOf(Community::class, $again);
@@ -140,6 +144,16 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
             self::assertInstanceOf(CarbonImmutable::class, $loaded->createdAt());
             self::assertSame($findings, $loaded->getFindings());
         });
+
+        $fmt = self::formatTimeElementFromApiIso($loaded->createdAt()->toIso8601String());
+        self::assertStringContainsString('datetime="', $fmt['html']);
+        self::assertStringContainsString($fmt['datetime'], $fmt['html']);
+
+        $instantiator = new EntityInstantiator(self::entityDefinition('wiki_lint_report'));
+        $again = $instantiator->instantiate(WikiLintReport::class, $loaded->toArray());
+        self::assertInstanceOf(WikiLintReport::class, $again);
+        self::assertSame($findings, $again->getFindings());
+        self::assertTrue($loaded->createdAt()->eq($again->createdAt()));
     }
 
     #[Test]
@@ -159,6 +173,42 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
         self::assertIsString($raw['updated_at'] ?? null);
         self::assertStringContainsString('2026-06-15', (string) $raw['updated_at']);
         self::assertInstanceOf(CarbonImmutable::class, $item->updatedAt());
+    }
+
+    #[Test]
+    public function set_updated_at_on_community_writes_iso8601_storage_shape(): void
+    {
+        $entity = Community::make([
+            'uuid' => Uuid::v4()->toRfc4122(),
+            'name' => 'Upd Co',
+            'slug' => 'upd-co',
+        ]);
+        $entity->enforceIsNew(true);
+        $at = CarbonImmutable::parse('2026-06-16T09:20:00+00:00');
+        $entity->set('updated_at', $at);
+
+        $raw = $entity->toArray();
+        self::assertIsString($raw['updated_at'] ?? null);
+        self::assertStringContainsString('2026-06-16', (string) $raw['updated_at']);
+        self::assertInstanceOf(CarbonImmutable::class, $entity->updatedAt());
+    }
+
+    #[Test]
+    public function set_updated_at_on_wiki_lint_report_writes_iso8601_storage_shape(): void
+    {
+        $report = WikiLintReport::make([
+            'uuid'         => Uuid::v4()->toRfc4122(),
+            'title'        => 'W',
+            'community_id' => 'c-w-upd',
+        ]);
+        $report->enforceIsNew(true);
+        $at = CarbonImmutable::parse('2026-06-17T10:05:00+00:00');
+        $report->set('updated_at', $at);
+
+        $raw = $report->toArray();
+        self::assertIsString($raw['updated_at'] ?? null);
+        self::assertStringContainsString('2026-06-17', (string) $raw['updated_at']);
+        self::assertInstanceOf(CarbonImmutable::class, $report->updatedAt());
     }
 
     #[Test]
@@ -262,6 +312,39 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
     }
 
     #[Test]
+    public function wiki_lint_report_raw_sql_corrupt_findings_column_normalizes_on_load(): void
+    {
+        $db = self::database();
+        self::assertInstanceOf(DBALDatabase::class, $db);
+        $conn = $db->getConnection();
+        $uuid = Uuid::v4()->toRfc4122();
+
+        $conn->executeStatement(
+            'INSERT INTO wiki_lint_report (uuid, bundle, title, langcode, _data, community_id, created_at, updated_at, findings)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                $uuid,
+                'wiki_lint_report',
+                'Raw findings',
+                'en',
+                '{}',
+                'c-raw-findings',
+                '2026-01-03T00:00:00+00:00',
+                '',
+                '{not valid json',
+            ],
+        );
+        $id = (string) $conn->lastInsertId();
+
+        $loaded = self::entityRepositoryFor('wiki_lint_report')->find($id);
+        self::assertInstanceOf(WikiLintReport::class, $loaded);
+        $this->assertNoCastException(static function () use ($loaded): void {
+            self::assertSame([], $loaded->getFindings());
+            $loaded->get('findings');
+        });
+    }
+
+    #[Test]
     public function wiki_lint_corrupt_findings_json_string_normalizes_to_empty_list(): void
     {
         $report = WikiLintReport::make([
@@ -277,6 +360,7 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
     #[Test]
     public function duplicate_and_with_round_trip_without_argument_count_errors(): void
     {
+        // Waaseyaa EntityBase::with(string $name, mixed $value) — no associative-array overload.
         $community = Community::make([
             'uuid'   => Uuid::v4()->toRfc4122(),
             'name'   => 'Dup Co',
@@ -287,7 +371,8 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
         self::assertInstanceOf(Community::class, $d);
         $w = $d->with('contact_email', 'x@y.z');
         self::assertSame('x@y.z', $w->contactEmail());
-        self::assertInstanceOf(SovereigntyProfile::class, $w->sovereigntyProfile());
+        self::assertSame(SovereigntyProfile::Local, $w->sovereigntyProfile());
+        self::assertInstanceOf(CarbonImmutable::class, $w->createdAt());
 
         $item = KnowledgeItem::make([
             'uuid'         => Uuid::v4()->toRfc4122(),
@@ -301,6 +386,7 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
         $w2 = $d2->with('content', 'Updated');
         self::assertSame('Updated', $w2->getContent());
         self::assertSame(AccessTier::Public, $w2->getAccessTier());
+        self::assertInstanceOf(CarbonImmutable::class, $w2->createdAt());
 
         $report = WikiLintReport::make([
             'uuid'         => Uuid::v4()->toRfc4122(),
@@ -313,6 +399,7 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
         $w3 = $d3->with('title', 'R2');
         self::assertSame('R2', (string) $w3->get('title'));
         self::assertSame([], $w3->getFindings());
+        self::assertInstanceOf(CarbonImmutable::class, $w3->createdAt());
     }
 
     #[Test]
@@ -394,6 +481,11 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
         self::assertSame(['default_language' => 'en'], $cLoad->get('wiki_schema'));
         self::assertInstanceOf(CarbonImmutable::class, $cLoad->createdAt());
 
+        $cBag = $cLoad->toArray();
+        self::assertSame(SovereigntyProfile::Local->value, $cBag['sovereignty_profile']);
+        self::assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T/', (string) $cBag['created_at']);
+        self::assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T/', (string) $cBag['updated_at']);
+
         $commPk = (string) $cLoad->get('id');
 
         $uuidK = Uuid::v4()->toRfc4122();
@@ -425,6 +517,15 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
         self::assertInstanceOf(CarbonImmutable::class, $iLoad->createdAt());
         self::assertNotNull($iLoad->updatedAt());
 
+        $kBag = $iLoad->toArray();
+        self::assertSame(AccessTier::Restricted->value, $kBag['access_tier']);
+        self::assertSame(KnowledgeType::Cultural->value, $kBag['knowledge_type']);
+        self::assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T/', (string) $kBag['created_at']);
+        self::assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T/', (string) $kBag['updated_at']);
+        self::assertSame(['knowledge_keeper'], json_decode((string) $kBag['allowed_roles'], true, 512, JSON_THROW_ON_ERROR));
+        self::assertSame(['u1'], json_decode((string) $kBag['allowed_users'], true, 512, JSON_THROW_ON_ERROR));
+        self::assertSame(['s1'], json_decode((string) $kBag['source_media_ids'], true, 512, JSON_THROW_ON_ERROR));
+
         $kid = (string) $iLoad->id();
 
         $uuidW = Uuid::v4()->toRfc4122();
@@ -445,6 +546,12 @@ final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestC
         self::assertSame($commPk, $wLoad->getCommunityId());
         self::assertCount(1, $wLoad->getFindings());
         self::assertSame('orphan', $wLoad->getFindings()[0]['type']);
+
+        $wBag = $wLoad->toArray();
+        self::assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T/', (string) $wBag['created_at']);
+        $decodedFindings = json_decode((string) $wBag['findings'], true, 512, JSON_THROW_ON_ERROR);
+        self::assertIsArray($decodedFindings);
+        self::assertSame('orphan', $decodedFindings[0]['type'] ?? null);
     }
 
     /**

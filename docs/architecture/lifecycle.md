@@ -161,6 +161,7 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetim
 ### 3.2.6 Integration tests
 
 - `tests/Integration/` boots `HttpKernel` with `WAASEYAA_DB=:memory:`, runs app migrations, and asserts real repository hydration, casts, and round-trips (`ContentEntitySqlIntegrationTest`, `GiikenKernelIntegrationTestCase`). Composer **`autoload-dev`** maps `Giiken\Tests\` → `tests/` for PHPUnit.
+- `ContentEntitySqlIntegrationTest` also covers `EntityInstantiator` re-hydration for all three entity types, SSR-style `<time datetime="">` formatting from ISO timestamps, `set('updated_at')` → ISO-8601 in `toArray()`, raw-SQL corrupt `wiki_lint_report.findings` normalization on load, and `toArray()` normalization after repository round-trips (enums, timestamps, JSON list columns).
 
 ### 3.3 Query + Pipeline Flow
 
