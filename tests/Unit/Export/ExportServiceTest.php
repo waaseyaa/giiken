@@ -130,7 +130,7 @@ final class ExportServiceTest extends TestCase
 
     private function community(string $id, string $name): Community
     {
-        return new Community([
+        return Community::make([
             'id'                  => $id,
             'uuid'                => $id . '-uuid',
             'name'                => $name,
@@ -147,7 +147,7 @@ final class ExportServiceTest extends TestCase
         string $title,
         string $content = 'Default content.',
     ): KnowledgeItem {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'id'             => $uuid,
             'uuid'           => $uuid,
             'community_id'   => $communityId,

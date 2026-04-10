@@ -128,7 +128,7 @@ final class PublicIngestionPolicyTest extends TestCase
 
     private function item(): KnowledgeItem
     {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'community_id' => self::COMMUNITY_A,
             'title'        => 'Test Item',
             'content'      => 'Body',

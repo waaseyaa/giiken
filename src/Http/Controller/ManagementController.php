@@ -170,7 +170,7 @@ final class ManagementController
         }
 
         $response = new BinaryFileResponse($zipPath);
-        $response->setContentDisposition('attachment', 'giiken-export-' . $community->getSlug() . '.zip');
+        $response->setContentDisposition('attachment', 'giiken-export-' . $community->slug() . '.zip');
         $response->deleteFileAfterSend(true);
 
         return $response;
@@ -201,9 +201,9 @@ final class ManagementController
     {
         return [
             'id'     => $community->get('id'),
-            'name'   => $community->getName(),
-            'slug'   => $community->getSlug(),
-            'locale' => $community->getLocale(),
+            'name'   => $community->name(),
+            'slug'   => $community->slug(),
+            'locale' => $community->locale(),
         ];
     }
 }

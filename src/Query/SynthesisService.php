@@ -56,7 +56,7 @@ final class SynthesisService
 
         $uuid = self::randomUuidV4();
 
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'uuid'           => $uuid,
             'title'          => $title,
             'content'        => $content,

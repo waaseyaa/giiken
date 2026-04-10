@@ -8,6 +8,7 @@ use Giiken\Entity\KnowledgeItem\AccessTier;
 use Giiken\Entity\KnowledgeItem\KnowledgeItem;
 use Giiken\Entity\KnowledgeItem\KnowledgeType;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Waaseyaa\Entity\Hydration\HydrationContext;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +18,7 @@ final class KnowledgeItemTest extends TestCase
     #[Test]
     public function it_sets_created_at_automatically(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id' => 'abc',
             'title'        => 'Test',
             'content'      => 'Body',
@@ -29,7 +30,7 @@ final class KnowledgeItemTest extends TestCase
     #[Test]
     public function it_returns_all_scalar_fields(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id'   => 'community-uuid',
             'title'          => 'Land History',
             'content'        => '# Land History\n\nContent here.',
@@ -49,7 +50,7 @@ final class KnowledgeItemTest extends TestCase
     #[Test]
     public function access_tier_defaults_to_members_for_unknown_value(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id' => 'abc',
             'title'        => 'Test',
             'content'      => 'Body',
@@ -62,7 +63,7 @@ final class KnowledgeItemTest extends TestCase
     #[Test]
     public function knowledge_type_returns_null_when_not_set(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id' => 'abc',
             'title'        => 'Test',
             'content'      => 'Body',
@@ -74,7 +75,7 @@ final class KnowledgeItemTest extends TestCase
     #[Test]
     public function it_stores_and_retrieves_json_arrays(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id'    => 'abc',
             'title'           => 'Restricted Item',
             'content'         => 'Body',
@@ -93,7 +94,7 @@ final class KnowledgeItemTest extends TestCase
     #[Test]
     public function json_arrays_return_empty_on_corrupt_data(): void
     {
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'community_id'  => 'abc',
             'title'         => 'Test',
             'content'       => 'Body',
@@ -110,5 +111,30 @@ final class KnowledgeItemTest extends TestCase
             \Giiken\Entity\HasCommunity::class,
             class_implements(KnowledgeItem::class) ?: [],
         );
+    }
+
+    #[Test]
+    public function from_storage_rehydrates_with_hydration_context(): void
+    {
+        $item = KnowledgeItem::fromStorage(
+            [
+                'community_id' => 'c1',
+                'title'          => 'Storage title',
+                'content'        => 'Body',
+                'access_tier'    => AccessTier::Public->value,
+            ],
+            new HydrationContext(
+                entityTypeId: 'knowledge_item',
+                entityKeys: [
+                    'id'    => 'id',
+                    'uuid'  => 'uuid',
+                    'label' => 'title',
+                ],
+            ),
+        );
+
+        $this->assertSame('c1', $item->getCommunityId());
+        $this->assertSame('Storage title', $item->getTitle());
+        $this->assertSame(AccessTier::Public, $item->getAccessTier());
     }
 }

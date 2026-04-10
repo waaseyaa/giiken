@@ -90,7 +90,7 @@ final class WikiLintJobTest extends TestCase
 
     private function makeItem(string $id, string $body): KnowledgeItem
     {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'id' => $id,
             'title' => ucfirst(str_replace('-', ' ', $id)),
             'body' => $body,

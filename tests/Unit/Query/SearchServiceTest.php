@@ -300,7 +300,7 @@ final class SearchServiceTest extends TestCase
 
     private function item(string $id, AccessTier $tier, string $createdAt = '2026-01-01T00:00:00+00:00'): KnowledgeItem
     {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'id'           => $id,
             'community_id' => self::COMMUNITY,
             'title'        => "Item {$id}",

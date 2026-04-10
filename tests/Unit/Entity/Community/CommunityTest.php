@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Giiken\Tests\Unit\Entity\Community;
 
 use Giiken\Entity\Community\Community;
+use Giiken\Entity\Community\WikiSchema;
+use Giiken\Entity\Community\SovereigntyProfile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -15,16 +17,16 @@ final class CommunityTest extends TestCase
     #[Test]
     public function it_sets_default_locale_and_created_at(): void
     {
-        $community = new Community(['name' => 'Sagamok Anishnawbek', 'slug' => 'sagamok']);
+        $community = Community::make(['name' => 'Sagamok Anishnawbek', 'slug' => 'sagamok']);
 
-        $this->assertSame('en', $community->getLocale());
-        $this->assertNotEmpty($community->getCreatedAt());
+        $this->assertSame('en', $community->locale());
+        $this->assertNotNull($community->createdAt());
     }
 
     #[Test]
     public function it_returns_provided_fields(): void
     {
-        $community = new Community([
+        $community = Community::make([
             'name'                => 'Sagamok Anishnawbek',
             'slug'                => 'sagamok',
             'sovereignty_profile' => 'local',
@@ -32,69 +34,100 @@ final class CommunityTest extends TestCase
             'contact_email'       => 'admin@sagamok.ca',
         ]);
 
-        $this->assertSame('Sagamok Anishnawbek', $community->getName());
-        $this->assertSame('sagamok', $community->getSlug());
-        $this->assertSame('local', $community->getSovereigntyProfile());
-        $this->assertSame('oj', $community->getLocale());
-        $this->assertSame('admin@sagamok.ca', $community->getContactEmail());
+        $this->assertSame('Sagamok Anishnawbek', $community->name());
+        $this->assertSame('sagamok', $community->slug());
+        $this->assertSame(SovereigntyProfile::Local, $community->sovereigntyProfile());
+        $this->assertSame('oj', $community->locale());
+        $this->assertSame('admin@sagamok.ca', $community->contactEmail());
     }
 
     #[Test]
     public function sovereignty_profile_rejects_invalid_values(): void
     {
-        $community = new Community([
+        $community = Community::make([
             'name'                => 'Test',
             'slug'                => 'test',
             'sovereignty_profile' => 'invalid_value',
         ]);
 
-        $this->assertSame('local', $community->getSovereigntyProfile());
+        $this->assertSame(SovereigntyProfile::Local, $community->sovereigntyProfile());
     }
 
     #[Test]
     public function it_accepts_all_valid_sovereignty_profiles(): void
     {
-        foreach (Community::SOVEREIGNTY_PROFILES as $profile) {
-            $community = new Community([
+        foreach (SovereigntyProfile::cases() as $profile) {
+            $community = Community::make([
                 'name'                => 'Test',
                 'slug'                => 'test',
-                'sovereignty_profile' => $profile,
+                'sovereignty_profile' => $profile->value,
             ]);
 
-            $this->assertSame($profile, $community->getSovereigntyProfile());
+            $this->assertSame($profile, $community->sovereigntyProfile());
         }
     }
 
     #[Test]
-    public function wiki_schema_returns_empty_array_when_not_set(): void
+    public function wiki_schema_returns_empty_typed_schema_when_not_set(): void
     {
-        $community = new Community(['name' => 'Test', 'slug' => 'test']);
+        $community = Community::make(['name' => 'Test', 'slug' => 'test']);
 
-        $this->assertSame([], $community->getWikiSchema());
+        $this->assertNull($community->get('wiki_schema'));
+        $this->assertEquals(WikiSchema::fromArray([]), $community->wikiSchema());
     }
 
     #[Test]
     public function wiki_schema_decodes_json_string(): void
     {
         $schema = ['default_language' => 'oj', 'llm_instructions' => 'Use Ojibwe terms.'];
-        $community = new Community([
+        $community = Community::make([
             'name'        => 'Test',
             'slug'        => 'test',
             'wiki_schema' => json_encode($schema, JSON_THROW_ON_ERROR),
         ]);
 
-        $this->assertSame($schema, $community->getWikiSchema());
+        $this->assertSame($schema, $community->get('wiki_schema'));
     }
 
     #[Test]
-    public function wiki_schema_returns_empty_array_on_corrupt_json(): void
+    public function wiki_schema_corrupt_json_surfaces_via_cast_exception_or_empty(): void
     {
-        $community = new Community([
+        $this->expectException(\Throwable::class);
+        $community = Community::make([
             'name'        => 'Test',
             'slug'        => 'test',
             'wiki_schema' => '{not valid json',
         ]);
+        $community->get('wiki_schema');
+    }
 
-        $this->assertSame([], $community->getWikiSchema());
+    #[Test]
+    public function make_does_not_throw_when_created_at_is_unparseable(): void
+    {
+        $community = Community::make([
+            'name'        => 'Test',
+            'slug'        => 'test',
+            'created_at'  => 'not-a-real-datetime',
+        ]);
+
+        $this->assertSame(
+            0,
+            $community->createdAt()->getTimestamp(),
+            'Corrupt created_at is coerced to Unix epoch so hydration and casts succeed.',
+        );
+        $community->get('created_at');
+    }
+
+    #[Test]
+    public function make_does_not_throw_when_updated_at_is_unparseable(): void
+    {
+        $community = Community::make([
+            'name'       => 'Test',
+            'slug'       => 'test',
+            'updated_at' => '%%%invalid%%%',
+        ]);
+
+        $this->assertNull($community->updatedAt());
+        $this->assertNull($community->get('updated_at'));
     }
 }

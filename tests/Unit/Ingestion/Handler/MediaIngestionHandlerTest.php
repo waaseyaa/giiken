@@ -89,7 +89,7 @@ final class MediaIngestionHandlerTest extends TestCase
             };
 
             $handler = new MediaIngestionHandler($mediaRepo, $queue);
-            $community = new Community(['id' => 'comm-42', 'name' => 'Test Community']);
+            $community = Community::make(['id' => 'comm-42', 'name' => 'Test Community', 'slug' => 'test-community']);
 
             $result = $handler->handle(
                 filePath: $tmpFile,

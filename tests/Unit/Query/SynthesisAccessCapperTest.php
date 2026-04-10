@@ -54,7 +54,7 @@ final class SynthesisAccessCapperTest extends TestCase
      */
     private function item(AccessTier $tier, array $roles, array $users): KnowledgeItem
     {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'title'          => 'x',
             'content'        => 'y',
             'community_id'   => 'c1',

@@ -74,7 +74,7 @@ final class BrokenLinkCheckTest extends TestCase
 
     private function makeItem(string $id, string $title, string $body): KnowledgeItem
     {
-        return new KnowledgeItem([
+        return KnowledgeItem::make([
             'id' => $id,
             'title' => $title,
             'body' => $body,

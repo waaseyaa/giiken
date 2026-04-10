@@ -22,8 +22,9 @@ final class IngestionHandlerRegistryTest extends TestCase
     protected function setUp(): void
     {
         $this->registry = new IngestionHandlerRegistry();
-        $this->community = new Community([
+        $this->community = Community::make([
             'name' => 'Test Community',
+            'slug' => 'test-community',
         ]);
     }
 

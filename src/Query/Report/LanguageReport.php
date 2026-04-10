@@ -18,7 +18,7 @@ final class LanguageReport implements ReportRendererInterface
     public function render(Community $community, array $knowledgeItems, DateRange $dateRange): string
     {
         $lines = [];
-        $lines[] = '# Language & Cultural Report: ' . $community->getName();
+        $lines[] = '# Language & Cultural Report: ' . $community->name();
         $lines[] = '';
         $lines[] = '**Period:** ' . $dateRange->from->format('Y-m-d') . ' to ' . $dateRange->to->format('Y-m-d');
         $lines[] = '';

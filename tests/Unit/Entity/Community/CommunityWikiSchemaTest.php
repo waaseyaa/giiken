@@ -15,8 +15,9 @@ final class CommunityWikiSchemaTest extends TestCase
     #[Test]
     public function get_wiki_schema_returns_typed_object(): void
     {
-        $community = new Community([
+        $community = Community::make([
             'name' => 'Test Community',
+            'slug' => 'test-community',
             'wiki_schema' => [
                 'default_language' => 'oji',
                 'knowledge_types' => ['Governance', 'Cultural'],
@@ -24,7 +25,7 @@ final class CommunityWikiSchemaTest extends TestCase
             ],
         ]);
 
-        $schema = $community->getTypedWikiSchema();
+        $schema = $community->wikiSchema();
 
         self::assertSame('oji', $schema->defaultLanguage);
         self::assertSame(['Governance', 'Cultural'], $schema->knowledgeTypes);
@@ -34,9 +35,9 @@ final class CommunityWikiSchemaTest extends TestCase
     #[Test]
     public function get_typed_wiki_schema_returns_defaults_when_empty(): void
     {
-        $community = new Community(['name' => 'Empty Schema']);
+        $community = Community::make(['name' => 'Empty Schema', 'slug' => 'empty-schema']);
 
-        $schema = $community->getTypedWikiSchema();
+        $schema = $community->wikiSchema();
 
         self::assertSame('en', $schema->defaultLanguage);
         self::assertSame([], $schema->knowledgeTypes);
@@ -52,12 +53,13 @@ final class CommunityWikiSchemaTest extends TestCase
             'llm_instructions' => 'Respond in French.',
         ], JSON_THROW_ON_ERROR);
 
-        $community = new Community([
+        $community = Community::make([
             'name' => 'JSON Schema',
+            'slug' => 'json-schema',
             'wiki_schema' => $schemaJson,
         ]);
 
-        $schema = $community->getTypedWikiSchema();
+        $schema = $community->wikiSchema();
 
         self::assertSame('fr', $schema->defaultLanguage);
         self::assertSame(['Event'], $schema->knowledgeTypes);

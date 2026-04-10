@@ -24,7 +24,7 @@ final class LandBriefReportTest extends TestCase
     protected function setUp(): void
     {
         $this->renderer  = new LandBriefReport();
-        $this->community = new Community(['name' => 'Massey', 'slug' => 'massey']);
+        $this->community = Community::make(['name' => 'Massey', 'slug' => 'massey']);
         $this->dateRange = new DateRange(
             from: new \DateTimeImmutable('2025-01-01'),
             to: new \DateTimeImmutable('2025-03-31'),
@@ -41,7 +41,7 @@ final class LandBriefReportTest extends TestCase
     public function renders_markdown_with_items(): void
     {
         $items = [
-            new KnowledgeItem([
+            KnowledgeItem::make([
                 'title'          => 'Treaty 9 Territory',
                 'content'        => 'Historical land use description.',
                 'knowledge_type' => KnowledgeType::Land->value,

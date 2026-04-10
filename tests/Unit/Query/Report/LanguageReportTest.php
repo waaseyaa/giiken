@@ -24,7 +24,7 @@ final class LanguageReportTest extends TestCase
     protected function setUp(): void
     {
         $this->renderer  = new LanguageReport();
-        $this->community = new Community(['name' => 'Massey', 'slug' => 'massey']);
+        $this->community = Community::make(['name' => 'Massey', 'slug' => 'massey']);
         $this->dateRange = new DateRange(
             from: new \DateTimeImmutable('2025-01-01'),
             to: new \DateTimeImmutable('2025-03-31'),
@@ -41,7 +41,7 @@ final class LanguageReportTest extends TestCase
     public function renders_markdown_with_items(): void
     {
         $items = [
-            new KnowledgeItem([
+            KnowledgeItem::make([
                 'title'          => 'Ojibwe Greetings',
                 'content'        => 'Boozhoo means hello.',
                 'knowledge_type' => KnowledgeType::Cultural->value,

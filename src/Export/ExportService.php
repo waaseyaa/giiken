@@ -59,15 +59,16 @@ final class ExportService implements ExportServiceInterface
 
     private function writeCommunityYaml(string $tmpDir, Community $community): void
     {
-        $wikiSchema = $community->getWikiSchema();
+        /** @var array<string, mixed>|null $wikiSchema */
+        $wikiSchema = $community->get('wiki_schema');
 
         $data = [
-            'name'                => $community->getName(),
-            'slug'                => $community->getSlug(),
-            'locale'              => $community->getLocale(),
-            'sovereignty_profile' => $community->getSovereigntyProfile(),
-            'contact_email'       => $community->getContactEmail(),
-            'wiki_schema'         => $wikiSchema === [] ? null : $wikiSchema,
+            'name'                => $community->name(),
+            'slug'                => $community->slug(),
+            'locale'              => $community->locale(),
+            'sovereignty_profile' => $community->sovereigntyProfile()->value,
+            'contact_email'       => $community->contactEmail(),
+            'wiki_schema'         => ($wikiSchema === null || $wikiSchema === []) ? null : $wikiSchema,
         ];
 
         file_put_contents($tmpDir . '/community.yaml', $this->arrayToYaml($data));
@@ -119,7 +120,7 @@ final class ExportService implements ExportServiceInterface
     private function writeReadme(string $tmpDir, Community $community): void
     {
         $date    = date('Y-m-d');
-        $name    = $community->getName();
+        $name    = $community->name();
         $content = <<<README
         # Giiken Export
 

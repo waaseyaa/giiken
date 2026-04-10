@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Giiken\Entity\KnowledgeItem;
 
+use Carbon\CarbonImmutable;
 use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 use Waaseyaa\Search\SearchIndexerInterface;
 
@@ -36,7 +37,7 @@ final class KnowledgeItemRepository implements KnowledgeItemRepositoryInterface
 
     public function save(KnowledgeItem $item): void
     {
-        $item->set('updated_at', date('c'));
+        $item->set('updated_at', CarbonImmutable::now()->toIso8601String());
         $this->repository->save($item);
         $this->indexer?->index($item);
     }

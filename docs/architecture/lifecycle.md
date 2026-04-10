@@ -129,6 +129,39 @@ App repositories (community, knowledge items) wrap `Waaseyaa\EntityStorage\Entit
 - filter by community/slug
 - save/delete with timestamp conventions; `KnowledgeItemRepository` optionally triggers `SearchIndexerInterface` (FTS) on save
 
+### 3.2.1 Framework pin (Waaseyaa alpha.120+)
+
+Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetime fields can use the framework’s `datetime_immutable` cast with `domain: carbon_immutable`. Default **storage** shape for that cast (no explicit `storage: unix`) is **ISO-8601 strings** (`DateTimeInterface::ATOM`). Repositories set `updated_at` with `CarbonImmutable::now()->toIso8601String()` so values round-trip through casts and `EntityRepository::save()`.
+
+### 3.2.2 `Community` entity
+
+- **Hydration:** `Community` implements `HydratableFromStorageInterface`. Rows are rebuilt with `Community::fromStorage()` / `Community::make()`; do not hand-roll `new Community(...)` from storage rows.
+- **Constructor bag merge:** The domain constructor spreads `$extra` first, then overlays normalized `name`, `slug`, `locale`, `sovereignty_profile`, and timestamps so an import bag cannot overwrite coerced sovereignty or parsed dates with invalid raw strings.
+- **Casts:** `wiki_schema` → `array`; `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `sovereignty_profile` → `SovereigntyProfile` backed enum.
+- **Reads:** `sovereigntyProfile()` uses `get('sovereignty_profile')` (enum cast) and `tryFrom` fallback to `Local`. Invalid strings in an import bag are normalized before they reach storage via `make()` / constructor overlay.
+
+### 3.2.3 `KnowledgeItem` entity
+
+- **Hydration:** Implements `HydratableFromStorageInterface` with `fromStorage()`, `make()`, and `duplicateInstance()` delegating to `fromStorage()` + `HydrationContext` (matches `ContentEntityBase` four-argument construction and avoids `ArgumentCountError` on `duplicate()` / `with()`).
+- **Constructor:** Widened to `(array $values = [], string $entityTypeId = '', array $entityKeys = [], array $fieldDefinitions = [])` and forwards to `parent::__construct`.
+- **Casts:** `created_at`, `updated_at`, `compiled_at` → `datetime_immutable` + `carbon_immutable`; `knowledge_type` → `KnowledgeType`; `access_tier` → `AccessTier`; JSON-backed lists → `array`. **Sanitization** in `make`/constructor coerces unknown `access_tier` to members, drops invalid `knowledge_type` strings, replaces corrupt JSON list strings with `[]` so `array` casts do not throw on legacy rows.
+- **Call sites:** Application and test code should construct instances with `KnowledgeItem::make([...])`, not `new KnowledgeItem([...])`. Use `fromStorage()` only where integration tests simulate `EntityInstantiator` / DB hydration.
+
+### 3.2.4 `WikiLintReport` entity
+
+- Same hydratable pattern as `KnowledgeItem`: widened constructor, `make()`, `fromStorage()`, `duplicateInstance()` via `HydrationContext`.
+- **Casts:** `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `findings` → `array`. Jobs and callers build rows with `WikiLintReport::make([...])`. Only fields with real SQL columns are persisted; there is no `knowledge_type` column on `wiki_lint_report` (do not put stray keys into `toArray()` for save).
+
+### 3.2.5 `EntityRepository` + Giiken SQLite tables
+
+- `Waaseyaa\EntityStorage\EntityRepository` with `SqlStorageDriver` writes **`$entity->toArray()` keys as table columns**. Unlike `SqlEntityStorage`, this path does **not** pack unknown keys into `_data`; migrations must declare every persisted field (including `20260410_122000` JSON list columns: `knowledge_item.allowed_roles`, `allowed_users`, `source_media_ids`, `wiki_lint_report.findings`).
+- **New-row id:** after `save()` on an insert, the entity object is **not** updated with the auto-increment primary key. Callers that need the numeric id should reload (e.g. `EntityRepository::findBy(['uuid' => $uuid], limit: 1)`) or extend the save path upstream.
+- **Storage-normalization:** `Community::make()`, `KnowledgeItem::make()` / `fromStorage()`, and `WikiLintReport::make()` / `fromStorage()` coerce cast fields (e.g. `wiki_schema`, JSON list casts) into the canonical shapes SQLite expects so loads do not hit `CastException` on corrupt JSON or empty datetime strings.
+
+### 3.2.6 Integration tests
+
+- `tests/Integration/` boots `HttpKernel` with `WAASEYAA_DB=:memory:`, runs app migrations, and asserts real repository hydration, casts, and round-trips (`ContentEntitySqlIntegrationTest`, `GiikenKernelIntegrationTestCase`). Composer **`autoload-dev`** maps `Giiken\Tests\` → `tests/` for PHPUnit.
+
 ### 3.3 Query + Pipeline Flow
 
 - Discovery/search flows enter through `SearchService`.

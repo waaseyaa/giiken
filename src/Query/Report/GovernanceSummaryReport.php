@@ -18,7 +18,7 @@ final class GovernanceSummaryReport implements ReportRendererInterface
     public function render(Community $community, array $knowledgeItems, DateRange $dateRange): string
     {
         $lines = [];
-        $lines[] = '# Governance Summary: ' . $community->getName();
+        $lines[] = '# Governance Summary: ' . $community->name();
         $lines[] = '';
         $lines[] = '**Period:** ' . $dateRange->from->format('Y-m-d') . ' to ' . $dateRange->to->format('Y-m-d');
         $lines[] = '';

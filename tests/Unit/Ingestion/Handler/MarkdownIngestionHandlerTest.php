@@ -35,7 +35,7 @@ final class MarkdownIngestionHandlerTest extends TestCase
     public function it_passes_markdown_content_through(): void
     {
         $handler = new MarkdownIngestionHandler($this->createMockMediaRepo());
-        $community = new Community(['name' => 'Test']);
+        $community = Community::make(['name' => 'Test', 'slug' => 'test']);
 
         $result = $handler->handle(
             $this->fixturesDir . '/sample.md',
@@ -53,7 +53,7 @@ final class MarkdownIngestionHandlerTest extends TestCase
     public function it_extracts_yaml_frontmatter_to_metadata(): void
     {
         $handler = new MarkdownIngestionHandler($this->createMockMediaRepo());
-        $community = new Community(['name' => 'Test']);
+        $community = Community::make(['name' => 'Test', 'slug' => 'test']);
 
         $result = $handler->handle(
             $this->fixturesDir . '/sample.md',
@@ -71,7 +71,7 @@ final class MarkdownIngestionHandlerTest extends TestCase
     public function it_parses_complex_yaml_frontmatter(): void
     {
         $handler = new MarkdownIngestionHandler($this->createMockMediaRepo());
-        $community = new Community(['name' => 'Test']);
+        $community = Community::make(['name' => 'Test', 'slug' => 'test']);
 
         $result = $handler->handle(
             $this->fixturesDir . '/sample.md',
@@ -88,7 +88,7 @@ final class MarkdownIngestionHandlerTest extends TestCase
     public function it_strips_frontmatter_from_content(): void
     {
         $handler = new MarkdownIngestionHandler($this->createMockMediaRepo());
-        $community = new Community(['name' => 'Test']);
+        $community = Community::make(['name' => 'Test', 'slug' => 'test']);
 
         $result = $handler->handle(
             $this->fixturesDir . '/sample.md',

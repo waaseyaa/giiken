@@ -156,7 +156,7 @@ final class DiscoveryControllerTest extends TestCase
         $community = $this->makeCommunity();
         $this->communityRepo->method('findBySlug')->willReturn($community);
 
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'id' => '1',
             'community_id' => 'comm-1',
             'title' => 'Test Item',
@@ -181,7 +181,7 @@ final class DiscoveryControllerTest extends TestCase
 
     private function makeCommunity(): Community
     {
-        return new Community([
+        return Community::make([
             'id' => 'comm-1',
             'name' => 'Test Community',
             'slug' => 'test-community',

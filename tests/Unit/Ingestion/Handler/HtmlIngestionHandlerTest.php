@@ -28,7 +28,7 @@ final class HtmlIngestionHandlerTest extends TestCase
     public function it_converts_html_to_markdown(): void
     {
         $handler = $this->createHandler("# Solar Panel Proposal\n\nThe township is considering...");
-        $community = new Community(['name' => 'Test']);
+        $community = Community::make(['name' => 'Test', 'slug' => 'test']);
 
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmpFile, '<h1>Test</h1>');

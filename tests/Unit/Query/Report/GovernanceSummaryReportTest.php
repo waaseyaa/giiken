@@ -24,7 +24,7 @@ final class GovernanceSummaryReportTest extends TestCase
     protected function setUp(): void
     {
         $this->renderer  = new GovernanceSummaryReport();
-        $this->community = new Community(['name' => 'Massey', 'slug' => 'massey']);
+        $this->community = Community::make(['name' => 'Massey', 'slug' => 'massey']);
         $this->dateRange = new DateRange(
             from: new \DateTimeImmutable('2025-01-01'),
             to: new \DateTimeImmutable('2025-03-31'),
@@ -41,7 +41,7 @@ final class GovernanceSummaryReportTest extends TestCase
     public function renders_markdown_with_items(): void
     {
         $items = [
-            new KnowledgeItem([
+            KnowledgeItem::make([
                 'title'          => 'Council Minutes',
                 'content'        => 'Quorum was reached.',
                 'knowledge_type' => KnowledgeType::Governance->value,

@@ -21,7 +21,7 @@ final class EmbedStep implements PipelineStepInterface
         $payload = $input['payload'];
         $entityId = bin2hex(random_bytes(16));
 
-        $item = new KnowledgeItem([
+        $item = KnowledgeItem::make([
             'uuid'             => $entityId,
             'community_id'     => $payload->communityId,
             'title'            => $payload->title,
