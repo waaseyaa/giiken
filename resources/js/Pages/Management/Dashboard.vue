@@ -7,7 +7,7 @@ defineProps<{ community: Community }>()
 
 <template>
   <ManagementLayout :community="community">
-    <h1 class="text-2xl font-bold text-indigo-dark mb-6">Dashboard</h1>
-    <p class="text-muted">Management dashboard coming soon. Use the sidebar to navigate.</p>
+    <h1 class="text-2xl font-bold text-ink mb-6">Dashboard</h1>
+    <p class="text-ink-muted">Management dashboard coming soon. Use the sidebar to navigate.</p>
   </ManagementLayout>
 </template>

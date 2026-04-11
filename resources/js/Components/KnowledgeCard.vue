@@ -15,20 +15,20 @@ const typeConfig = props.knowledgeType ? KNOWLEDGE_TYPE_CONFIG[props.knowledgeTy
 </script>
 
 <template>
-  <Link :href="`/${communitySlug}/item/${id}`" class="block p-4 bg-white rounded-lg border border-border hover:shadow-md transition-shadow">
+  <Link :href="`/${communitySlug}/item/${id}`" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
     <div class="flex items-start gap-3">
       <div
         v-if="typeConfig"
         class="w-3 h-3 rounded-full mt-1.5 shrink-0"
-        :style="{ backgroundColor: typeConfig.text }"
+        :class="typeConfig.dot"
       />
       <div class="min-w-0">
-        <h3 class="font-semibold text-indigo-dark truncate">{{ title }}</h3>
-        <p class="text-sm text-muted mt-1 line-clamp-2">{{ summary }}</p>
+        <h3 class="font-semibold text-ink truncate">{{ title }}</h3>
+        <p class="text-sm text-ink-muted mt-1 line-clamp-2">{{ summary }}</p>
         <span
           v-if="typeConfig"
           class="inline-block text-xs px-2 py-0.5 rounded-full mt-2"
-          :style="{ backgroundColor: typeConfig.bg, color: typeConfig.text }"
+          :class="typeConfig.chip"
         >
           {{ typeConfig.label }}
         </span>

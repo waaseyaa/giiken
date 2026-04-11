@@ -38,7 +38,7 @@ function toggle() {
       <span
         v-if="typeConfig"
         class="text-xs px-2 py-0.5 rounded-full shrink-0"
-        :style="{ backgroundColor: typeConfig.bg, color: typeConfig.text }"
+        :class="typeConfig.chip"
       >
         {{ typeConfig.label }}
       </span>

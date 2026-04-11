@@ -23,7 +23,7 @@ function pageUrl(page: number): string {
       :key="page"
       :href="pageUrl(page)"
       class="px-3 py-1.5 rounded text-sm"
-      :class="page === currentPage ? 'bg-indigo text-white' : 'bg-indigo-light text-indigo hover:bg-indigo hover:text-white'"
+      :class="page === currentPage ? 'bg-primary text-on-primary' : 'bg-primary-subtle text-primary hover:bg-primary hover:text-on-primary'"
     >
       {{ page }}
     </Link>

@@ -17,7 +17,7 @@ defineProps<{
 
 <template>
   <DiscoveryLayout :community="community">
-    <div class="bg-gradient-to-br from-indigo to-indigo-mid text-white py-10 px-6 text-center">
+    <div class="bg-gradient-to-br from-primary to-primary-hover text-on-primary py-10 px-6 text-center">
       <div class="flex justify-center">
         <SearchInput :community-slug="community.slug" :initial-query="question" />
       </div>
@@ -32,7 +32,7 @@ defineProps<{
       />
 
       <div v-if="relatedItems.items.length > 0" class="mt-8">
-        <h2 class="text-lg font-semibold text-indigo-dark mb-4">Related knowledge</h2>
+        <h2 class="text-lg font-semibold text-ink mb-4">Related knowledge</h2>
         <div class="grid gap-4 sm:grid-cols-2">
           <KnowledgeCard
             v-for="item in relatedItems.items"

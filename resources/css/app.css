@@ -1,42 +1,48 @@
 @import "tailwindcss";
 
 @theme {
-  /* Semantic role tokens — use these in new code. */
+  /* Surfaces */
   --color-surface: #f8f8fd;
   --color-surface-raised: #ffffff;
   --color-surface-inverse: #1a1a2e;
 
+  /* Text.
+     --color-ink and --color-surface-inverse share #1a1a2e today because
+     the default theme uses the same shade for body text and the dark
+     sidebar/topbar. If a community theme diverges them, update both. */
   --color-ink: #1a1a2e;
   --color-ink-muted: #9090b0;
+
+  /* Text over non-default surfaces. Distinct roles even though both
+     resolve to white today: on-inverse is for dark chrome, on-primary is
+     for primary-coloured actions (buttons, badges, gradients). Theming
+     may push them apart. */
   --color-on-inverse: #ffffff;
   --color-on-primary: #ffffff;
 
+  /* Primary brand */
   --color-primary: #3d35c8;
   --color-primary-hover: #6e66ff;
   --color-primary-subtle: #f0f0ff;
 
   --color-border: #e8eaf0;
 
+  /* Status — danger only for now. Add warning/success/info as usages arise. */
   --color-danger: #991b1b;
   --color-danger-border: #f87171;
   --color-danger-subtle: #fef2f2;
 
-  --color-type-cultural-bg: #f0f0ff;
-  --color-type-cultural-text: #3d35c8;
-  --color-type-governance-bg: #e8f5f0;
-  --color-type-governance-text: #1e8a6e;
-  --color-type-land-bg: #edf2e8;
-  --color-type-land-text: #4a7a3a;
-  --color-type-relationship-bg: #fff0f5;
-  --color-type-relationship-text: #c83568;
-  --color-type-event-bg: #fff8e8;
-  --color-type-event-text: #c89a35;
-
-  /* Legacy aliases — kept for in-flight migration, will be removed. */
-  --color-indigo: #3d35c8;
-  --color-indigo-dark: #1a1a2e;
-  --color-indigo-light: #f0f0ff;
-  --color-indigo-mid: #6e66ff;
-  --color-muted: #9090b0;
-  --color-bg: #f8f8fd;
+  /* Knowledge-type palette. Each type has a saturated colour for active
+     states and text, and a subtle colour for backgrounds.
+     Consumed by KNOWLEDGE_TYPE_CONFIG in resources/js/types.ts. */
+  --color-cultural: #3d35c8;
+  --color-cultural-subtle: #f0f0ff;
+  --color-governance: #1e8a6e;
+  --color-governance-subtle: #e8f5f0;
+  --color-land: #4a7a3a;
+  --color-land-subtle: #edf2e8;
+  --color-relationship: #c83568;
+  --color-relationship-subtle: #fff0f5;
+  --color-event: #c89a35;
+  --color-event-subtle: #fff8e8;
 }
