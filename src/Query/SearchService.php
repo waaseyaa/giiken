@@ -18,6 +18,14 @@ class SearchService
     private const SEMANTIC_WEIGHT = 0.6;
     private const FTS_WEIGHT      = 0.4;
 
+    /**
+     * Linear bonus added to a document's merged FTS raw score for every
+     * query term it matched beyond the first. Rewards documents that match
+     * more of the user's query without overwhelming the individual
+     * per-term relevance signal. Tune here, not inline. See giiken#68.
+     */
+    private const MULTI_TERM_MATCH_BONUS = 0.05;
+
     public function __construct(
         private readonly SearchProviderInterface $ftsProvider,
         private readonly EmbeddingProviderInterface $embeddingProvider,
@@ -181,8 +189,10 @@ class SearchService
 
     /**
      * Run FTS once per content-bearing term and merge the hits by taking each
-     * document's best score across terms. Returns a map of entity-id => raw
-     * score suitable for feeding into the existing min-max normalization path.
+     * document's best score across terms, then add a linear bonus proportional
+     * to the number of distinct query terms each document matched. Returns a
+     * map of entity-id => adjusted raw score suitable for feeding into the
+     * existing min-max normalization path.
      *
      * @return array<string, float>
      */
@@ -195,7 +205,10 @@ class SearchService
             $terms = [$query];
         }
 
-        $raw = [];
+        /** @var array<string, float> $bestScore */
+        $bestScore = [];
+        /** @var array<string, array<string, true>> $matchedTerms */
+        $matchedTerms = [];
         foreach ($terms as $term) {
             $request = new SearchRequest(
                 query: $term,
@@ -209,11 +222,18 @@ class SearchService
                 if ($entityId === null) {
                     continue;
                 }
-                // Keep the best per-doc score we have seen across any term.
-                if (!isset($raw[$entityId]) || $hit->score > $raw[$entityId]) {
-                    $raw[$entityId] = $hit->score;
+                if (!isset($bestScore[$entityId]) || $hit->score > $bestScore[$entityId]) {
+                    $bestScore[$entityId] = $hit->score;
                 }
+                $matchedTerms[$entityId][$term] = true;
             }
+        }
+
+        /** @var array<string, float> $raw */
+        $raw = [];
+        foreach ($bestScore as $entityId => $score) {
+            $extraMatches = count($matchedTerms[$entityId] ?? []) - 1;
+            $raw[$entityId] = $score + (self::MULTI_TERM_MATCH_BONUS * max(0, $extraMatches));
         }
 
         return $raw;

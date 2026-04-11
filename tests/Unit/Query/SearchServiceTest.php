@@ -475,6 +475,75 @@ final class SearchServiceTest extends TestCase
     }
 
     #[Test]
+    public function multi_term_match_outranks_single_term_match_with_comparable_score(): void
+    {
+        // doc-a matches only "governance" with raw score 0.80.
+        // doc-b matches both "governance" and "council" with a slightly lower
+        // best per-term score (0.78). Without the multi-term ranking bonus,
+        // doc-a's higher individual score would win. With the bonus applied
+        // (MULTI_TERM_MATCH_BONUS * 1 extra match), doc-b should rank first.
+        $this->ftsProvider
+            ->method('search')
+            ->willReturnCallback(function (SearchRequest $r): SearchResult {
+                return match ($r->query) {
+                    'governance' => $this->ftsResult([
+                        ['id' => 'knowledge_item:doc-a', 'score' => 0.80],
+                        ['id' => 'knowledge_item:doc-b', 'score' => 0.78],
+                    ]),
+                    'council' => $this->ftsResult([
+                        ['id' => 'knowledge_item:doc-b', 'score' => 0.60],
+                    ]),
+                    default => SearchResult::empty(),
+                };
+            });
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $docA = $this->item('doc-a', AccessTier::Public);
+        $docB = $this->item('doc-b', AccessTier::Public);
+        $this->repository
+            ->method('find')
+            ->willReturnCallback(static fn (string $id) => match ($id) {
+                'doc-a' => $docA,
+                'doc-b' => $docB,
+                default => null,
+            });
+
+        $query  = new SearchQuery(query: 'governance council', communityId: self::COMMUNITY);
+        $result = $this->service->search($query, $this->memberAccount());
+
+        self::assertCount(2, $result->items);
+        self::assertSame('doc-b', $result->items[0]->id);
+        self::assertSame('doc-a', $result->items[1]->id);
+    }
+
+    #[Test]
+    public function single_term_match_retains_its_best_score_without_bonus(): void
+    {
+        // One surviving term, one doc hit — the bonus only applies when a doc
+        // matched MORE than one term, so this path should be unchanged from
+        // the pre-#68 behaviour. Mirrors the assertions in the earlier
+        // "merges_per_term_hits_by_best_score" test.
+        $this->ftsProvider
+            ->method('search')
+            ->willReturn($this->ftsResult([
+                ['id' => 'knowledge_item:solo', 'score' => 0.9],
+            ]));
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $solo = $this->item('solo', AccessTier::Public);
+        $this->repository->method('find')->with('solo')->willReturn($solo);
+
+        $query  = new SearchQuery(query: 'cedar', communityId: self::COMMUNITY);
+        $result = $this->service->search($query, $this->memberAccount());
+
+        self::assertCount(1, $result->items);
+        // Normalized to 1.0, FTS weight 0.4 → 0.4. Identical to the pre-bonus path.
+        self::assertEqualsWithDelta(0.4, $result->items[0]->score, 0.001);
+    }
+
+    #[Test]
     public function stopwords_only_query_falls_back_to_single_search(): void
     {
         // "what is the" — everything filters out. We should make exactly one
