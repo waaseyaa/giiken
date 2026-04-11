@@ -52,14 +52,20 @@ composer run analyse
 # Install git hooks
 lefthook install
 
-# Run all tests
+# Run all PHP tests
 ./vendor/bin/phpunit
 
-# Run a single test file
+# Run a single PHP test file
 ./vendor/bin/phpunit tests/Unit/Access/KnowledgeItemAccessPolicyTest.php
 
-# Run a specific test suite
+# Run a specific PHP test suite
 ./vendor/bin/phpunit --testsuite Unit
+
+# Run frontend tests (Vitest + Vue Test Utils)
+npm run test:js
+
+# Run frontend tests in watch mode
+npm run test:js:watch
 
 # Static analysis
 ./vendor/bin/phpstan analyse src/
@@ -142,9 +148,20 @@ Built-in checks: `BrokenLinkCheck`, `OrphanPageCheck`.
 
 ## Testing Conventions
 
+### Backend (PHPUnit)
+
 - PHPUnit 10.5+ with `#[Test]`, `#[CoversClass]`, and `#[DataProvider]` attributes
 - Test fixtures built in `setUp()` using private helper methods for creating entities and mock accounts
 - Access policy tests cover every combination of role × access tier
 - Pipeline step tests mock `LlmProviderInterface` / `EmbeddingProviderInterface`
 - Tests mirror `src/` structure: `tests/Unit/Access/`, `tests/Unit/Entity/`, `tests/Unit/Pipeline/`, `tests/Unit/Ingestion/`, `tests/Unit/Wiki/`
 - Config: `phpunit.xml.dist` (bootstrap: `vendor/autoload.php`, suites: Unit, Integration)
+
+### Frontend (Vitest + Vue Test Utils)
+
+- Vitest 3 with the `test` block in `vite.config.ts` (reuses the `@/` → `resources/js` alias).
+- Environment: `happy-dom`. No global injections — import `describe`, `it`, `expect` from `vitest` explicitly.
+- Test files live under `tests/js/` and are included via `tests/js/**/*.{test,spec}.ts`.
+- `@vue/test-utils` `mount()` drives component rendering. Stub `@inertiajs/vue3`'s `Link` via `global.stubs.Link` with a plain anchor so tests don't need a router.
+- Scripts: `npm run test:js` (one-shot) / `npm run test:js:watch`.
+- Real-browser smoke tests live under `/tmp/giiken-puppeteer/` using puppeteer-core against system Chrome — those are complementary to Vitest, not a replacement.

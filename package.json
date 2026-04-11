@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "lint": "vue-tsc --noEmit"
+    "lint": "vue-tsc --noEmit",
+    "test:js": "vitest run",
+    "test:js:watch": "vitest"
   },
   "dependencies": {
     "@inertiajs/vue3": "^2.0",
@@ -14,9 +16,12 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.0",
     "@vitejs/plugin-vue": "^5.0",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.8.9",
     "tailwindcss": "^4.0",
     "typescript": "^5.7",
     "vite": "^6.0",
+    "vitest": "^3.2.4",
     "vue-tsc": "^2.0"
   }
 }
