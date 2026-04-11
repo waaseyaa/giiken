@@ -56,20 +56,24 @@ export interface QaResponse {
 
 /**
  * Per-type badge styling. Classes reference the --color-{type}* tokens
- * defined in resources/css/app.css. `chip` is the default non-active
- * pill (subtle background + saturated text); `dot` is the solid colour
- * used for the small indicator dot on cards.
+ * defined in resources/css/app.css.
+ *
+ * - `chip` — default non-active pill (subtle background + saturated text).
+ * - `activeChip` — inverted pill used when the type is selected (saturated
+ *   background + on-primary text). Consumed by TypeFilter.
+ * - `dot` — solid colour used for the small indicator dot on cards.
  */
 export interface KnowledgeTypeStyle {
   label: string
   chip: string
+  activeChip: string
   dot: string
 }
 
 export const KNOWLEDGE_TYPE_CONFIG: Record<KnowledgeType, KnowledgeTypeStyle> = {
-  cultural: { label: 'Cultural', chip: 'bg-cultural-subtle text-cultural', dot: 'bg-cultural' },
-  governance: { label: 'Governance', chip: 'bg-governance-subtle text-governance', dot: 'bg-governance' },
-  land: { label: 'Land', chip: 'bg-land-subtle text-land', dot: 'bg-land' },
-  relationship: { label: 'Relationship', chip: 'bg-relationship-subtle text-relationship', dot: 'bg-relationship' },
-  event: { label: 'Event', chip: 'bg-event-subtle text-event', dot: 'bg-event' },
+  cultural: { label: 'Cultural', chip: 'bg-cultural-subtle text-cultural', activeChip: 'bg-cultural text-on-primary', dot: 'bg-cultural' },
+  governance: { label: 'Governance', chip: 'bg-governance-subtle text-governance', activeChip: 'bg-governance text-on-primary', dot: 'bg-governance' },
+  land: { label: 'Land', chip: 'bg-land-subtle text-land', activeChip: 'bg-land text-on-primary', dot: 'bg-land' },
+  relationship: { label: 'Relationship', chip: 'bg-relationship-subtle text-relationship', activeChip: 'bg-relationship text-on-primary', dot: 'bg-relationship' },
+  event: { label: 'Event', chip: 'bg-event-subtle text-event', activeChip: 'bg-event text-on-primary', dot: 'bg-event' },
 }
