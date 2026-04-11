@@ -10,5 +10,6 @@ final readonly class QaCitation
         public string $itemId,
         public string $title,
         public string $excerpt,
+        public ?string $knowledgeType = null,
     ) {}
 }

@@ -184,6 +184,7 @@ final class DiscoveryController
                 'itemId' => $c->itemId,
                 'title' => $c->title,
                 'excerpt' => $c->excerpt,
+                'knowledgeType' => $c->knowledgeType,
             ], $qaResponse->citations),
             'noRelevantItems' => $qaResponse->noRelevantItems,
             'relatedItems' => $this->serializeResultSet($related),
