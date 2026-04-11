@@ -68,27 +68,27 @@ const shouldRenderNoAnswer = computed(
 <template>
   <NoAnswerState v-if="shouldRenderNoAnswer" />
 
-  <div v-else class="bg-white rounded-lg border border-border p-6">
+  <div v-else class="bg-surface-raised rounded-lg border border-border p-6">
     <div class="flex items-center gap-2 mb-4">
-      <span class="w-2.5 h-2.5 bg-indigo rounded-full" />
-      <span class="font-semibold text-indigo-dark">Answer</span>
-      <span class="text-xs text-muted">{{ answerLabel }}</span>
+      <span class="w-2.5 h-2.5 bg-primary rounded-full" />
+      <span class="font-semibold text-ink">Answer</span>
+      <span class="text-xs text-ink-muted">{{ answerLabel }}</span>
     </div>
 
     <div v-if="loading" data-test="answer-loading" class="space-y-3">
-      <div class="h-4 bg-bg rounded animate-pulse" />
-      <div class="h-4 bg-bg rounded animate-pulse w-11/12" />
-      <div class="h-4 bg-bg rounded animate-pulse w-3/4" />
+      <div class="h-4 bg-surface rounded animate-pulse" />
+      <div class="h-4 bg-surface rounded animate-pulse w-11/12" />
+      <div class="h-4 bg-surface rounded animate-pulse w-3/4" />
     </div>
 
     <div v-else>
-      <p class="text-indigo-dark whitespace-pre-line leading-relaxed">
+      <p class="text-ink whitespace-pre-line leading-relaxed">
         <template v-for="(part, i) in answerParts" :key="i">
           <template v-if="part.kind === 'text'">{{ part.text }}</template>
           <sup v-else class="mx-0.5">
             <a
               :href="`#citation-${part.index}`"
-              class="text-indigo font-semibold no-underline hover:underline"
+              class="text-primary font-semibold no-underline hover:underline"
               >[{{ part.index }}]</a
             >
           </sup>
@@ -96,7 +96,7 @@ const shouldRenderNoAnswer = computed(
       </p>
 
       <div v-if="citations.length > 0" class="mt-6 pt-4 border-t border-border">
-        <p class="text-sm font-medium text-muted mb-2">Sources</p>
+        <p class="text-sm font-medium text-ink-muted mb-2">Sources</p>
         <div class="space-y-2">
           <CitationCard
             v-for="(citation, idx) in citations"

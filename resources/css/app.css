@@ -1,11 +1,42 @@
 @import "tailwindcss";
 
 @theme {
+  /* Semantic role tokens — use these in new code. */
+  --color-surface: #f8f8fd;
+  --color-surface-raised: #ffffff;
+  --color-surface-inverse: #1a1a2e;
+
+  --color-ink: #1a1a2e;
+  --color-ink-muted: #9090b0;
+  --color-on-inverse: #ffffff;
+  --color-on-primary: #ffffff;
+
+  --color-primary: #3d35c8;
+  --color-primary-hover: #6e66ff;
+  --color-primary-subtle: #f0f0ff;
+
+  --color-border: #e8eaf0;
+
+  --color-danger: #991b1b;
+  --color-danger-border: #f87171;
+  --color-danger-subtle: #fef2f2;
+
+  --color-type-cultural-bg: #f0f0ff;
+  --color-type-cultural-text: #3d35c8;
+  --color-type-governance-bg: #e8f5f0;
+  --color-type-governance-text: #1e8a6e;
+  --color-type-land-bg: #edf2e8;
+  --color-type-land-text: #4a7a3a;
+  --color-type-relationship-bg: #fff0f5;
+  --color-type-relationship-text: #c83568;
+  --color-type-event-bg: #fff8e8;
+  --color-type-event-text: #c89a35;
+
+  /* Legacy aliases — kept for in-flight migration, will be removed. */
   --color-indigo: #3d35c8;
   --color-indigo-dark: #1a1a2e;
   --color-indigo-light: #f0f0ff;
   --color-indigo-mid: #6e66ff;
   --color-muted: #9090b0;
-  --color-border: #e8eaf0;
   --color-bg: #f8f8fd;
 }
