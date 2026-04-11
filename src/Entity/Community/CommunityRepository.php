@@ -28,6 +28,16 @@ final class CommunityRepository implements CommunityRepositoryInterface
         return $entity instanceof Community ? $entity : null;
     }
 
+    public function findAllPublic(?int $limit = null): array
+    {
+        $results = $this->repository->findBy([], ['name' => 'ASC'], $limit);
+
+        return array_values(array_filter(
+            $results,
+            static fn ($entity): bool => $entity instanceof Community,
+        ));
+    }
+
     public function save(Community $community): void
     {
         $community->set('updated_at', CarbonImmutable::now()->toIso8601String());

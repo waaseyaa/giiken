@@ -45,10 +45,11 @@ The first Giiken app-level class in normal boot is `Giiken\GiikenServiceProvider
 
 - `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
 - `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `Giiken\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
-- `register()` re-binds `InertiaFullPageRendererInterface` with a project-root-based `ViteAssetManager` (`public/build` manifest or `VITE_DEV_SERVER`), sets `Inertia::setVersion('giiken')`, and refreshes `Inertia::setRenderer(...)` so asset paths do not depend on `getcwd()`
+- `register()` re-binds `InertiaFullPageRendererInterface` with a project-root-based `ViteAssetManager` (`public/build` manifest or `VITE_DEV_SERVER`), sets `Inertia::setVersion('giiken')`, and refreshes `Inertia::setRenderer(...)` with a custom template closure that rewrites the data-page attribute from `data-page="true"` to `data-page="app"` so Inertia v2's client-side reader (`script[data-page="app"]`) actually finds the initial page object — workaround for waaseyaa/framework#1227
 - Frontend bundle: Vite entry `resources/js/app.ts`, production output under `public/build` (`npm run build`); set `VITE_DEV_SERVER` (e.g. `http://127.0.0.1:5173`) when using `npm run dev` for HMR
 - `commands()` contributes CLI commands (`giiken:seed:test-community`)
 - `routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `GET` `/logout`)
+- `HomeController::discover` (`GET /`) injects `CommunityRepositoryInterface` and ships the result of `findAllPublic()` as the `communities` Inertia prop for `Pages/Discover.vue`, which renders a community card grid linking into `/{slug}` Discovery pages
 
 ### 1.4 Schema and local data
 

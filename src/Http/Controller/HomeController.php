@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Giiken\Http\Controller;
 
+use Giiken\Entity\Community\Community;
+use Giiken\Entity\Community\CommunityRepositoryInterface;
 use Giiken\Http\Inertia\InertiaHttpResponder;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,12 +13,13 @@ use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Inertia\Inertia;
 
 /**
- * Public landing route: Inertia {@see Discover} page (Phase 4 UX skeleton).
+ * Public landing route: Inertia Discover page listing communities.
  */
 final class HomeController
 {
     public function __construct(
         private readonly ?InertiaHttpResponder $inertiaHttp = null,
+        private readonly ?CommunityRepositoryInterface $communityRepo = null,
     ) {}
 
     /**
@@ -35,8 +38,20 @@ final class HomeController
             ]);
         }
 
+        $communities = $this->communityRepo === null
+            ? []
+            : array_map(
+                static fn (Community $c): array => [
+                    'id'     => $c->id(),
+                    'name'   => $c->name(),
+                    'slug'   => $c->slug(),
+                    'locale' => $c->locale(),
+                ],
+                $this->communityRepo->findAllPublic(),
+            );
+
         return $this->inertiaHttp->toResponse(
-            Inertia::render('Discover', []),
+            Inertia::render('Discover', ['communities' => $communities]),
             $httpRequest,
             $account,
         );

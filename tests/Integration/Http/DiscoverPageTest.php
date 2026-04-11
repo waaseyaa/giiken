@@ -30,6 +30,8 @@ final class DiscoverPageTest extends TestCase
         self::$kernel = new HttpKernel(self::$projectRoot);
         $boot = new \ReflectionMethod(AbstractKernel::class, 'boot');
         $boot->invoke(self::$kernel);
+
+        self::$kernel->getMigrator()->run(self::$kernel->getMigrationLoader()->loadAll());
     }
 
     public static function tearDownAfterClass(): void
@@ -50,8 +52,10 @@ final class DiscoverPageTest extends TestCase
         $content = (string) $response->getContent();
         self::assertStringContainsString('text/html', (string) $response->headers->get('Content-Type'));
         self::assertStringContainsString('"component":"Discover"', $content);
+        // Giiken rewrites data-page="true" → data-page="app" so Inertia v2's
+        // client reader (`script[data-page="app"]`) actually finds the page object.
         self::assertMatchesRegularExpression(
-            '/<script[^>]+data-page="true"[^>]*>/',
+            '/<script[^>]+data-page="app"[^>]*>/',
             $content,
         );
     }

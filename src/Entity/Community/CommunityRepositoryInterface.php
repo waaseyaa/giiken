@@ -10,6 +10,11 @@ interface CommunityRepositoryInterface
 
     public function findBySlug(string $slug): ?Community;
 
+    /**
+     * @return list<Community>
+     */
+    public function findAllPublic(?int $limit = null): array;
+
     public function save(Community $community): void;
 
     public function delete(Community $community): void;
