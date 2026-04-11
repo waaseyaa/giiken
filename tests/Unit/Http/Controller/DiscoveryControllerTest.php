@@ -209,7 +209,7 @@ final class DiscoveryControllerTest extends TestCase
 
         $response = $this->controller->ask(
             ['communitySlug' => 'test-community'],
-            ['question' => 'What is this?'],
+            ['q' => 'What is this?'],
             $this->account,
             new HttpRequest(),
         );
@@ -219,6 +219,46 @@ final class DiscoveryControllerTest extends TestCase
         self::assertSame('Discovery/Ask', $page['component']);
         self::assertSame('The answer', $page['props']['answer'] ?? null);
         self::assertSame([], $page['props']['citations'] ?? null);
+    }
+
+    #[Test]
+    public function ask_passes_q_query_string_through_to_qa_service(): void
+    {
+        $community = $this->makeCommunity();
+        $this->communityRepo->method('findBySlug')->willReturn($community);
+
+        $capturedQuestion = null;
+        $capturedCommunityId = null;
+        $this->qaService
+            ->expects(self::once())
+            ->method('ask')
+            ->willReturnCallback(
+                function (string $question, string $communityId) use (&$capturedQuestion, &$capturedCommunityId): QaResponse {
+                    $capturedQuestion = $question;
+                    $capturedCommunityId = $communityId;
+
+                    return new QaResponse(answer: 'stub', citedItemIds: [], noRelevantItems: false);
+                },
+            );
+        $this->searchService->method('search')->willReturn(SearchResultSet::empty());
+
+        $request = HttpRequest::create('/test-community/ask', 'GET', [
+            'q' => 'what is governance about here',
+        ]);
+
+        $response = $this->controller->ask(
+            ['communitySlug' => 'test-community'],
+            ['q' => 'what is governance about here'],
+            $this->account,
+            $request,
+        );
+
+        self::assertInstanceOf(Response::class, $response);
+        self::assertSame('what is governance about here', $capturedQuestion);
+        self::assertSame('comm-1', $capturedCommunityId);
+
+        $page = $this->decodePage($response);
+        self::assertSame('what is governance about here', $page['props']['question'] ?? null);
     }
 
     #[Test]
