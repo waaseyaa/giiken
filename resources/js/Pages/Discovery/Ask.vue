@@ -1,22 +1,18 @@
 <script setup lang="ts">
 import DiscoveryLayout from '@/Layouts/DiscoveryLayout.vue'
 import SearchInput from '@/Components/SearchInput.vue'
-import QaAnswer from '@/Components/QaAnswer.vue'
+import AnswerPanel from '@/Components/AnswerPanel.vue'
 import KnowledgeCard from '@/Components/KnowledgeCard.vue'
-import type { Community, SearchResultSet, SearchResult } from '@/types'
+import type { Community, Citation, SearchResultSet } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   community: Community
   question: string
   answer: string
-  citedItemIds: string[]
+  citations: Citation[]
   noRelevantItems: boolean
   relatedItems: SearchResultSet
 }>()
-
-const citedItems: SearchResult[] = props.relatedItems.items.filter(i =>
-  props.citedItemIds.includes(i.id)
-)
 </script>
 
 <template>
@@ -28,9 +24,10 @@ const citedItems: SearchResult[] = props.relatedItems.items.filter(i =>
     </div>
 
     <div class="max-w-3xl mx-auto px-6 py-8">
-      <QaAnswer
+      <AnswerPanel
         :answer="answer"
-        :cited-items="citedItems"
+        :citations="citations"
+        :community-slug="community.slug"
         :no-relevant-items="noRelevantItems"
       />
 

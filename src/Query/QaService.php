@@ -98,6 +98,7 @@ final class QaService implements QaServiceInterface
                 itemId: $item->id,
                 title: $item->title,
                 excerpt: $this->excerpt($item->summary),
+                knowledgeType: $item->knowledgeType?->value,
             );
         }
 

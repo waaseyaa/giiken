@@ -40,10 +40,17 @@ export interface SearchResultSet {
   totalPages: number
 }
 
+export interface Citation {
+  itemId: string
+  title: string
+  excerpt: string
+  knowledgeType: KnowledgeType | null
+}
+
 export interface QaResponse {
   answer: string
   citedItemIds: string[]
-  citedItems: SearchResult[]
+  citations: Citation[]
   noRelevantItems: boolean
 }
 
