@@ -21,6 +21,14 @@ use Giiken\Http\Controller\QueryApiController;
 use Giiken\Http\Controller\WebLoginController;
 use Giiken\Http\Controller\WebLogoutController;
 use Giiken\Http\Inertia\InertiaHttpResponder;
+use Giiken\Ingestion\Converter\FileConverterInterface;
+use Giiken\Ingestion\Converter\MarkItDownConverter;
+use Giiken\Ingestion\Handler\CsvIngestionHandler;
+use Giiken\Ingestion\Handler\DocumentIngestionHandler;
+use Giiken\Ingestion\Handler\HtmlIngestionHandler;
+use Giiken\Ingestion\Handler\MarkdownIngestionHandler;
+use Giiken\Ingestion\Handler\MediaIngestionHandler;
+use Giiken\Ingestion\IngestionHandlerRegistry;
 use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
 use Giiken\Pipeline\Provider\LlmProviderInterface;
 use Giiken\Pipeline\Provider\NullEmbeddingProvider;
@@ -48,6 +56,10 @@ use Waaseyaa\EntityStorage\EntityRepository as WaaseyaaEntityRepository;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
 use Waaseyaa\Inertia\Inertia;
 use Waaseyaa\Inertia\RootTemplateRenderer;
+use Waaseyaa\Media\FileRepositoryInterface;
+use Waaseyaa\Media\LocalFileRepository;
+use Waaseyaa\Queue\QueueInterface;
+use Waaseyaa\Queue\SyncQueue;
 use Waaseyaa\Routing\RouteBuilder;
 use Waaseyaa\Routing\WaaseyaaRouter;
 use Waaseyaa\Search\SearchIndexerInterface;
@@ -192,7 +204,47 @@ final class GiikenServiceProvider extends ServiceProvider
             );
         });
 
+        $this->registerIngestionHandlers();
+
         $this->registerInertiaViteRenderer();
+    }
+
+    /**
+     * Wire the ingestion pipeline: a single {@see IngestionHandlerRegistry}
+     * containing all five file handlers, backed by a local-filesystem media
+     * repository and a synchronous queue. Production will swap the queue for
+     * a real backend (see waaseyaa/giiken#39 follow-ups); the file converter
+     * is a shell wrapper around the optional MarkItDown venv and is only
+     * invoked when a non-media upload arrives.
+     */
+    private function registerIngestionHandlers(): void
+    {
+        $projectRoot = dirname(__DIR__);
+
+        $this->singleton(FileRepositoryInterface::class, static function () use ($projectRoot): FileRepositoryInterface {
+            return new LocalFileRepository($projectRoot . '/storage/media');
+        });
+
+        $this->singleton(QueueInterface::class, static fn (): QueueInterface => new SyncQueue());
+
+        $this->singleton(FileConverterInterface::class, static function () use ($projectRoot): FileConverterInterface {
+            return new MarkItDownConverter($projectRoot . '/storage/markitdown-venv');
+        });
+
+        $this->singleton(IngestionHandlerRegistry::class, function (): IngestionHandlerRegistry {
+            $registry  = new IngestionHandlerRegistry();
+            $mediaRepo = $this->resolve(FileRepositoryInterface::class);
+            $queue     = $this->resolve(QueueInterface::class);
+            $converter = $this->resolve(FileConverterInterface::class);
+
+            $registry->register(new MarkdownIngestionHandler($mediaRepo));
+            $registry->register(new CsvIngestionHandler($converter, $mediaRepo));
+            $registry->register(new HtmlIngestionHandler($converter, $mediaRepo));
+            $registry->register(new DocumentIngestionHandler($converter, $mediaRepo));
+            $registry->register(new MediaIngestionHandler($mediaRepo, $queue));
+
+            return $registry;
+        });
     }
 
     /**
@@ -426,6 +478,17 @@ final class GiikenServiceProvider extends ServiceProvider
                 ->controller(ManagementController::class . '::ingestion')
                 ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
                 ->methods('GET')
+                ->requireAuthentication()
+                ->render()
+                ->build(),
+        );
+
+        $router->addRoute(
+            'giiken.management.ingestion.upload',
+            RouteBuilder::create('/{communitySlug}/manage/ingestion')
+                ->controller(ManagementController::class . '::ingestUpload')
+                ->requirement('communitySlug', self::COMMUNITY_SLUG_REQUIREMENT)
+                ->methods('POST')
                 ->requireAuthentication()
                 ->render()
                 ->build(),

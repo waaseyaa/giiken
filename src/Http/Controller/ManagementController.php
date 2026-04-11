@@ -8,7 +8,10 @@ use Giiken\Entity\Community\Community;
 use Giiken\Entity\Community\CommunityRepositoryInterface;
 use Giiken\Export\ExportServiceInterface;
 use Giiken\Http\Inertia\InertiaHttpResponder;
+use Giiken\Ingestion\IngestionException;
+use Giiken\Ingestion\IngestionHandlerRegistry;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
@@ -21,6 +24,7 @@ final class ManagementController
         private readonly ?CommunityRepositoryInterface $communityRepo = null,
         private readonly ?InertiaHttpResponder $inertiaHttp = null,
         private readonly ?ExportServiceInterface $exportService = null,
+        private readonly ?IngestionHandlerRegistry $handlerRegistry = null,
     ) {}
 
     /**
@@ -114,6 +118,72 @@ final class ManagementController
         return $this->page('Management/Ingestion', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
             'bootError' => null,
+        ], $httpRequest, $account);
+    }
+
+    /**
+     * POST endpoint that accepts a multipart file upload from the Management
+     * Ingestion page, hands it to the appropriate handler via
+     * {@see IngestionHandlerRegistry}, and re-renders the Ingestion page with
+     * the result (success summary or error). The result is reported in the
+     * page's Inertia props so the Vue page can render it inline.
+     *
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     */
+    public function ingestUpload(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    {
+        if ($this->communityRepo === null || $this->handlerRegistry === null) {
+            return $this->page('Management/Ingestion', [
+                'community' => null,
+                'bootError' => 'Ingestion services are not configured yet.',
+            ], $httpRequest, $account);
+        }
+
+        $inbound       = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
+        $community     = $this->communityRepo->findBySlug($communitySlug);
+
+        $baseProps = [
+            'community' => $community !== null ? $this->serializeCommunity($community) : null,
+            'bootError' => null,
+        ];
+
+        if ($community === null) {
+            return $this->page('Management/Ingestion', $baseProps + [
+                'uploadError' => 'Community not found.',
+            ], $httpRequest, $account);
+        }
+
+        $upload = $httpRequest->files->get('file');
+        if (!$upload instanceof UploadedFile) {
+            return $this->page('Management/Ingestion', $baseProps + [
+                'uploadError' => 'No file was attached. Choose a file and try again.',
+            ], $httpRequest, $account);
+        }
+
+        $mimeType = (string) ($upload->getClientMimeType() ?: $upload->getMimeType());
+
+        try {
+            $raw = $this->handlerRegistry->handle(
+                filePath:         $upload->getPathname(),
+                mimeType:         $mimeType,
+                originalFilename: $upload->getClientOriginalName(),
+                community:        $community,
+            );
+        } catch (IngestionException $e) {
+            return $this->page('Management/Ingestion', $baseProps + [
+                'uploadError' => $e->getMessage(),
+            ], $httpRequest, $account);
+        }
+
+        return $this->page('Management/Ingestion', $baseProps + [
+            'uploadResult' => [
+                'originalFilename' => $raw->originalFilename,
+                'mimeType'         => $raw->mimeType,
+                'mediaId'          => $raw->mediaId,
+                'metadata'         => $raw->metadata,
+            ],
         ], $httpRequest, $account);
     }
 
