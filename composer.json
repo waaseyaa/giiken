@@ -65,10 +65,10 @@
         "dev": "php bin/waaseyaa serve",
         "test": "./vendor/bin/phpunit",
         "post-install-cmd": [
-            "@php -r \"if (file_exists('bin/waaseyaa') && is_dir('vendor/bin')) { @unlink('vendor/bin/waaseyaa'); symlink('../../bin/waaseyaa', 'vendor/bin/waaseyaa'); echo \\\"Repointed vendor/bin/waaseyaa -> bin/waaseyaa\\n\\\"; }\""
+            "@php scripts/repoint-vendor-bin.php"
         ],
         "post-update-cmd": [
-            "@php -r \"if (file_exists('bin/waaseyaa') && is_dir('vendor/bin')) { @unlink('vendor/bin/waaseyaa'); symlink('../../bin/waaseyaa', 'vendor/bin/waaseyaa'); echo \\\"Repointed vendor/bin/waaseyaa -> bin/waaseyaa\\n\\\"; }\""
+            "@php scripts/repoint-vendor-bin.php"
         ]
     },
     "extra": {
