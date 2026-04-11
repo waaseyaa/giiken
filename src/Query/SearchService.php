@@ -65,24 +65,17 @@ class SearchService
     private function hybridSearch(SearchQuery $query, AccountInterface $account): SearchResultSet
     {
         // --- FTS ---
-        $ftsRequest = new SearchRequest(
-            query: $query->query,
-            filters: new SearchFilters(),
-            page: 1,
-            pageSize: 100,
-        );
-        $ftsResult = $this->ftsProvider->search($ftsRequest);
-
-        /** @var array<string, float> $ftsRaw id => raw score */
-        $ftsRaw = [];
-        foreach ($ftsResult->hits as $hit) {
-            $entityId = $this->parseEntityId($hit->id);
-            if ($entityId === null) {
-                continue;
-            }
-            // Filter to this community post-query (SearchFilters has no community_id).
-            $ftsRaw[$entityId] = $hit->score;
-        }
+        // Waaseyaa\Search\Fts5SearchProvider::escapeQuery quotes each whitespace-
+        // separated term individually, which FTS5 treats as an implicit AND. A
+        // multi-word natural-language question like "what is governance about"
+        // therefore requires every term to appear in the same row, and nothing
+        // matches. We work around it by tokenizing the query ourselves (drop
+        // stopwords and trivially short terms) and issuing one FTS search per
+        // surviving term, then OR-ing the hits together by keeping each doc's
+        // best per-term score. If the tokenizer throws everything away we fall
+        // back to the original single-shot path so already-simple queries keep
+        // working. See waaseyaa/giiken#61.
+        $ftsRaw = $this->runFtsOverTerms($query->query);
 
         // --- Semantic ---
         $semanticRaw = [];
@@ -184,6 +177,93 @@ class SearchService
             fn (KnowledgeItem $item): bool =>
                 $this->accessPolicy->access($item, 'view', $account)->isAllowed(),
         ));
+    }
+
+    /**
+     * Run FTS once per content-bearing term and merge the hits by taking each
+     * document's best score across terms. Returns a map of entity-id => raw
+     * score suitable for feeding into the existing min-max normalization path.
+     *
+     * @return array<string, float>
+     */
+    private function runFtsOverTerms(string $query): array
+    {
+        $terms = $this->tokenizeForFts($query);
+        if ($terms === []) {
+            // Everything filtered out — hand the whole query to FTS as-is and
+            // let the vendor escaper do its thing. Mirrors the pre-#61 path.
+            $terms = [$query];
+        }
+
+        $raw = [];
+        foreach ($terms as $term) {
+            $request = new SearchRequest(
+                query: $term,
+                filters: new SearchFilters(),
+                page: 1,
+                pageSize: 100,
+            );
+            $result = $this->ftsProvider->search($request);
+            foreach ($result->hits as $hit) {
+                $entityId = $this->parseEntityId($hit->id);
+                if ($entityId === null) {
+                    continue;
+                }
+                // Keep the best per-doc score we have seen across any term.
+                if (!isset($raw[$entityId]) || $hit->score > $raw[$entityId]) {
+                    $raw[$entityId] = $hit->score;
+                }
+            }
+        }
+
+        return $raw;
+    }
+
+    /**
+     * Split a natural-language query into content-bearing terms. Lowercases,
+     * strips punctuation, drops English stopwords, and drops tokens shorter
+     * than two characters.
+     *
+     * @return string[]
+     */
+    private function tokenizeForFts(string $query): array
+    {
+        static $stopwords = [
+            'a' => true, 'an' => true, 'the' => true,
+            'is' => true, 'are' => true, 'am' => true, 'be' => true, 'was' => true, 'were' => true,
+            'of' => true, 'in' => true, 'on' => true, 'at' => true, 'to' => true, 'for' => true,
+            'and' => true, 'or' => true, 'not' => true, 'but' => true,
+            'what' => true, 'when' => true, 'where' => true, 'why' => true, 'how' => true, 'who' => true,
+            'this' => true, 'that' => true, 'these' => true, 'those' => true,
+            'do' => true, 'does' => true, 'did' => true, 'done' => true,
+            'about' => true, 'with' => true, 'as' => true, 'by' => true, 'from' => true,
+            'i' => true, 'me' => true, 'my' => true, 'we' => true, 'us' => true, 'our' => true,
+            'you' => true, 'your' => true, 'it' => true, 'its' => true,
+            'can' => true, 'could' => true, 'should' => true, 'would' => true, 'may' => true, 'might' => true,
+            'there' => true, 'here' => true,
+        ];
+
+        $rawTerms = preg_split('/[^\p{L}\p{N}]+/u', $query) ?: [];
+
+        /** @var string[] $terms */
+        $terms = [];
+        $seen = [];
+        foreach ($rawTerms as $term) {
+            $lower = mb_strtolower($term);
+            if ($lower === '' || mb_strlen($lower) < 2) {
+                continue;
+            }
+            if (isset($stopwords[$lower])) {
+                continue;
+            }
+            if (isset($seen[$lower])) {
+                continue;
+            }
+            $seen[$lower] = true;
+            $terms[] = $lower;
+        }
+
+        return $terms;
     }
 
     /**

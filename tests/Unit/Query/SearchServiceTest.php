@@ -295,6 +295,105 @@ final class SearchServiceTest extends TestCase
     }
 
     // ------------------------------------------------------------------
+    // Multi-word query rewriting (waaseyaa/giiken#61)
+    // ------------------------------------------------------------------
+
+    #[Test]
+    public function multi_word_query_issues_one_fts_search_per_content_term(): void
+    {
+        // Content-bearing terms after stopword strip from
+        // "what is governance about in this community" are "governance" and "community".
+        $seen = [];
+        $this->ftsProvider
+            ->expects(self::exactly(2))
+            ->method('search')
+            ->willReturnCallback(function (SearchRequest $r) use (&$seen): SearchResult {
+                $seen[] = $r->query;
+
+                return match ($r->query) {
+                    'governance' => $this->ftsResult([['id' => 'knowledge_item:gov-1', 'score' => 0.9]]),
+                    'community'  => $this->ftsResult([['id' => 'knowledge_item:com-1', 'score' => 0.7]]),
+                    default      => SearchResult::empty(),
+                };
+            });
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $gov = $this->item('gov-1', AccessTier::Public);
+        $com = $this->item('com-1', AccessTier::Public);
+        $this->repository
+            ->method('find')
+            ->willReturnCallback(static fn (string $id) => match ($id) {
+                'gov-1' => $gov,
+                'com-1' => $com,
+                default => null,
+            });
+
+        $query = new SearchQuery(
+            query: 'what is governance about in this community',
+            communityId: self::COMMUNITY,
+        );
+        $result = $this->service->search($query, $this->memberAccount());
+
+        self::assertSame(['governance', 'community'], $seen);
+        self::assertCount(2, $result->items);
+    }
+
+    #[Test]
+    public function multi_word_query_merges_per_term_hits_by_best_score(): void
+    {
+        // Same doc hit by two terms — we keep the higher score.
+        $this->ftsProvider
+            ->method('search')
+            ->willReturnCallback(function (SearchRequest $r): SearchResult {
+                return match ($r->query) {
+                    'governance' => $this->ftsResult([['id' => 'knowledge_item:shared', 'score' => 0.4]]),
+                    'overview'   => $this->ftsResult([['id' => 'knowledge_item:shared', 'score' => 0.95]]),
+                    default      => SearchResult::empty(),
+                };
+            });
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $shared = $this->item('shared', AccessTier::Public);
+        $this->repository->method('find')->with('shared')->willReturn($shared);
+
+        $query = new SearchQuery(query: 'governance overview', communityId: self::COMMUNITY);
+        $result = $this->service->search($query, $this->memberAccount());
+
+        self::assertCount(1, $result->items);
+        self::assertSame('shared', $result->items[0]->id);
+        // A single FTS hit normalizes to 1.0, so weighted score is 0.4 regardless
+        // of which term supplied it. The point of the test is the doc survives
+        // the merge even though each individual FTS call only saw it once.
+        self::assertEqualsWithDelta(0.4, $result->items[0]->score, 0.001);
+    }
+
+    #[Test]
+    public function stopwords_only_query_falls_back_to_single_search(): void
+    {
+        // "what is the" — everything filters out. We should make exactly one
+        // FTS call and hand the raw query through so the vendor escaper gets
+        // the same input the caller would have given it.
+        $seen = null;
+        $this->ftsProvider
+            ->expects(self::once())
+            ->method('search')
+            ->willReturnCallback(function (SearchRequest $r) use (&$seen): SearchResult {
+                $seen = $r->query;
+
+                return SearchResult::empty();
+            });
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $query = new SearchQuery(query: 'what is the', communityId: self::COMMUNITY);
+        $this->service->search($query, $this->memberAccount());
+
+        self::assertSame('what is the', $seen);
+    }
+
+    // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
 
