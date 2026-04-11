@@ -118,7 +118,8 @@ class SearchService
         /** @var KnowledgeItem[] $accessible */
         $accessible = [];
         foreach (array_keys($scores) as $id) {
-            $item = $this->repository->find($id);
+            // PHP casts numeric-string array keys to int, so $id may be int|string here.
+            $item = $this->repository->find((string) $id);
             if ($item === null) {
                 continue;
             }
