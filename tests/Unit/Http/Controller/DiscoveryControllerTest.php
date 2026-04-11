@@ -115,7 +115,7 @@ final class DiscoveryControllerTest extends TestCase
 
         $response = $this->controller->search(
             ['communitySlug' => 'test-community'],
-            ['query' => 'test query', 'page' => 1],
+            ['q' => 'test query', 'page' => 1],
             $this->account,
             new HttpRequest(),
         );
@@ -124,6 +124,77 @@ final class DiscoveryControllerTest extends TestCase
         $page = $this->decodePage($response);
         self::assertSame('Discovery/Search', $page['component']);
         self::assertSame(1, $page['props']['results']['totalHits'] ?? null);
+    }
+
+    #[Test]
+    public function search_passes_q_query_string_through_to_search_service(): void
+    {
+        $community = $this->makeCommunity();
+        $this->communityRepo->method('findBySlug')->willReturn($community);
+
+        $capturedQuery = null;
+        $this->searchService
+            ->expects(self::once())
+            ->method('search')
+            ->willReturnCallback(
+                function (SearchQuery $q) use (&$capturedQuery): SearchResultSet {
+                    $capturedQuery = $q;
+
+                    return new SearchResultSet(items: [], totalHits: 0, totalPages: 0);
+                },
+            );
+
+        $request = HttpRequest::create('/test-community/search', 'GET', [
+            'q' => 'governance',
+            'page' => '2',
+        ]);
+
+        $response = $this->controller->search(
+            ['communitySlug' => 'test-community'],
+            ['q' => 'governance', 'page' => '2'],
+            $this->account,
+            $request,
+        );
+
+        self::assertInstanceOf(Response::class, $response);
+        self::assertInstanceOf(SearchQuery::class, $capturedQuery);
+        self::assertSame('governance', $capturedQuery->query);
+        self::assertSame('comm-1', $capturedQuery->communityId);
+        self::assertSame(2, $capturedQuery->page);
+
+        $page = $this->decodePage($response);
+        self::assertSame('governance', $page['props']['query'] ?? null);
+        self::assertSame(2, $page['props']['page'] ?? null);
+    }
+
+    #[Test]
+    public function search_defaults_to_empty_query_when_q_missing(): void
+    {
+        $community = $this->makeCommunity();
+        $this->communityRepo->method('findBySlug')->willReturn($community);
+
+        $capturedQuery = null;
+        $this->searchService
+            ->expects(self::once())
+            ->method('search')
+            ->willReturnCallback(
+                function (SearchQuery $q) use (&$capturedQuery): SearchResultSet {
+                    $capturedQuery = $q;
+
+                    return new SearchResultSet(items: [], totalHits: 0, totalPages: 0);
+                },
+            );
+
+        $this->controller->search(
+            ['communitySlug' => 'test-community'],
+            [],
+            $this->account,
+            new HttpRequest(),
+        );
+
+        self::assertInstanceOf(SearchQuery::class, $capturedQuery);
+        self::assertSame('', $capturedQuery->query);
+        self::assertSame(1, $capturedQuery->page);
     }
 
     #[Test]
