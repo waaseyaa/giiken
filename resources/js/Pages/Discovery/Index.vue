@@ -21,9 +21,9 @@ const filteredItems = computed(() => {
 
 <template>
   <DiscoveryLayout :community="community">
-    <div class="bg-gradient-to-br from-indigo to-indigo-mid text-white py-16 px-6 text-center">
+    <div class="bg-gradient-to-br from-primary to-primary-hover text-on-primary py-16 px-6 text-center">
       <h1 class="text-3xl font-bold mb-2">{{ community.name }} Knowledge Base</h1>
-      <p class="text-indigo-light mb-8">Search or ask anything</p>
+      <p class="text-primary-subtle mb-8">Search or ask anything</p>
       <div class="flex justify-center">
         <SearchInput :community-slug="community.slug" />
       </div>
@@ -44,7 +44,7 @@ const filteredItems = computed(() => {
         />
       </div>
 
-      <p v-if="filteredItems.length === 0" class="text-muted text-center mt-12">
+      <p v-if="filteredItems.length === 0" class="text-ink-muted text-center mt-12">
         No knowledge items yet. Upload documents to get started.
       </p>
     </div>

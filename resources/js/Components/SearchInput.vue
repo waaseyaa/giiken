@@ -28,9 +28,9 @@ function submit() {
       v-model="query"
       type="text"
       placeholder="Search or ask a question..."
-      class="flex-1 px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-indigo text-base"
+      class="flex-1 px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-base"
     />
-    <button type="submit" class="px-6 py-3 bg-indigo text-white rounded-lg hover:bg-indigo-mid font-medium">
+    <button type="submit" class="px-6 py-3 bg-primary text-on-primary rounded-lg hover:bg-primary-hover font-medium">
       Ask →
     </button>
   </form>

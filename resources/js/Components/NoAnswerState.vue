@@ -5,9 +5,9 @@
 </script>
 
 <template>
-  <div class="bg-white rounded-lg border border-border p-6 text-center">
-    <p class="text-indigo-dark font-medium mb-1">No information found</p>
-    <p class="text-sm text-muted italic">
+  <div class="bg-surface-raised rounded-lg border border-border p-6 text-center">
+    <p class="text-ink font-medium mb-1">No information found</p>
+    <p class="text-sm text-ink-muted italic">
       I could not find information about this in the community's knowledge base.
     </p>
   </div>
