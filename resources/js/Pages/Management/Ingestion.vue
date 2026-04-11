@@ -38,15 +38,15 @@ function onFileChange(event: Event) {
 
 <template>
   <ManagementLayout :community="community">
-    <h1 class="text-2xl font-bold text-indigo-dark mb-6">Ingestion Queue</h1>
+    <h1 class="text-2xl font-bold text-ink mb-6">Ingestion Queue</h1>
 
     <div v-if="bootError" class="mb-4 p-3 border border-amber-400 bg-amber-50 text-amber-900 rounded">
       {{ bootError }}
     </div>
 
-    <section class="mb-8 p-4 border border-border rounded bg-white">
-      <h2 class="text-lg font-semibold text-indigo-dark mb-3">Upload a file</h2>
-      <p class="text-sm text-muted mb-4">
+    <section class="mb-8 p-4 border border-border rounded bg-surface-raised">
+      <h2 class="text-lg font-semibold text-ink mb-3">Upload a file</h2>
+      <p class="text-sm text-ink-muted mb-4">
         Markdown, CSV, HTML, Word/PDF documents, and audio/video files are accepted.
         Audio and video files are queued for transcription.
       </p>
@@ -61,7 +61,7 @@ function onFileChange(event: Event) {
         <div>
           <button
             type="submit"
-            class="px-4 py-2 bg-indigo text-white rounded disabled:opacity-50"
+            class="px-4 py-2 bg-primary text-on-primary rounded disabled:opacity-50"
             :disabled="form.processing || !form.file"
           >
             {{ form.processing ? 'Uploading…' : 'Upload' }}
@@ -69,7 +69,7 @@ function onFileChange(event: Event) {
         </div>
       </form>
 
-      <div v-if="uploadError" class="mt-4 p-3 border border-red-400 bg-red-50 text-red-900 rounded text-sm">
+      <div v-if="uploadError" class="mt-4 p-3 border border-danger-border bg-danger-subtle text-danger rounded text-sm">
         {{ uploadError }}
       </div>
 
@@ -84,7 +84,7 @@ function onFileChange(event: Event) {
       </div>
     </section>
 
-    <p class="text-muted text-sm">
+    <p class="text-ink-muted text-sm">
       Pipeline status display will be wired when the queue service is integrated.
     </p>
   </ManagementLayout>

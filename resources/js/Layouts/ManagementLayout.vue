@@ -6,8 +6,8 @@ defineProps<{ community: Community }>()
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg flex">
-    <aside class="w-56 bg-indigo-dark text-white flex flex-col shrink-0">
+  <div class="min-h-screen bg-surface flex">
+    <aside class="w-56 bg-surface-inverse text-on-inverse flex flex-col shrink-0">
       <div class="px-4 py-5 border-b border-white/10">
         <span class="font-bold text-sm">{{ community.name }}</span>
       </div>
