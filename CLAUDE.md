@@ -36,7 +36,7 @@ PHPUnit: 198/198 passing.
 
 `./bin/waaseyaa` is the giiken-local entry that loads `.env` and uses the project root. By default, composer installs `vendor/bin/waaseyaa` as a proxy to the `waaseyaa/cli` package's bin, which does **not** load `.env` and resolves `projectRoot` relative to its own vendor location — that path lands in `vendor/waaseyaa/cli/storage/waaseyaa.sqlite` and falls through to `APP_ENV=production`, tripping the `DatabaseBootstrapper` "must already exist" guard.
 
-To make both invocations equivalent, `composer.json` runs a `post-install-cmd` / `post-update-cmd` that replaces `vendor/bin/waaseyaa` with a symlink to `../../bin/waaseyaa`. After any `composer install` / `composer update`, both `./bin/waaseyaa` and `./vendor/bin/waaseyaa` point at the same wrapper. This is a workaround for waaseyaa/framework#1226 — once that lands, the symlink hook can be removed.
+To make both invocations equivalent, `composer.json` runs a `post-install-cmd` / `post-update-cmd` that invokes `scripts/repoint-vendor-bin.php`, which replaces `vendor/bin/waaseyaa` with a symlink to `../../bin/waaseyaa`. The script is idempotent — safe to re-run. After any `composer install` / `composer update`, both `./bin/waaseyaa` and `./vendor/bin/waaseyaa` point at the same wrapper. This is a workaround for waaseyaa/framework#1226; once that lands, delete `scripts/repoint-vendor-bin.php`, the two composer hook entries, and this paragraph.
 
 ## Commands
 
