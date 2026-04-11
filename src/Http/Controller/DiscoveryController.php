@@ -93,12 +93,11 @@ final class DiscoveryController
         $searchService = $this->searchService;
         $communityRepo = $this->communityRepo;
 
-        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
-        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
-        $searchQuery = (string) $inbound->queryParam('q', '');
-        $page = max(1, (int) $inbound->queryParam('page', 1));
+        $ctx = $this->resolveCommunityContext($params, $query, $httpRequest, $communityRepo);
+        $searchQuery = $ctx['queryValue'];
+        $page = max(1, (int) $ctx['inbound']->queryParam('page', 1));
+        $community = $ctx['community'];
 
-        $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
             return $this->page('Discovery/Search', [
                 'community' => null,
@@ -151,11 +150,10 @@ final class DiscoveryController
         $qaService = $this->qaService;
         $communityRepo = $this->communityRepo;
 
-        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
-        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
-        $question = (string) $inbound->queryParam('q', '');
+        $ctx = $this->resolveCommunityContext($params, $query, $httpRequest, $communityRepo);
+        $question = $ctx['queryValue'];
+        $community = $ctx['community'];
 
-        $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
             return $this->page('Discovery/Ask', [
                 'community' => null,
@@ -240,6 +238,35 @@ final class DiscoveryController
                 'updatedAt' => $item->getUpdatedAt(),
             ],
         ], $httpRequest, $account);
+    }
+
+    /**
+     * Resolve the three pieces every discovery endpoint needs off an inbound
+     * HTTP request: the `InboundHttpRequest` wrapper, the community looked up
+     * by route slug (or `null` if missing), and the value of a single query
+     * string parameter (`q` by default). Extracted from the duplicated top of
+     * `search()` and `ask()` — see waaseyaa/giiken#71.
+     *
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $query
+     * @return array{inbound: InboundHttpRequest, community: ?Community, queryValue: string}
+     */
+    private function resolveCommunityContext(
+        array $params,
+        array $query,
+        HttpRequest $httpRequest,
+        CommunityRepositoryInterface $communityRepo,
+        string $queryKey = 'q',
+    ): array {
+        $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
+        $communitySlug = (string) $inbound->routeParam('communitySlug', '');
+        $queryValue = (string) $inbound->queryParam($queryKey, '');
+
+        return [
+            'inbound' => $inbound,
+            'community' => $communityRepo->findBySlug($communitySlug),
+            'queryValue' => $queryValue,
+        ];
     }
 
     /**
