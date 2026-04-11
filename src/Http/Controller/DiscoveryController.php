@@ -78,7 +78,7 @@ final class DiscoveryController
         HttpRequest $httpRequest,
     ): Response {
         if ($this->searchService === null || $this->communityRepo === null) {
-            $searchQuery = (string) ($query['query'] ?? '');
+            $searchQuery = (string) ($query['q'] ?? '');
             $page = max(1, (int) ($query['page'] ?? 1));
 
             return $this->page('Discovery/Search', [
@@ -95,7 +95,7 @@ final class DiscoveryController
 
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
-        $searchQuery = (string) $inbound->queryParam('query', '');
+        $searchQuery = (string) $inbound->queryParam('q', '');
         $page = max(1, (int) $inbound->queryParam('page', 1));
 
         $community = $communityRepo->findBySlug($communitySlug);

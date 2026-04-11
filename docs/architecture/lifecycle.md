@@ -169,6 +169,8 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetim
 - Discovery/search flows enter through `SearchService`.
 - Q&A flows call `QaService` and then search for related items.
 - Compilation flows traverse pipeline steps and persist knowledge items via repository.
+- `DiscoveryController::search` pulls the user-facing search term from the `q` query-string parameter (matching the `SearchInput.vue` submit contract and `Pagination.vue` page links), constructs a `SearchQuery(query, communityId, page)`, calls `SearchService::search`, and ships `query` + `results` as Inertia props for `Pages/Discovery/Search.vue`. Empty `q` intentionally falls through to `SearchService::recentItems` so the page renders the full community feed.
+- `KnowledgeItemRepository::save` works around two framework quirks to keep FTS in sync: (1) after `Waaseyaa\EntityRepository::save` dispatches `POST_SAVE`, `SearchIndexSubscriber` indexes the entity while it still has a null auto-increment id, producing a stale `document_id` of `knowledge_item:`; and (2) `SearchService::hybridSearch` needs the real integer id to look items up. The repository reloads the new entity by uuid, calls `Fts5SearchIndexer::remove('knowledge_item:')` to scrub the stale empty-id row, then re-indexes the reloaded copy. `SearchService::hybridSearch` also casts the `array_keys($scores)` id back to string before calling `$this->repository->find()`, since PHP coerces numeric-string array keys to int.
 
 ## 4. Failure Lifecycle
 
