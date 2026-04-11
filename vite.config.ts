@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
@@ -19,5 +20,10 @@ export default defineConfig({
     server: {
         port: 5173,
         strictPort: true,
+    },
+    test: {
+        environment: 'happy-dom',
+        include: ['tests/js/**/*.{test,spec}.ts'],
+        globals: false,
     },
 });
