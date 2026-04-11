@@ -370,6 +370,111 @@ final class SearchServiceTest extends TestCase
     }
 
     #[Test]
+    public function non_english_locale_preserves_tokens_that_look_like_english_stopwords(): void
+    {
+        // Anishinaabemowin token "an" (fragment of ani-/an-prefixed verbs) would
+        // be dropped by the English stopword list. With locale != 'en' the
+        // tokenizer must keep it. We assert the FTS provider is called with
+        // both "an" and "governance" (two separate calls), which would not
+        // happen under the English path.
+        $calls = [];
+        $this->ftsProvider
+            ->method('search')
+            ->willReturnCallback(function (SearchRequest $r) use (&$calls): SearchResult {
+                $calls[] = $r->query;
+
+                return SearchResult::empty();
+            });
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $query = new SearchQuery(
+            query: 'an governance',
+            communityId: self::COMMUNITY,
+            locale: 'oj',
+        );
+        $this->service->search($query, $this->memberAccount());
+
+        self::assertContains('an', $calls);
+        self::assertContains('governance', $calls);
+    }
+
+    #[Test]
+    public function english_locale_still_drops_stopwords(): void
+    {
+        $calls = [];
+        $this->ftsProvider
+            ->method('search')
+            ->willReturnCallback(function (SearchRequest $r) use (&$calls): SearchResult {
+                $calls[] = $r->query;
+
+                return SearchResult::empty();
+            });
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $query = new SearchQuery(
+            query: 'an governance',
+            communityId: self::COMMUNITY,
+            locale: 'en',
+        );
+        $this->service->search($query, $this->memberAccount());
+
+        self::assertNotContains('an', $calls);
+        self::assertContains('governance', $calls);
+    }
+
+    #[Test]
+    public function null_locale_defaults_to_english_stopword_filtering(): void
+    {
+        // Backward compatibility: existing callers that don't pass a locale
+        // should get the pre-#67 behaviour (English stopwords applied).
+        $calls = [];
+        $this->ftsProvider
+            ->method('search')
+            ->willReturnCallback(function (SearchRequest $r) use (&$calls): SearchResult {
+                $calls[] = $r->query;
+
+                return SearchResult::empty();
+            });
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $query = new SearchQuery(query: 'an governance', communityId: self::COMMUNITY);
+        $this->service->search($query, $this->memberAccount());
+
+        self::assertNotContains('an', $calls);
+        self::assertContains('governance', $calls);
+    }
+
+    #[Test]
+    public function single_character_tokens_are_retained_under_non_english_locale(): void
+    {
+        // FTS5 accepts single-character tokens. For non-English locales we
+        // lower the length floor from 2 to 1 so short stem words survive.
+        $calls = [];
+        $this->ftsProvider
+            ->method('search')
+            ->willReturnCallback(function (SearchRequest $r) use (&$calls): SearchResult {
+                $calls[] = $r->query;
+
+                return SearchResult::empty();
+            });
+
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $query = new SearchQuery(
+            query: 'n governance',
+            communityId: self::COMMUNITY,
+            locale: 'oj',
+        );
+        $this->service->search($query, $this->memberAccount());
+
+        self::assertContains('n', $calls);
+        self::assertContains('governance', $calls);
+    }
+
+    #[Test]
     public function stopwords_only_query_falls_back_to_single_search(): void
     {
         // "what is the" — everything filters out. We should make exactly one

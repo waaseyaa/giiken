@@ -75,7 +75,7 @@ class SearchService
         // best per-term score. If the tokenizer throws everything away we fall
         // back to the original single-shot path so already-simple queries keep
         // working. See waaseyaa/giiken#61.
-        $ftsRaw = $this->runFtsOverTerms($query->query);
+        $ftsRaw = $this->runFtsOverTerms($query->query, $query->locale);
 
         // --- Semantic ---
         $semanticRaw = [];
@@ -186,9 +186,9 @@ class SearchService
      *
      * @return array<string, float>
      */
-    private function runFtsOverTerms(string $query): array
+    private function runFtsOverTerms(string $query, ?string $locale): array
     {
-        $terms = $this->tokenizeForFts($query);
+        $terms = $this->tokenizeForFts($query, $locale);
         if ($terms === []) {
             // Everything filtered out — hand the whole query to FTS as-is and
             // let the vendor escaper do its thing. Mirrors the pre-#61 path.
@@ -220,13 +220,48 @@ class SearchService
     }
 
     /**
-     * Split a natural-language query into content-bearing terms. Lowercases,
-     * strips punctuation, drops English stopwords, and drops tokens shorter
-     * than two characters.
+     * Split a natural-language query into content-bearing terms. Lowercases
+     * and strips punctuation. Applies English stopword filtering only when
+     * locale is null (back-compat) or 'en' — other locales keep every
+     * non-empty token so Indigenous-language queries are not silently
+     * eroded. Length floor is 1, since FTS5 handles single-character tokens
+     * fine and short stem words are meaningful in several Indigenous
+     * languages (see waaseyaa/giiken#67).
      *
      * @return string[]
      */
-    private function tokenizeForFts(string $query): array
+    private function tokenizeForFts(string $query, ?string $locale): array
+    {
+        $applyEnglishStopwords = ($locale === null || $locale === 'en');
+        $stopwords = $applyEnglishStopwords ? self::englishStopwords() : [];
+
+        $rawTerms = preg_split('/[^\p{L}\p{N}]+/u', $query) ?: [];
+
+        /** @var string[] $terms */
+        $terms = [];
+        $seen = [];
+        foreach ($rawTerms as $term) {
+            $lower = mb_strtolower($term);
+            if ($lower === '') {
+                continue;
+            }
+            if (isset($stopwords[$lower])) {
+                continue;
+            }
+            if (isset($seen[$lower])) {
+                continue;
+            }
+            $seen[$lower] = true;
+            $terms[] = $lower;
+        }
+
+        return $terms;
+    }
+
+    /**
+     * @return array<string, true>
+     */
+    private static function englishStopwords(): array
     {
         static $stopwords = [
             'a' => true, 'an' => true, 'the' => true,
@@ -243,27 +278,7 @@ class SearchService
             'there' => true, 'here' => true,
         ];
 
-        $rawTerms = preg_split('/[^\p{L}\p{N}]+/u', $query) ?: [];
-
-        /** @var string[] $terms */
-        $terms = [];
-        $seen = [];
-        foreach ($rawTerms as $term) {
-            $lower = mb_strtolower($term);
-            if ($lower === '' || mb_strlen($lower) < 2) {
-                continue;
-            }
-            if (isset($stopwords[$lower])) {
-                continue;
-            }
-            if (isset($seen[$lower])) {
-                continue;
-            }
-            $seen[$lower] = true;
-            $terms[] = $lower;
-        }
-
-        return $terms;
+        return $stopwords;
     }
 
     /**

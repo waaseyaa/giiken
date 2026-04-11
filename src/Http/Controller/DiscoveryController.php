@@ -113,6 +113,7 @@ final class DiscoveryController
                 query: $searchQuery,
                 communityId: (string) $community->get('id'),
                 page: $page,
+                locale: $community->locale(),
             ),
             $account,
         );
@@ -171,7 +172,12 @@ final class DiscoveryController
         $qaResponse = $qaService->ask($question, $communityId, $account);
 
         $related = $searchService->search(
-            new SearchQuery(query: $question, communityId: $communityId, pageSize: 5),
+            new SearchQuery(
+                query: $question,
+                communityId: $communityId,
+                pageSize: 5,
+                locale: $community->locale(),
+            ),
             $account,
         );
 
