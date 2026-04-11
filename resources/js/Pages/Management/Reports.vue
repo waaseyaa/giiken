@@ -21,7 +21,7 @@ function generateReport(type: string) {
 
 <template>
   <ManagementLayout :community="community">
-    <h1 class="text-2xl font-bold text-indigo-dark mb-6">Reports</h1>
+    <h1 class="text-2xl font-bold text-ink mb-6">Reports</h1>
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
       <ReportCard

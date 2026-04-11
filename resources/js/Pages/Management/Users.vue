@@ -7,7 +7,7 @@ defineProps<{ community: Community }>()
 
 <template>
   <ManagementLayout :community="community">
-    <h1 class="text-2xl font-bold text-indigo-dark mb-6">Users</h1>
-    <p class="text-muted">User management will be wired when the Waaseyaa user service is integrated.</p>
+    <h1 class="text-2xl font-bold text-ink mb-6">Users</h1>
+    <p class="text-ink-muted">User management will be wired when the Waaseyaa user service is integrated.</p>
   </ManagementLayout>
 </template>

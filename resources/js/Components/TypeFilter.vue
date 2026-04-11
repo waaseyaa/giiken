@@ -12,7 +12,7 @@ const types = Object.entries(KNOWLEDGE_TYPE_CONFIG) as [KnowledgeType, typeof KN
   <div class="flex gap-2 flex-wrap">
     <button
       class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-      :class="active === null ? 'bg-indigo text-white' : 'bg-indigo-light text-indigo'"
+      :class="active === null ? 'bg-primary text-on-primary' : 'bg-primary-subtle text-primary'"
       @click="emit('select', null)"
     >
       All
@@ -21,9 +21,7 @@ const types = Object.entries(KNOWLEDGE_TYPE_CONFIG) as [KnowledgeType, typeof KN
       v-for="[type, config] in types"
       :key="type"
       class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-      :style="active === type
-        ? { backgroundColor: config.text, color: 'white' }
-        : { backgroundColor: config.bg, color: config.text }"
+      :class="active === type ? config.activeChip : config.chip"
       @click="emit('select', type)"
     >
       {{ config.label }}
