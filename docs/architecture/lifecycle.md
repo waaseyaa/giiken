@@ -49,7 +49,7 @@ The first Giiken app-level class in normal boot is `Giiken\GiikenServiceProvider
 - Frontend bundle: Vite entry `resources/js/app.ts`, production output under `public/build` (`npm run build`); set `VITE_DEV_SERVER` (e.g. `http://127.0.0.1:5173`) when using `npm run dev` for HMR
 - `commands()` contributes CLI commands (`giiken:seed:test-community`)
 - `routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `GET` `/logout`)
-- `HomeController::discover` (`GET /`) injects `CommunityRepositoryInterface` and ships the result of `findAllPublic()` as the `communities` Inertia prop for `Pages/Discover.vue`, which renders a community card grid linking into `/{slug}` Discovery pages
+- `HomeController::discover` (`GET /`) injects `CommunityRepositoryInterface` and ships the result of `findAll()` as the `communities` Inertia prop for `Pages/Discover.vue`, which renders a community card grid linking into `/{slug}` Discovery pages
 
 ### 1.4 Schema and local data
 

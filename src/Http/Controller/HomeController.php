@@ -47,7 +47,7 @@ final class HomeController
                     'slug'   => $c->slug(),
                     'locale' => $c->locale(),
                 ],
-                $this->communityRepo->findAllPublic(),
+                $this->communityRepo->findAll(),
             );
 
         return $this->inertiaHttp->toResponse(

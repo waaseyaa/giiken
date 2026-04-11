@@ -28,7 +28,7 @@ final class CommunityRepository implements CommunityRepositoryInterface
         return $entity instanceof Community ? $entity : null;
     }
 
-    public function findAllPublic(?int $limit = null): array
+    public function findAll(?int $limit = null): array
     {
         $results = $this->repository->findBy([], ['name' => 'ASC'], $limit);
 
