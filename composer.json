@@ -53,6 +53,9 @@
         }
     },
     "config": {
+        "allow-plugins": {
+            "wikimedia/composer-merge-plugin": true
+        },
         "optimize-autoloader": true,
         "process-timeout": 0,
         "sort-packages": true
@@ -63,6 +66,12 @@
         "test": "./vendor/bin/phpunit"
     },
     "extra": {
+        "merge-plugin": {
+            "include": [
+                "composer.local.json"
+            ],
+            "prepend-repositories": true
+        },
         "waaseyaa": {
             "providers": [
                 "Giiken\\GiikenServiceProvider"
@@ -72,7 +81,8 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require-dev": {
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.5",
-        "phpstan/phpstan": "^1.10"
+        "wikimedia/composer-merge-plugin": "^2.1"
     }
 }
