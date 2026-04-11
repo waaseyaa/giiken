@@ -14,3 +14,6 @@
 /public/build/
 /storage/
 /waaseyaa-sync-*/
+
+# Local Composer overlay: symlink waaseyaa monorepo packages (see composer.local.json.example)
+/composer.local.json
