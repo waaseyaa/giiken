@@ -34,7 +34,12 @@
 
   /* Knowledge-type palette. Each type has a saturated colour for active
      states and text, and a subtle colour for backgrounds.
-     Consumed by KNOWLEDGE_TYPE_CONFIG in resources/js/types.ts. */
+     Consumed by KNOWLEDGE_TYPE_CONFIG in resources/js/types.ts.
+     NOTE: --color-cultural intentionally duplicates --color-primary's
+     hex. Tailwind v4 @theme resolves tokens eagerly and does not support
+     var() references between tokens, so the value has to repeat. A
+     community theme that decouples cultural from primary should set
+     both independently. */
   --color-cultural: #3d35c8;
   --color-cultural-subtle: #f0f0ff;
   --color-governance: #1e8a6e;
