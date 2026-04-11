@@ -132,7 +132,7 @@ final class DiscoveryController
     public function ask(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->searchService === null || $this->qaService === null || $this->communityRepo === null) {
-            $question = (string) ($query['question'] ?? '');
+            $question = (string) ($query['q'] ?? '');
 
             return $this->page('Discovery/Ask', [
                 'community' => null,
@@ -152,7 +152,7 @@ final class DiscoveryController
 
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
-        $question = (string) $inbound->queryParam('question', '');
+        $question = (string) $inbound->queryParam('q', '');
 
         $community = $communityRepo->findBySlug($communitySlug);
         if ($community === null) {
