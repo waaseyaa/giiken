@@ -8,36 +8,35 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 
 **PHP:** 8.4+ | **License:** GPL-2.0-or-later | **Namespace:** `Giiken\` (PSR-4)
 
-## Boot-to-browser status (as of 2026-04-06, second probe)
+## Boot-to-browser status (as of 2026-04-11)
 
-`vendor/bin/waaseyaa serve` starts, but a `GET /{community-slug}` request cannot yet reach the controller. Each step was discovered by running the next and letting the next failure name the next gap. Do not skip levels.
+✅ **Phase A green.** Boot, migrations, seed, and SSR dispatch all work end-to-end on `waaseyaa/* ^0.1.0-alpha.120`.
 
-### Framework prerequisites (waaseyaa repo)
+Verified smoke path:
 
-1. ✅ **alpha.107** released — bundles cli bin entrypoint, `app.url` default, `[Class, method]` array-controller normalization (waaseyaa/framework#1125).
-2. ✅ **foundation→ssr dependency** — waaseyaa/framework#1127, **closed**. `composer update waaseyaa/*` was removing `vendor/waaseyaa/ssr` because foundation never declared it. Resolved upstream.
-3. 🟡 **EntityRepository factory** — waaseyaa/framework#1128. The framework provides no `EntityTypeManager::getRepository(string $id)` accessor. Building a working `Waaseyaa\EntityStorage\EntityRepository` requires manually assembling 3-7 dependencies. This is the architectural blocker for #42 below.
-4. 🟡 **Hook discipline** — waaseyaa/framework#1126 (spec-drift + phpunit pre-push hooks) is the meta-blocker for cutting alpha.108.
+```
+./bin/waaseyaa migrate                            # 1 migration applied
+./bin/waaseyaa giiken:seed:test-community         # community + 3 knowledge items
+./bin/waaseyaa serve                              # or php -S 127.0.0.1:8080 -t public public/index.php
+curl http://127.0.0.1:8080/                       # 200, Inertia "Discover"
+curl http://127.0.0.1:8080/test-community         # 200, Inertia "Discovery/Index" with seeded items
+```
 
-### Upgrade note (2026-04-10)
+PHPUnit: 198/198 passing.
 
-- Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** (see `docs/architecture/lifecycle.md` for `HydratableFromStorageInterface`, `$casts`, and `::make()` patterns on `Community`, `KnowledgeItem`, and `WikiLintReport`).
-- `waaseyaa/ssr` had to be re-added as an explicit app dependency to satisfy `Waaseyaa\User\UserServiceProvider` runtime wiring after `composer update "waaseyaa/*"`.
-- `public/index.php` now emits responses (`$response = $kernel->handle(); $response->send();`) to avoid zero-byte `200` responses.
-- Unit and full PHPUnit suites pass after updating controller/test signatures for the current SSR app-controller calling convention (`($params, $query, $account, $httpRequest)`).
-- Current runtime blocker: `GET /{community-slug}` still returns `500` (`<h1>Internal Server Error</h1>`) under `php -S`, despite dependency and signature fixes. This requires follow-up debugging in SSR dispatch/runtime error reporting.
+### Resolved (closed)
 
-### Giiken-side prerequisites (this repo)
+- waaseyaa/framework#1125 — cli bin entrypoint, `app.url` default, array-controller normalization (alpha.107).
+- waaseyaa/framework#1127 — foundation→ssr dependency.
+- giiken#42 — `GiikenServiceProvider` provider registrations.
+- giiken#43 — entity schema migrations (`community`, `knowledge_item`, `wiki_lint_report`).
+- giiken#44 — `giiken:seed:test-community` console command.
 
-5. 🔴 **Service registrations** — #42, blocked on framework#1128. `GiikenServiceProvider::register()` does not bind `SearchService`, `QaServiceInterface`, `CommunityRepositoryInterface`, or `KnowledgeItemRepositoryInterface`. `SsrPageHandler::resolveControllerInstance()` throws when reflecting `DiscoveryController`'s constructor. Wiring requires `EntityRepository` factory machinery that doesn't exist yet.
-6. 🔴 **Entity schema migration** — #43. No migration materializes `community`, `knowledge_item`, `wiki_lint_report` tables. `vendor/bin/waaseyaa migrate` reports "Nothing to migrate".
-7. 🔴 **Seed command** — #44. `vendor/bin/waaseyaa giiken:seed:test-community` does not exist.
-8. 🔴 **Real LLM providers** — #40. Comments in `GiikenServiceProvider` say `NullLlmAdapter`/`FakeEmbeddingAdapter` should wire `Waaseyaa\AI\Agent\Provider\NullLlmProvider`, but **that framework class does not exist** (`find packages/ai-agent -name 'NullLlm*'` is empty). #40 needs either a giiken-local null impl or a small framework precursor before it can land.
-9. 🔴 **Session auth** — #41. `HttpKernel` already has the `_account` pipeline machinery and `waaseyaa/auth` ships `LoginController`/`LogoutController`/`AuthenticateMiddleware`. The real gap is no login page, no test users seeded with community roles, no integration tests covering anonymous/member/staff tiers. The framing of "kernel passes null" in the original issue is partially outdated.
+### `vendor/bin/waaseyaa` is symlinked to the giiken wrapper
 
-### Two giiken-local interfaces have no concrete implementations
+`./bin/waaseyaa` is the giiken-local entry that loads `.env` and uses the project root. By default, composer installs `vendor/bin/waaseyaa` as a proxy to the `waaseyaa/cli` package's bin, which does **not** load `.env` and resolves `projectRoot` relative to its own vendor location — that path lands in `vendor/waaseyaa/cli/storage/waaseyaa.sqlite` and falls through to `APP_ENV=production`, tripping the `DatabaseBootstrapper` "must already exist" guard.
 
-`Giiken\Pipeline\Provider\LlmProviderInterface` and `Giiken\Pipeline\Provider\EmbeddingProviderInterface` exist with no production implementations — only anonymous classes inside test fixtures (`tests/Unit/Pipeline/Step/*Test.php`). #40 should also create concrete null implementations as a starting point.
+To make both invocations equivalent, `composer.json` runs a `post-install-cmd` / `post-update-cmd` that replaces `vendor/bin/waaseyaa` with a symlink to `../../bin/waaseyaa`. After any `composer install` / `composer update`, both `./bin/waaseyaa` and `./vendor/bin/waaseyaa` point at the same wrapper. This is a workaround for waaseyaa/framework#1226 — once that lands, the symlink hook can be removed.
 
 ## Commands
 
