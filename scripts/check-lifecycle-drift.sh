@@ -52,11 +52,11 @@ if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
     fi
   fi
 else
-  if git rev-parse HEAD~1 >/dev/null 2>&1; then
-    CHANGED_FILES="$(git diff --name-only HEAD~1..HEAD)"
-  else
-    CHANGED_FILES=""
-  fi
+  # Local / pre-commit path: inspect staged changes, not the previous commit.
+  # Using HEAD~1..HEAD here meant a drifty commit would permanently block the
+  # next commit (and a clean staged change would pass just because the last
+  # commit happened to touch the lifecycle doc). See waaseyaa/giiken#56.
+  CHANGED_FILES="$(git diff --cached --name-only)"
 fi
 
 if [[ -z "${CHANGED_FILES}" ]]; then
