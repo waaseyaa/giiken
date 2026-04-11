@@ -87,6 +87,11 @@ final class ImportServiceTest extends TestCase
                 return null;
             }
 
+            public function findAllPublic(?int $limit = null): array
+            {
+                return [];
+            }
+
             public function save(Community $community): void
             {
                 $community->set('id', $this->communityId);
@@ -135,6 +140,7 @@ final class ImportServiceTest extends TestCase
         $communityRepository = new class implements CommunityRepositoryInterface {
             public function find(string $id): ?Community { return null; }
             public function findBySlug(string $slug): ?Community { return null; }
+            public function findAllPublic(?int $limit = null): array { return []; }
             public function save(Community $community): void {}
             public function delete(Community $community): void {}
         };

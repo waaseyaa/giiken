@@ -209,7 +209,31 @@ final class GiikenServiceProvider extends ServiceProvider
             baseUrl: '',
             devServerUrl: $devServerUrl,
         );
-        $renderer = new RootTemplateRenderer(assetManager: $assetManager);
+
+        // Workaround for waaseyaa/inertia: framework renders <script data-page="true">,
+        // but Inertia v2's client reader queries for `script[data-page="app"]` (matching
+        // the el id). Rewrite the attribute so the page object actually mounts.
+        $template = static function (string $scriptTag) use ($assetManager): string {
+            $scriptTag = str_replace('data-page="true"', 'data-page="app"', $scriptTag);
+            $assetTags = $assetManager->assetTags();
+
+            return <<<HTML
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                {$assetTags}
+            </head>
+            <body>
+                <div id="app"></div>
+                {$scriptTag}
+            </body>
+            </html>
+            HTML;
+        };
+
+        $renderer = new RootTemplateRenderer(template: $template, assetManager: $assetManager);
         Inertia::setRenderer($renderer);
         Inertia::setVersion('giiken');
         $this->singleton(InertiaFullPageRendererInterface::class, static fn (): InertiaFullPageRendererInterface => $renderer);
