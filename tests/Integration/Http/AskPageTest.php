@@ -95,12 +95,14 @@ final class AskPageTest extends GiikenKernelIntegrationTestCase
         self::assertSame('Discovery/Ask', $decoded['component'] ?? null);
         $props = $decoded['props'] ?? [];
         self::assertSame('what is governance about here', $props['question'] ?? null);
-        // QaService is currently stubbed; the core assertion is that the dispatch
-        // reaches it with the real question. Related-items search quality is out
-        // of scope for this bug fix — see #59 for the real LLM provider and any
-        // future multi-word FTS tuning.
         self::assertIsString($props['answer'] ?? null);
-        self::assertArrayHasKey('relatedItems', $props);
+        // Multi-word tokenization (see #61) should surface "governance" and
+        // return at least one related item + citation from the seeded
+        // Governance overview. Real answer content is still from the stub
+        // LLM provider (#59), so we do not assert answer text.
+        self::assertGreaterThan(0, $props['relatedItems']['totalHits'] ?? 0);
+        self::assertFalse($props['noRelevantItems'] ?? null);
+        self::assertGreaterThan(0, count($props['citations'] ?? []));
     }
 
     #[Test]
