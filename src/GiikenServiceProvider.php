@@ -210,9 +210,21 @@ final class GiikenServiceProvider extends ServiceProvider
             devServerUrl: $devServerUrl,
         );
 
-        // Workaround for waaseyaa/inertia: framework renders <script data-page="true">,
-        // but Inertia v2's client reader queries for `script[data-page="app"]` (matching
-        // the el id). Rewrite the attribute so the page object actually mounts.
+        // This closure is the single source of truth for Giiken's root HTML
+        // shell — there is no blade/twig equivalent, and nothing else
+        // re-declares the doctype/head/#app/script tags. Future readers
+        // diffing against a hypothetical `resources/views/app.blade.php`
+        // should not exist: there is no such file.
+        //
+        // Workaround for waaseyaa/inertia: framework renders
+        // <script data-page="true">, but Inertia v2's client reader queries
+        // for `script[data-page="app"]` (matching the el id). Rewrite the
+        // attribute so the page object actually mounts.
+        //
+        // Remove the attribute rewrite — and consider returning to the
+        // framework default `RootTemplateRenderer` constructor instead of
+        // passing a custom template — once waaseyaa/framework#1227 ships.
+        // Tracked as waaseyaa/giiken#66.
         $template = static function (string $scriptTag) use ($assetManager): string {
             $scriptTag = str_replace('data-page="true"', 'data-page="app"', $scriptTag);
             $assetTags = $assetManager->assetTags();

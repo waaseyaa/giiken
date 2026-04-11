@@ -1,4 +1,15 @@
 #!/usr/bin/env bash
+#
+# Lifecycle drift check: blocks commits/pushes that touch lifecycle-impacting
+# files (controllers, entities, pipeline, etc.) without also updating
+# docs/architecture/lifecycle.md.
+#
+# Pre-commit runs against **staged** changes (`git diff --cached`). A commit
+# created via `git commit --amend` that touches a lifecycle file WITHOUT
+# re-staging it can slip past this hook because the amend does not appear in
+# the staged diff. Pre-push is the authoritative gate and will catch any such
+# drift before it reaches origin. See waaseyaa/giiken#73.
+#
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"

@@ -50,6 +50,15 @@ final class KnowledgeItemRepository implements KnowledgeItemRepositoryInterface
         // the last one. We work around it here: after save, scrub that stale
         // empty-suffix row and re-index the freshly-loaded entity that now
         // has its real id.
+        //
+        // SINGLE-WRITER ASSUMPTION: the scrub below (`remove('knowledge_item:')`)
+        // is not atomic with the subscriber's index call. In a concurrent
+        // setup, worker A can remove the empty-suffix row that worker B just
+        // wrote before worker B runs its own re-index, and B ends up
+        // unindexed. Giiken runs as a single-process SQLite app today so this
+        // is latent, but the race is real. Remove this whole workaround (and
+        // this comment) once the framework back-fills auto-increment ids in
+        // the POST_SAVE dispatch path — tracked as waaseyaa/giiken#57.
         $this->repository->save($item);
 
         if ($this->indexer === null) {
