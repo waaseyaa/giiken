@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
-
-interface CommunitySummary {
-  id: number | string
-  name: string
-  slug: string
-  locale: string
-}
+import SearchHero from '@/Components/SearchHero.vue'
+import BrowseStrip from '@/Components/BrowseStrip.vue'
+import type { CommunitySummary } from '@/types'
 
 defineProps<{
   communities: CommunitySummary[]
@@ -19,12 +15,8 @@ defineProps<{
       <span class="font-bold text-lg">Giiken</span>
     </nav>
 
-    <header class="bg-gradient-to-br from-primary to-primary-hover text-on-primary py-20 px-6 text-center">
-      <h1 class="text-4xl font-bold mb-3">Sovereign Indigenous Knowledge</h1>
-      <p class="text-primary-subtle text-lg max-w-2xl mx-auto">
-        Browse community knowledge bases. Each community governs its own content under its own protocols.
-      </p>
-    </header>
+    <SearchHero :communities="communities" />
+    <BrowseStrip :communities="communities" />
 
     <main class="max-w-5xl mx-auto px-6 py-12">
       <h2 class="text-xl font-semibold text-ink mb-6">Communities</h2>
