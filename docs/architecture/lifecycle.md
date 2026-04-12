@@ -15,10 +15,11 @@ This document describes how a request moves through Giiken at runtime, where app
 
 `public/index.php`:
 
-1. Loads Composer autoloader.
-2. Loads `.env` with `Symfony Dotenv` (fails fast with HTTP 500 on parse/path error).
-3. Instantiates `Waaseyaa\Foundation\Kernel\HttpKernel` with project root.
-4. Calls `$kernel->handle()` and then `$response->send()`.
+1. **CLI-server static file guard:** When running under PHP's built-in server (`PHP_SAPI === 'cli-server'`), checks if the request maps to an existing file on disk and returns `false` to let the server serve it directly. No effect on production servers.
+2. Loads Composer autoloader.
+3. Loads `.env` with `Symfony Dotenv` (fails fast with HTTP 500 on parse/path error).
+4. Instantiates `Waaseyaa\Foundation\Kernel\HttpKernel` with project root.
+5. Calls `$kernel->handle()` and then `$response->send()`.
 
 ### 1.2 Kernel Boot Sequence
 
