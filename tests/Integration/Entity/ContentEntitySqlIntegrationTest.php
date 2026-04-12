@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Integration\Entity;
+namespace App\Tests\Integration\Entity;
 
 use Carbon\CarbonImmutable;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\SovereigntyProfile;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Tests\Integration\Support\GiikenKernelIntegrationTestCase;
-use Giiken\Wiki\WikiLintReport;
+use App\Entity\Community\Community;
+use App\Entity\Community\SovereigntyProfile;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Tests\Integration\Support\AppKernelIntegrationTestCase;
+use App\Wiki\WikiLintReport;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\Uid\Uuid;
@@ -22,7 +22,7 @@ use Waaseyaa\Entity\Hydration\HydrationContext;
 use Waaseyaa\EntityStorage\Hydration\EntityInstantiator;
 
 #[CoversNothing]
-final class ContentEntitySqlIntegrationTest extends GiikenKernelIntegrationTestCase
+final class ContentEntitySqlIntegrationTest extends AppKernelIntegrationTestCase
 {
     #[Test]
     public function community_row_hydrates_via_repository_instantiator_and_casts(): void

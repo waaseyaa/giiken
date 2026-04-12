@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query;
+namespace App\Tests\Unit\Query;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\SearchResultItem;
-use Giiken\Query\SearchResultSet;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\SearchResultItem;
+use App\Query\SearchResultSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

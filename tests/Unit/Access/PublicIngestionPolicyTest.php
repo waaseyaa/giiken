@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Access;
+namespace App\Tests\Unit\Access;
 
-use Giiken\Access\PublicIngestionPolicy;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Access\PublicIngestionPolicy;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

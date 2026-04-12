@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Entity\KnowledgeItem;
+namespace App\Entity\KnowledgeItem;
 
 enum KnowledgeType: string
 {

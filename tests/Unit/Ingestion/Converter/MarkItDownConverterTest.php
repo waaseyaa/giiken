@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Converter;
+namespace App\Tests\Unit\Ingestion\Converter;
 
-use Giiken\Ingestion\Converter\ConversionException;
-use Giiken\Ingestion\Converter\MarkItDownConverter;
+use App\Ingestion\Converter\ConversionException;
+use App\Ingestion\Converter\MarkItDownConverter;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

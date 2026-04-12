@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query;
+namespace App\Tests\Unit\Query;
 
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\SynthesisAccessCapper;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\SynthesisAccessCapper;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

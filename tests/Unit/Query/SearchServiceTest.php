@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query;
+namespace App\Tests\Unit\Query;
 
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Query\SearchQuery;
-use Giiken\Query\SearchService;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Query\SearchQuery;
+use App\Query\SearchService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;

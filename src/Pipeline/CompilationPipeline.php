@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Pipeline;
+namespace App\Pipeline;
 
-use Giiken\Ingestion\RawDocument;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Pipeline\Step\ClassifyStep;
-use Giiken\Pipeline\Step\EmbedStep;
-use Giiken\Pipeline\Step\LinkStep;
-use Giiken\Pipeline\Step\StructureStep;
-use Giiken\Pipeline\Step\TranscribeStep;
+use App\Ingestion\RawDocument;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Step\ClassifyStep;
+use App\Pipeline\Step\EmbedStep;
+use App\Pipeline\Step\LinkStep;
+use App\Pipeline\Step\StructureStep;
+use App\Pipeline\Step\TranscribeStep;
 use Waaseyaa\AI\Pipeline\PipelineContext;
 use Waaseyaa\AI\Pipeline\PipelineStepInterface;
 use Waaseyaa\Entity\Repository\EntityRepositoryInterface;

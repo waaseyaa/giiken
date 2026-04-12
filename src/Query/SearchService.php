@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Search\SearchFilters;
 use Waaseyaa\Search\SearchProviderInterface;

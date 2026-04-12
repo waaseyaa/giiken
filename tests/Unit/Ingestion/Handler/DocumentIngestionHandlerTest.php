@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Handler;
+namespace App\Tests\Unit\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Converter\FileConverterInterface;
-use Giiken\Ingestion\Handler\DocumentIngestionHandler;
+use App\Entity\Community\Community;
+use App\Ingestion\Converter\FileConverterInterface;
+use App\Ingestion\Handler\DocumentIngestionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

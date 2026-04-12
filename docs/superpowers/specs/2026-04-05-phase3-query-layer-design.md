@@ -35,7 +35,7 @@ Provides hybrid full-text + semantic search over KnowledgeItems, scoped to a com
 #### Interface
 
 ```php
-namespace Giiken\Query;
+namespace App\Query;
 
 class SearchService
 {
@@ -117,7 +117,7 @@ RAG-based question answering grounded in a community's knowledge base.
 #### Interface
 
 ```php
-namespace Giiken\Query;
+namespace App\Query;
 
 class QaService
 {
@@ -164,7 +164,7 @@ class QaService
 #### Interfaces
 
 ```php
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
 interface ReportRendererInterface
 {
@@ -231,7 +231,7 @@ Produces a ZIP archive containing the community's full dataset in open, portable
 #### Interface
 
 ```php
-namespace Giiken\Export;
+namespace App\Export;
 
 class ExportService
 {
@@ -300,7 +300,7 @@ Handles the core round-trip: community config + knowledge items. Media files are
 #### Interface
 
 ```php
-namespace Giiken\Export;
+namespace App\Export;
 
 class ImportService
 {
@@ -378,7 +378,7 @@ Error handling: on failure, sets `transcription_status = 'failed'` with an error
 
 ## Service Provider Wiring
 
-`GiikenServiceProvider` additions:
+`AppServiceProvider` additions:
 
 ```php
 // Search indexing: index KnowledgeItems on save
@@ -441,7 +441,7 @@ $container->singleton(ImportService::class, /* ... */);
 |------|--------|
 | `src/Entity/KnowledgeItem/KnowledgeItem.php` | Implement `SearchIndexableInterface` |
 | `src/Entity/KnowledgeItem/KnowledgeItemRepository.php` | Index on save |
-| `src/GiikenServiceProvider.php` | Register new services and handlers |
+| `src/AppServiceProvider.php` | Register new services and handlers |
 
 ### Test Files
 

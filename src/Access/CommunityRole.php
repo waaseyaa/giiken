@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Access;
+namespace App\Access;
 
 enum CommunityRole: string
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
 final readonly class SearchQuery
 {

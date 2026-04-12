@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline;
+namespace App\Pipeline;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use App\Entity\KnowledgeItem\KnowledgeType;
 
 final class CompilationPayload
 {

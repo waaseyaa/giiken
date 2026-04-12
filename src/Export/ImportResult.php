@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Export;
+namespace App\Export;
 
 final readonly class ImportResult
 {

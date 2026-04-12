@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Http\Controller;
+namespace App\Tests\Unit\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Http\Controller\ManagementController;
-use Giiken\Http\Inertia\InertiaHttpResponder;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Http\Controller\ManagementController;
+use App\Http\Inertia\InertiaHttpResponder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;

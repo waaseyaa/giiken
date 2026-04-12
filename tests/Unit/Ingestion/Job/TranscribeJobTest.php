@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Job;
+namespace App\Tests\Unit\Ingestion\Job;
 
-use Giiken\Ingestion\Job\TranscribeJob;
+use App\Ingestion\Job\TranscribeJob;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

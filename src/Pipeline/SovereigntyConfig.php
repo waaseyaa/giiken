@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline;
+namespace App\Pipeline;
 
 final class SovereigntyConfig
 {

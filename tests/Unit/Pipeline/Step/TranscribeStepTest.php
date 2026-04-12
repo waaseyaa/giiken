@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Tests\Unit\Pipeline\Step;
+namespace App\Tests\Unit\Pipeline\Step;
 
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\Step\TranscribeStep;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\Step\TranscribeStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

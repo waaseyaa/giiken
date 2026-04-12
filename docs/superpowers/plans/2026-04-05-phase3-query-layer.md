@@ -4,7 +4,7 @@
 
 **Goal:** Build hybrid search, RAG Q&A, report generation, data export/import, and audio/video ingestion on top of the Phase 2 ingestion pipeline.
 
-**Architecture:** Two implementation units — Unit 1 (Search + Q&A) provides hybrid full-text/semantic search and RAG-based question answering; Unit 2 (Reports + Export) provides report rendering and sovereign data portability. A standalone media handler adds audio/video ingestion. All new services are wired through GiikenServiceProvider.
+**Architecture:** Two implementation units — Unit 1 (Search + Q&A) provides hybrid full-text/semantic search and RAG-based question answering; Unit 2 (Reports + Export) provides report rendering and sovereign data portability. A standalone media handler adds audio/video ingestion. All new services are wired through AppServiceProvider.
 
 **Tech Stack:** PHP 8.4, PHPUnit 10.5, Waaseyaa framework (search, ai-vector, queue, media, entity, access packages)
 
@@ -40,7 +40,7 @@
 |------|--------|
 | `src/Entity/KnowledgeItem/KnowledgeItem.php` | Implement `SearchIndexableInterface` |
 | `src/Entity/KnowledgeItem/KnowledgeItemRepository.php` | Add `SearchIndexerInterface` indexing on save |
-| `src/GiikenServiceProvider.php` | Register all new services |
+| `src/AppServiceProvider.php` | Register all new services |
 
 ### Test Files
 
@@ -78,9 +78,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query;
+namespace App\Tests\Unit\Query;
 
-use Giiken\Query\SearchQuery;
+use App\Query\SearchQuery;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -133,11 +133,11 @@ final class SearchQueryTest extends TestCase
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query;
+namespace App\Tests\Unit\Query;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\SearchResultItem;
-use Giiken\Query\SearchResultSet;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\SearchResultItem;
+use App\Query\SearchResultSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -193,7 +193,7 @@ Expected: FAIL — classes not found
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
 final readonly class SearchQuery
 {
@@ -217,9 +217,9 @@ final readonly class SearchQuery
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use App\Entity\KnowledgeItem\KnowledgeType;
 
 final readonly class SearchResultItem
 {
@@ -240,7 +240,7 @@ final readonly class SearchResultItem
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
 final readonly class SearchResultSet
 {
@@ -288,11 +288,11 @@ git commit -m "feat(query): add search value objects (SearchQuery, SearchResultI
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Entity\KnowledgeItem;
+namespace App\Tests\Unit\Entity\KnowledgeItem;
 
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -444,16 +444,16 @@ git commit -m "feat(entity): KnowledgeItem implements SearchIndexableInterface"
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query;
+namespace App\Tests\Unit\Query;
 
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Query\SearchQuery;
-use Giiken\Query\SearchService;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Query\SearchQuery;
+use App\Query\SearchService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -719,12 +719,12 @@ Expected: FAIL — SearchService class not found
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Search\SearchFilters;
 use Waaseyaa\Search\SearchProviderInterface;
@@ -1023,16 +1023,16 @@ git commit -m "feat(query): hybrid search service with access control and FTS in
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query;
+namespace App\Tests\Unit\Query;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Query\QaResponse;
-use Giiken\Query\QaService;
-use Giiken\Query\SearchQuery;
-use Giiken\Query\SearchResultItem;
-use Giiken\Query\SearchResultSet;
-use Giiken\Query\SearchService;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Query\QaResponse;
+use App\Query\QaService;
+use App\Query\SearchQuery;
+use App\Query\SearchResultItem;
+use App\Query\SearchResultSet;
+use App\Query\SearchService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1151,7 +1151,7 @@ Expected: FAIL — QaService class not found
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
 final readonly class QaResponse
 {
@@ -1173,9 +1173,9 @@ final readonly class QaResponse
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
 use Waaseyaa\Access\AccountInterface;
 
 final class QaService
@@ -1277,9 +1277,9 @@ git commit -m "feat(query): RAG-based Q&A service with citation parsing"
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query\Report;
+namespace App\Tests\Unit\Query\Report;
 
-use Giiken\Query\Report\DateRange;
+use App\Query\Report\DateRange;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1320,14 +1320,14 @@ final class DateRangeTest extends TestCase
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query\Report;
+namespace App\Tests\Unit\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\Report\DateRange;
-use Giiken\Query\Report\GovernanceSummaryReport;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\Report\DateRange;
+use App\Query\Report\GovernanceSummaryReport;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1406,7 +1406,7 @@ Expected: FAIL — classes not found
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
 final readonly class DateRange
 {
@@ -1429,10 +1429,10 @@ final readonly class DateRange
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 interface ReportRendererInterface
 {
@@ -1452,10 +1452,10 @@ interface ReportRendererInterface
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 final class GovernanceSummaryReport implements ReportRendererInterface
 {
@@ -1526,14 +1526,14 @@ git commit -m "feat(report): DateRange, ReportRendererInterface, GovernanceSumma
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query\Report;
+namespace App\Tests\Unit\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\Report\DateRange;
-use Giiken\Query\Report\LanguageReport;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\Report\DateRange;
+use App\Query\Report\LanguageReport;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1598,14 +1598,14 @@ final class LanguageReportTest extends TestCase
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query\Report;
+namespace App\Tests\Unit\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\Report\DateRange;
-use Giiken\Query\Report\LandBriefReport;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\Report\DateRange;
+use App\Query\Report\LandBriefReport;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1675,10 +1675,10 @@ Expected: FAIL — classes not found
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 final class LanguageReport implements ReportRendererInterface
 {
@@ -1725,10 +1725,10 @@ final class LanguageReport implements ReportRendererInterface
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 final class LandBriefReport implements ReportRendererInterface
 {
@@ -1796,19 +1796,19 @@ git commit -m "feat(report): LanguageReport and LandBriefReport renderers"
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query\Report;
+namespace App\Tests\Unit\Query\Report;
 
-use Giiken\Access\CommunityRole;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\Report\DateRange;
-use Giiken\Query\Report\GovernanceSummaryReport;
-use Giiken\Query\Report\LandBriefReport;
-use Giiken\Query\Report\LanguageReport;
-use Giiken\Query\Report\ReportService;
+use App\Access\CommunityRole;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\Report\DateRange;
+use App\Query\Report\GovernanceSummaryReport;
+use App\Query\Report\LandBriefReport;
+use App\Query\Report\LanguageReport;
+use App\Query\Report\ReportService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1985,13 +1985,13 @@ Expected: FAIL — ReportService class not found
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
-use Giiken\Access\CommunityRole;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use App\Access\CommunityRole;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Entity\KnowledgeItem\KnowledgeType;
 use Waaseyaa\Access\AccountInterface;
 
 final class ReportService
@@ -2125,16 +2125,16 @@ git commit -m "feat(report): ReportService with role-based access and date filte
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Export;
+namespace App\Tests\Unit\Export;
 
-use Giiken\Access\CommunityRole;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Export\ExportService;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Access\CommunityRole;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Export\ExportService;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -2304,13 +2304,13 @@ Expected: FAIL — ExportService class not found
 
 declare(strict_types=1);
 
-namespace Giiken\Export;
+namespace App\Export;
 
-use Giiken\Access\CommunityRole;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Access\CommunityRole;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Media\FileRepositoryInterface;
 
@@ -2553,18 +2553,18 @@ git commit -m "feat(export): ExportService produces ZIP archive with community d
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Export;
+namespace App\Tests\Unit\Export;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepository;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Export\ExportService;
-use Giiken\Export\ImportResult;
-use Giiken\Export\ImportService;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepository;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Export\ExportService;
+use App\Export\ImportResult;
+use App\Export\ImportService;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -2695,7 +2695,7 @@ Expected: FAIL — ImportService class not found
 
 declare(strict_types=1);
 
-namespace Giiken\Export;
+namespace App\Export;
 
 final readonly class ImportResult
 {
@@ -2718,12 +2718,12 @@ final readonly class ImportResult
 
 declare(strict_types=1);
 
-namespace Giiken\Export;
+namespace App\Export;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepository;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepository;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Media\FileRepositoryInterface;
 
@@ -2969,11 +2969,11 @@ git commit -m "feat(export): ImportService with round-trip support"
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Handler;
+namespace App\Tests\Unit\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Handler\MediaIngestionHandler;
-use Giiken\Ingestion\IngestionException;
+use App\Entity\Community\Community;
+use App\Ingestion\Handler\MediaIngestionHandler;
+use App\Ingestion\IngestionException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -3099,12 +3099,12 @@ Expected: FAIL — MediaIngestionHandler class not found
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Handler;
+namespace App\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\FileIngestionHandlerInterface;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\RawDocument;
+use App\Entity\Community\Community;
+use App\Ingestion\FileIngestionHandlerInterface;
+use App\Ingestion\IngestionException;
+use App\Ingestion\RawDocument;
 use Waaseyaa\Media\File;
 use Waaseyaa\Media\FileRepositoryInterface;
 use Waaseyaa\Queue\QueueInterface;
@@ -3157,7 +3157,7 @@ final class MediaIngestionHandler implements FileIngestionHandlerInterface
         $savedFile = $this->mediaRepo->save($file);
         $mediaId = $savedFile->uri;
 
-        $this->queue->dispatch(new \Giiken\Ingestion\Job\TranscribeJob(
+        $this->queue->dispatch(new \App\Ingestion\Job\TranscribeJob(
             mediaId: $mediaId,
             communityId: (string) $community->get('id'),
             originalFilename: $originalFilename,
@@ -3194,12 +3194,12 @@ Expected: FAIL — TranscribeJob class not found (needed by MediaIngestionHandle
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Job;
+namespace App\Tests\Unit\Ingestion\Job;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Ingestion\Job\TranscribeJob;
-use Giiken\Pipeline\Step\TranscribeStep;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Ingestion\Job\TranscribeJob;
+use App\Pipeline\Step\TranscribeStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -3261,7 +3261,7 @@ Expected: FAIL — TranscribeJob class not found
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Job;
+namespace App\Ingestion\Job;
 
 use Waaseyaa\Queue\Job;
 
@@ -3311,32 +3311,32 @@ git commit -m "feat(ingestion): audio/video handler with async TranscribeJob"
 
 ---
 
-## Task 12: GiikenServiceProvider Wiring
+## Task 12: AppServiceProvider Wiring
 
 **Files:**
-- Modify: `src/GiikenServiceProvider.php`
+- Modify: `src/AppServiceProvider.php`
 
 - [ ] **Step 1: Run all tests before modifying**
 
 Run: `./vendor/bin/phpunit`
 Expected: All tests pass
 
-- [ ] **Step 2: Update GiikenServiceProvider**
+- [ ] **Step 2: Update AppServiceProvider**
 
-In `src/GiikenServiceProvider.php`, add the new service registrations. The register method should document the Phase 3 services. Since the Waaseyaa DI container specifics aren't defined yet in the service provider pattern, add a comment block documenting the wiring:
+In `src/AppServiceProvider.php`, add the new service registrations. The register method should document the Phase 3 services. Since the Waaseyaa DI container specifics aren't defined yet in the service provider pattern, add a comment block documenting the wiring:
 
 Add imports at the top of the file:
 
 ```php
-use Giiken\Query\SearchService;
-use Giiken\Query\QaService;
-use Giiken\Query\Report\ReportService;
-use Giiken\Query\Report\GovernanceSummaryReport;
-use Giiken\Query\Report\LanguageReport;
-use Giiken\Query\Report\LandBriefReport;
-use Giiken\Export\ExportService;
-use Giiken\Export\ImportService;
-use Giiken\Ingestion\Handler\MediaIngestionHandler;
+use App\Query\SearchService;
+use App\Query\QaService;
+use App\Query\Report\ReportService;
+use App\Query\Report\GovernanceSummaryReport;
+use App\Query\Report\LanguageReport;
+use App\Query\Report\LandBriefReport;
+use App\Export\ExportService;
+use App\Export\ImportService;
+use App\Ingestion\Handler\MediaIngestionHandler;
 ```
 
 Replace the comment at the end of the class:
@@ -3371,8 +3371,8 @@ Expected: No errors (or only pre-existing ones)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/GiikenServiceProvider.php
-git commit -m "feat(provider): document Phase 3 service wiring in GiikenServiceProvider"
+git add src/AppServiceProvider.php
+git commit -m "feat(provider): document Phase 3 service wiring in AppServiceProvider"
 ```
 
 - [ ] **Step 6: Final full test run**

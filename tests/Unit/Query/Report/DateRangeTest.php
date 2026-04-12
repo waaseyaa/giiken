@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query\Report;
+namespace App\Tests\Unit\Query\Report;
 
-use Giiken\Query\Report\DateRange;
+use App\Query\Report\DateRange;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

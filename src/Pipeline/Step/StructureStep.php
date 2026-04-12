@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\PipelineException;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\PipelineException;
+use App\Pipeline\Provider\LlmProviderInterface;
 use Waaseyaa\AI\Pipeline\PipelineContext;
 use Waaseyaa\AI\Pipeline\PipelineStepInterface;
 use Waaseyaa\AI\Pipeline\StepResult;

@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion;
+namespace App\Ingestion;
 
 final class IngestionException extends \RuntimeException {}

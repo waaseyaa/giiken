@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Job;
+namespace App\Ingestion\Job;
 
 use Waaseyaa\Queue\Job;
 

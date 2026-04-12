@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Wiki\Check;
+namespace App\Wiki\Check;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 final class BrokenLinkCheck implements LintCheckInterface
 {

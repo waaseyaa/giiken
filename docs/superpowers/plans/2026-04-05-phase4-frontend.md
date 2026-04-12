@@ -4,7 +4,7 @@
 
 **Goal:** Build the Inertia.js frontend so Giiken is usable in a browser: search, Q&A, knowledge browsing, and staff management panel.
 
-**Architecture:** Vue 3 + Inertia.js rendered by PHP controllers registered in `GiikenServiceProvider::routes()`. The Waaseyaa framework provides `Inertia::render()`, `InertiaMiddleware`, `ControllerDispatcher`, and `ViteAssetManager`. Controllers are closures returning `InertiaResponse`. Two surfaces in one app: Discovery (all users) and Management (staff+).
+**Architecture:** Vue 3 + Inertia.js rendered by PHP controllers registered in `AppServiceProvider::routes()`. The Waaseyaa framework provides `Inertia::render()`, `InertiaMiddleware`, `ControllerDispatcher`, and `ViteAssetManager`. Controllers are closures returning `InertiaResponse`. Two surfaces in one app: Discovery (all users) and Management (staff+).
 
 **Tech Stack:** Vue 3, TypeScript, Inertia.js (via `waaseyaa/inertia`), Vite, Tailwind CSS v4, PHP 8.4 controllers
 
@@ -60,7 +60,7 @@ src/
 │   │   └── ManagementController.php     # Dashboard, reports, users, ingestion, export
 │   └── Middleware/
 │       └── RequireStaffRole.php         # Guards management routes
-├── GiikenServiceProvider.php            # MODIFY: add routes
+├── AppServiceProvider.php            # MODIFY: add routes
 ```
 
 ### Tests
@@ -287,7 +287,7 @@ git commit -m "feat: scaffold frontend tooling (Vue 3, Vite, Tailwind, Inertia)"
 **Files:**
 - Create: `src/Http/Controller/DiscoveryController.php`
 - Create: `tests/Unit/Http/Controller/DiscoveryControllerTest.php`
-- Modify: `src/GiikenServiceProvider.php`
+- Modify: `src/AppServiceProvider.php`
 
 - [ ] **Step 1: Write the failing test for DiscoveryController**
 
@@ -298,20 +298,20 @@ Create `tests/Unit/Http/Controller/DiscoveryControllerTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Http\Controller;
+namespace App\Tests\Unit\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Http\Controller\DiscoveryController;
-use Giiken\Query\QaResponse;
-use Giiken\Query\QaService;
-use Giiken\Query\SearchQuery;
-use Giiken\Query\SearchResultItem;
-use Giiken\Query\SearchResultSet;
-use Giiken\Query\SearchService;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Http\Controller\DiscoveryController;
+use App\Query\QaResponse;
+use App\Query\QaService;
+use App\Query\SearchQuery;
+use App\Query\SearchResultItem;
+use App\Query\SearchResultSet;
+use App\Query\SearchService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -439,13 +439,13 @@ Create `src/Http/Controller/DiscoveryController.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Controller;
+namespace App\Http\Controller;
 
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Query\QaService;
-use Giiken\Query\SearchQuery;
-use Giiken\Query\SearchService;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Query\QaService;
+use App\Query\SearchQuery;
+use App\Query\SearchService;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Inertia\Inertia;
 use Waaseyaa\Inertia\InertiaResponse;
@@ -541,7 +541,7 @@ final class DiscoveryController
         ]);
     }
 
-    private function serializeCommunity(\Giiken\Entity\Community\Community $community): array
+    private function serializeCommunity(\App\Entity\Community\Community $community): array
     {
         return [
             'id' => $community->get('id'),
@@ -551,7 +551,7 @@ final class DiscoveryController
         ];
     }
 
-    private function serializeResultSet(\Giiken\Query\SearchResultSet $resultSet): array
+    private function serializeResultSet(\App\Query\SearchResultSet $resultSet): array
     {
         return [
             'items' => array_map(fn ($item) => [
@@ -599,9 +599,9 @@ Create `tests/Unit/Http/Middleware/RequireStaffRoleTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Http\Middleware;
+namespace App\Tests\Unit\Http\Middleware;
 
-use Giiken\Http\Middleware\RequireStaffRole;
+use App\Http\Middleware\RequireStaffRole;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -681,9 +681,9 @@ Create `src/Http/Middleware/RequireStaffRole.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Middleware;
+namespace App\Http\Middleware;
 
-use Giiken\Access\CommunityRole;
+use App\Access\CommunityRole;
 use Waaseyaa\Access\AccountInterface;
 
 final class RequireStaffRole
@@ -730,14 +730,14 @@ Create `tests/Unit/Http/Controller/ManagementControllerTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Http\Controller;
+namespace App\Tests\Unit\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Http\Controller\ManagementController;
-use Giiken\Query\Export\ExportService;
-use Giiken\Query\Export\ImportService;
-use Giiken\Query\Report\ReportService;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Http\Controller\ManagementController;
+use App\Query\Export\ExportService;
+use App\Query\Export\ImportService;
+use App\Query\Report\ReportService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -827,13 +827,13 @@ Create `src/Http/Controller/ManagementController.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Controller;
+namespace App\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Query\Export\ExportService;
-use Giiken\Query\Export\ImportService;
-use Giiken\Query\Report\ReportService;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Query\Export\ExportService;
+use App\Query\Export\ImportService;
+use App\Query\Report\ReportService;
 use Waaseyaa\Inertia\Inertia;
 use Waaseyaa\Inertia\InertiaResponse;
 
@@ -921,9 +921,9 @@ git commit -m "feat: add RequireStaffRole middleware and ManagementController"
 ## Task 4: Route Registration
 
 **Files:**
-- Modify: `src/GiikenServiceProvider.php`
+- Modify: `src/AppServiceProvider.php`
 
-- [ ] **Step 1: Add routes to GiikenServiceProvider**
+- [ ] **Step 1: Add routes to AppServiceProvider**
 
 Add the following use statements and route definitions inside `routes()`:
 
@@ -1007,7 +1007,7 @@ Expected: No errors
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/GiikenServiceProvider.php
+git add src/AppServiceProvider.php
 git commit -m "feat: register discovery and management routes"
 ```
 

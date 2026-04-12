@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Http\Controller;
+namespace App\Tests\Unit\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Http\Controller\DiscoveryController;
-use Giiken\Http\Inertia\InertiaHttpResponder;
-use Giiken\Query\QaResponse;
-use Giiken\Query\QaServiceInterface;
-use Giiken\Query\SearchQuery;
-use Giiken\Query\SearchResultItem;
-use Giiken\Query\SearchResultSet;
-use Giiken\Query\SearchService;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Http\Controller\DiscoveryController;
+use App\Http\Inertia\InertiaHttpResponder;
+use App\Query\QaResponse;
+use App\Query\QaServiceInterface;
+use App\Query\SearchQuery;
+use App\Query\SearchResultItem;
+use App\Query\SearchResultSet;
+use App\Query\SearchService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;

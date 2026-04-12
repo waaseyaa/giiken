@@ -144,9 +144,9 @@ Create `tests/Unit/Entity/Community/WikiSchemaTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Entity\Community;
+namespace App\Tests\Unit\Entity\Community;
 
-use Giiken\Entity\Community\WikiSchema;
+use App\Entity\Community\WikiSchema;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -251,7 +251,7 @@ Create `src/Entity/Community/WikiSchema.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Entity\Community;
+namespace App\Entity\Community;
 
 final class WikiSchema
 {
@@ -316,10 +316,10 @@ Create `tests/Unit/Entity/Community/CommunityWikiSchemaTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Entity\Community;
+namespace App\Tests\Unit\Entity\Community;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\WikiSchema;
+use App\Entity\Community\Community;
+use App\Entity\Community\WikiSchema;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -403,7 +403,7 @@ public function getTypedWikiSchema(): WikiSchema
 Add the import at the top of the file:
 
 ```php
-use Giiken\Entity\Community\WikiSchema;
+use App\Entity\Community\WikiSchema;
 ```
 
 - [ ] **Step 9: Run test to verify it passes**
@@ -447,11 +447,11 @@ Create `tests/Unit/Wiki/Check/OrphanPageCheckTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Wiki\Check;
+namespace App\Tests\Unit\Wiki\Check;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Wiki\Check\LintCheckInterface;
-use Giiken\Wiki\Check\OrphanPageCheck;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Wiki\Check\LintCheckInterface;
+use App\Wiki\Check\OrphanPageCheck;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -545,9 +545,9 @@ Create `src/Wiki/Check/LintCheckInterface.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Wiki\Check;
+namespace App\Wiki\Check;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 interface LintCheckInterface
 {
@@ -570,9 +570,9 @@ Create `src/Wiki/Check/OrphanPageCheck.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Wiki\Check;
+namespace App\Wiki\Check;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 final class OrphanPageCheck implements LintCheckInterface
 {
@@ -648,11 +648,11 @@ Create `tests/Unit/Wiki/Check/BrokenLinkCheckTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Wiki\Check;
+namespace App\Tests\Unit\Wiki\Check;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Wiki\Check\BrokenLinkCheck;
-use Giiken\Wiki\Check\LintCheckInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Wiki\Check\BrokenLinkCheck;
+use App\Wiki\Check\LintCheckInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -749,9 +749,9 @@ Create `src/Wiki/Check/BrokenLinkCheck.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Wiki\Check;
+namespace App\Wiki\Check;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 final class BrokenLinkCheck implements LintCheckInterface
 {
@@ -825,7 +825,7 @@ Create `src/Wiki/WikiLintReport.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Wiki;
+namespace App\Wiki;
 
 use Waaseyaa\Entity\ContentEntityBase;
 
@@ -916,14 +916,14 @@ Create `tests/Unit/Wiki/WikiLintJobTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Wiki;
+namespace App\Tests\Unit\Wiki;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Wiki\Check\BrokenLinkCheck;
-use Giiken\Wiki\Check\LintCheckInterface;
-use Giiken\Wiki\Check\OrphanPageCheck;
-use Giiken\Wiki\WikiLintJob;
-use Giiken\Wiki\WikiLintReport;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Wiki\Check\BrokenLinkCheck;
+use App\Wiki\Check\LintCheckInterface;
+use App\Wiki\Check\OrphanPageCheck;
+use App\Wiki\WikiLintJob;
+use App\Wiki\WikiLintReport;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1031,9 +1031,9 @@ Create `src/Wiki/WikiLintJob.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Wiki;
+namespace App\Wiki;
 
-use Giiken\Wiki\Check\LintCheckInterface;
+use App\Wiki\Check\LintCheckInterface;
 use Waaseyaa\Entity\EntityRepositoryInterface;
 
 final class WikiLintJob
@@ -1107,15 +1107,15 @@ git commit -m "feat(#23): add WikiLintJob orchestrating checks and saving report
 
 ---
 
-## Task 7: Register wiki entities in GiikenServiceProvider
+## Task 7: Register wiki entities in AppServiceProvider
 
 **Files:**
-- Modify: `src/GiikenServiceProvider.php`
-- Modify: `tests/Unit/GiikenServiceProviderTest.php` (if entity registration is tested there)
+- Modify: `src/AppServiceProvider.php`
+- Modify: `tests/Unit/AppServiceProviderTest.php` (if entity registration is tested there)
 
 - [ ] **Step 1: Read the current service provider**
 
-Read `src/GiikenServiceProvider.php` to understand the registration pattern.
+Read `src/AppServiceProvider.php` to understand the registration pattern.
 
 - [ ] **Step 2: Add WikiLintReport entity type registration**
 
@@ -1124,7 +1124,7 @@ Add the `wiki_lint_report` entity type to the service provider's entity type reg
 - [ ] **Step 3: Run existing service provider test**
 
 ```bash
-./vendor/bin/phpunit tests/Unit/GiikenServiceProviderTest.php
+./vendor/bin/phpunit tests/Unit/AppServiceProviderTest.php
 ```
 
 Expected: PASS (may need test update if it asserts entity type count).
@@ -1132,7 +1132,7 @@ Expected: PASS (may need test update if it asserts entity type count).
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/GiikenServiceProvider.php tests/Unit/GiikenServiceProviderTest.php
+git add src/AppServiceProvider.php tests/Unit/AppServiceProviderTest.php
 git commit -m "feat(#23): register wiki_lint_report entity type in service provider"
 ```
 

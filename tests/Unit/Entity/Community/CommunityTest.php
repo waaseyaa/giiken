@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Entity\Community;
+namespace App\Tests\Unit\Entity\Community;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\WikiSchema;
-use Giiken\Entity\Community\SovereigntyProfile;
+use App\Entity\Community\Community;
+use App\Entity\Community\WikiSchema;
+use App\Entity\Community\SovereigntyProfile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

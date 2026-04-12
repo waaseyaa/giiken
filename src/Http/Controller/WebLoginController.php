@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Controller;
+namespace App\Http\Controller;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;

@@ -1,0 +1,120 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AnswerPanel snapshot > renders an answer with citations 1`] = `
+"<div class="bg-surface-raised rounded-lg border border-border p-6">
+  <div class="flex items-center gap-2 mb-4"><span class="w-2.5 h-2.5 bg-primary rounded-full"></span><span class="font-semibold text-ink">Answer</span><span class="text-xs text-ink-muted">from your knowledge base</span></div>
+  <div>
+    <p class="text-ink whitespace-pre-line leading-relaxed">This is the answer <sup class="mx-0.5"><a href="#citation-1" class="text-primary font-semibold no-underline hover:underline">[1]</a></sup> with sources <sup class="mx-0.5"><a href="#citation-2" class="text-primary font-semibold no-underline hover:underline">[2]</a></sup>.</p>
+    <div class="mt-6 pt-4 border-t border-border">
+      <p class="text-sm font-medium text-ink-muted mb-2">Sources</p>
+      <div class="space-y-2">
+        <div id="citation-1" class="border border-border rounded bg-surface overflow-hidden"><button type="button" class="w-full flex items-start gap-2 text-left p-3 hover:bg-surface-raised transition-colors" aria-expanded="false" aria-controls="citation-1-body"><span class="text-primary font-medium shrink-0">[1]</span><span class="font-medium text-ink flex-1 min-w-0 truncate">Doc A</span><span class="text-xs px-2 py-0.5 rounded-full shrink-0 bg-cultural-subtle text-cultural">Cultural</span><span class="text-xs text-ink-muted shrink-0">+</span></button>
+          <!--v-if-->
+        </div>
+        <div id="citation-2" class="border border-border rounded bg-surface overflow-hidden"><button type="button" class="w-full flex items-start gap-2 text-left p-3 hover:bg-surface-raised transition-colors" aria-expanded="false" aria-controls="citation-2-body"><span class="text-primary font-medium shrink-0">[2]</span><span class="font-medium text-ink flex-1 min-w-0 truncate">Doc B</span><span class="text-xs px-2 py-0.5 rounded-full shrink-0 bg-land-subtle text-land">Land</span><span class="text-xs text-ink-muted shrink-0">+</span></button>
+          <!--v-if-->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>"
+`;
+
+exports[`BrowseStrip snapshot > renders with single community 1`] = `
+"<section class="max-w-5xl mx-auto px-6 pt-8">
+  <div class="flex gap-2 overflow-x-auto flex-nowrap justify-center"><a href="/test-nation?type=cultural" class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-cultural-subtle text-cultural">Cultural</a><a href="/test-nation?type=governance" class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-governance-subtle text-governance">Governance</a><a href="/test-nation?type=land" class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-land-subtle text-land">Land</a><a href="/test-nation?type=relationship" class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-relationship-subtle text-relationship">Relationship</a><a href="/test-nation?type=event" class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-event-subtle text-event">Event</a></div>
+</section>"
+`;
+
+exports[`CitationCard snapshot > renders a citation 1`] = `
+"<div id="citation-1" class="border border-border rounded bg-surface overflow-hidden"><button type="button" class="w-full flex items-start gap-2 text-left p-3 hover:bg-surface-raised transition-colors" aria-expanded="false" aria-controls="citation-1-body"><span class="text-primary font-medium shrink-0">[1]</span><span class="font-medium text-ink flex-1 min-w-0 truncate">Governance doc</span><span class="text-xs px-2 py-0.5 rounded-full shrink-0 bg-governance-subtle text-governance">Governance</span><span class="text-xs text-ink-muted shrink-0">+</span></button>
+  <!--v-if-->
+</div>"
+`;
+
+exports[`KnowledgeCard snapshots > renders cultural variant 1`] = `
+"<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
+  <div class="flex items-start gap-3">
+    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-cultural"></div>
+    <div class="min-w-0">
+      <h3 class="font-semibold text-ink truncate">cultural item</h3>
+      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A cultural knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-cultural-subtle text-cultural">Cultural</span>
+    </div>
+  </div>
+</a>"
+`;
+
+exports[`KnowledgeCard snapshots > renders event variant 1`] = `
+"<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
+  <div class="flex items-start gap-3">
+    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-event"></div>
+    <div class="min-w-0">
+      <h3 class="font-semibold text-ink truncate">event item</h3>
+      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A event knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-event-subtle text-event">Event</span>
+    </div>
+  </div>
+</a>"
+`;
+
+exports[`KnowledgeCard snapshots > renders governance variant 1`] = `
+"<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
+  <div class="flex items-start gap-3">
+    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-governance"></div>
+    <div class="min-w-0">
+      <h3 class="font-semibold text-ink truncate">governance item</h3>
+      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A governance knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-governance-subtle text-governance">Governance</span>
+    </div>
+  </div>
+</a>"
+`;
+
+exports[`KnowledgeCard snapshots > renders land variant 1`] = `
+"<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
+  <div class="flex items-start gap-3">
+    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-land"></div>
+    <div class="min-w-0">
+      <h3 class="font-semibold text-ink truncate">land item</h3>
+      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A land knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-land-subtle text-land">Land</span>
+    </div>
+  </div>
+</a>"
+`;
+
+exports[`KnowledgeCard snapshots > renders relationship variant 1`] = `
+"<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
+  <div class="flex items-start gap-3">
+    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-relationship"></div>
+    <div class="min-w-0">
+      <h3 class="font-semibold text-ink truncate">relationship item</h3>
+      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A relationship knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-relationship-subtle text-relationship">Relationship</span>
+    </div>
+  </div>
+</a>"
+`;
+
+exports[`SearchHero snapshots > renders with multiple communities (shows select) 1`] = `
+"<header class="bg-gradient-to-br from-primary to-primary-hover text-on-primary py-20 px-6 text-center">
+  <h1 class="text-4xl font-bold mb-3">Sovereign Indigenous Knowledge</h1>
+  <p class="text-primary-subtle text-lg max-w-2xl mx-auto mb-10"> Browse community knowledge bases. Each community governs its own content under its own protocols. </p>
+  <form class="flex items-center justify-center gap-2 max-w-2xl mx-auto"><select class="px-3 py-3 rounded-lg border border-border text-ink text-base">
+      <option value="test-nation">Test Nation</option>
+      <option value="second-nation">Second Nation</option>
+    </select><input type="text" placeholder="Search or ask a question..." class="flex-1 px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-ink text-base"><button type="submit" class="px-6 py-3 bg-surface text-primary rounded-lg hover:bg-surface-raised font-medium"> Ask → </button></form>
+</header>"
+`;
+
+exports[`SearchHero snapshots > renders with single community (no select) 1`] = `
+"<header class="bg-gradient-to-br from-primary to-primary-hover text-on-primary py-20 px-6 text-center">
+  <h1 class="text-4xl font-bold mb-3">Sovereign Indigenous Knowledge</h1>
+  <p class="text-primary-subtle text-lg max-w-2xl mx-auto mb-10"> Browse community knowledge bases. Each community governs its own content under its own protocols. </p>
+  <form class="flex items-center justify-center gap-2 max-w-2xl mx-auto">
+    <!--v-if--><input type="text" placeholder="Search or ask a question..." class="flex-1 px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-ink text-base"><button type="submit" class="px-6 py-3 bg-surface text-primary rounded-lg hover:bg-surface-raised font-medium"> Ask → </button>
+  </form>
+</header>"
+`;
+
+exports[`SearchInput snapshot > renders default state 1`] = `"<form class="flex gap-2 w-full max-w-2xl"><input type="text" placeholder="Search or ask a question..." class="flex-1 px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-base"><button type="submit" class="px-6 py-3 bg-primary text-on-primary rounded-lg hover:bg-primary-hover font-medium"> Ask → </button></form>"`;
+
+exports[`TypeFilter snapshots > renders with cultural active 1`] = `"<div class="flex gap-2 flex-wrap"><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-primary-subtle text-primary"> All </button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-cultural text-on-primary">Cultural</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-governance-subtle text-governance">Governance</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-land-subtle text-land">Land</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-relationship-subtle text-relationship">Relationship</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-event-subtle text-event">Event</button></div>"`;
+
+exports[`TypeFilter snapshots > renders with no active filter 1`] = `"<div class="flex gap-2 flex-wrap"><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-primary text-on-primary"> All </button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-cultural-subtle text-cultural">Cultural</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-governance-subtle text-governance">Governance</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-land-subtle text-land">Land</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-relationship-subtle text-relationship">Relationship</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-event-subtle text-event">Event</button></div>"`;

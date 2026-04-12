@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
 use InvalidArgumentException;
 use RuntimeException;
 use Waaseyaa\Access\AccountInterface;

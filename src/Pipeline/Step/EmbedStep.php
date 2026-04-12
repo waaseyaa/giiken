@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\AI\Pipeline\PipelineContext;
 use Waaseyaa\AI\Pipeline\PipelineStepInterface;
 use Waaseyaa\AI\Pipeline\StepResult;

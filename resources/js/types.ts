@@ -14,8 +14,20 @@ export interface KnowledgeItem {
 }
 
 export type KnowledgeType = 'cultural' | 'governance' | 'land' | 'relationship' | 'event'
+
+export const KNOWLEDGE_TYPES = [
+  'cultural', 'governance', 'land', 'relationship', 'event',
+] as const satisfies readonly KnowledgeType[]
+
 export type AccessTier = 'public' | 'members' | 'staff' | 'restricted'
 export type CommunityRole = 'admin' | 'knowledge_keeper' | 'staff' | 'member' | 'public'
+
+export interface CommunitySummary {
+  id: number | string
+  name: string
+  slug: string
+  locale: string
+}
 
 export interface Community {
   id: string

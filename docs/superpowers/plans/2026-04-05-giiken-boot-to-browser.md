@@ -967,7 +967,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Migration;
+namespace App\Tests\Unit\Migration;
 
 use Doctrine\DBAL\DriverManager;
 use PHPUnit\Framework\Attributes\Test;
@@ -1045,9 +1045,9 @@ Expected: FAIL — migration file does not exist.
 declare(strict_types=1);
 
 use Doctrine\DBAL\Connection;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Wiki\WikiLintReport;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Wiki\WikiLintReport;
 use Waaseyaa\Database\DBALDatabase;
 use Waaseyaa\Entity\EntityType;
 use Waaseyaa\EntityStorage\EntitySchemaSync;
@@ -1170,10 +1170,10 @@ Expected: a single `embed(string $text): array` method (confirmed during spec re
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Pipeline\Provider\Adapter;
+namespace App\Tests\Unit\Pipeline\Provider\Adapter;
 
-use Giiken\Pipeline\Provider\Adapter\FakeEmbeddingAdapter;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Provider\Adapter\FakeEmbeddingAdapter;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1237,15 +1237,15 @@ Expected: FAIL — adapter class does not exist.
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Provider\Adapter;
+namespace App\Pipeline\Provider\Adapter;
 
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\AI\Vector\Testing\FakeEmbeddingProvider;
 
 /**
  * Bridges the framework's FakeEmbeddingProvider to Giiken's local
  * EmbeddingProviderInterface. Used as the dev/default binding in
- * GiikenServiceProvider until a real provider is wired.
+ * AppServiceProvider until a real provider is wired.
  *
  * See waaseyaa/giiken#40 for the plan to replace this with a
  * sovereignty-profile-aware real provider.
@@ -1307,10 +1307,10 @@ Expected: a `complete(string $systemPrompt, string $userContent): string` method
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Pipeline\Provider\Adapter;
+namespace App\Tests\Unit\Pipeline\Provider\Adapter;
 
-use Giiken\Pipeline\Provider\Adapter\NullLlmAdapter;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Provider\Adapter\NullLlmAdapter;
+use App\Pipeline\Provider\LlmProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1363,9 +1363,9 @@ The framework's `NullLlmProvider` implements the multi-turn `ProviderInterface` 
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Provider\Adapter;
+namespace App\Pipeline\Provider\Adapter;
 
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
 use Waaseyaa\AiAgent\Provider\MessageRequest;
 use Waaseyaa\AiAgent\Provider\NullLlmProvider;
 
@@ -1452,13 +1452,13 @@ cat src/Access/AccessTier.php
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Console;
+namespace App\Tests\Unit\Console;
 
-use Giiken\Console\SeedTestCommunityCommand;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Console\SeedTestCommunityCommand;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1602,15 +1602,15 @@ Expected: FAIL — `SeedTestCommunityCommand` class does not exist.
 
 declare(strict_types=1);
 
-namespace Giiken\Console;
+namespace App\Console;
 
-use Giiken\Access\AccessTier;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\Community\WikiSchema;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use App\Access\AccessTier;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\Community\WikiSchema;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -1729,34 +1729,34 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 
 ---
 
-### Task B11: Wire services in GiikenServiceProvider — register() bindings
+### Task B11: Wire services in AppServiceProvider — register() bindings
 
 **Files:**
-- Modify: `src/GiikenServiceProvider.php`
+- Modify: `src/AppServiceProvider.php`
 
 - [ ] **Step 1: Add use statements and replace the TODO block**
 
-At the top of `GiikenServiceProvider.php`, add use statements:
+At the top of `AppServiceProvider.php`, add use statements:
 
 ```php
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Console\SeedTestCommunityCommand;
-use Giiken\Entity\Community\CommunityRepository;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Pipeline\Provider\Adapter\FakeEmbeddingAdapter;
-use Giiken\Pipeline\Provider\Adapter\NullLlmAdapter;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Query\QaService;
-use Giiken\Query\QaServiceInterface;
-use Giiken\Query\Report\GovernanceSummaryReport;
-use Giiken\Query\Report\LandBriefReport;
-use Giiken\Query\Report\LanguageReport;
-use Giiken\Query\Report\ReportService;
-use Giiken\Query\Report\ReportServiceInterface;
-use Giiken\Query\SearchService;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Console\SeedTestCommunityCommand;
+use App\Entity\Community\CommunityRepository;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Pipeline\Provider\Adapter\FakeEmbeddingAdapter;
+use App\Pipeline\Provider\Adapter\NullLlmAdapter;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Query\QaService;
+use App\Query\QaServiceInterface;
+use App\Query\Report\GovernanceSummaryReport;
+use App\Query\Report\LandBriefReport;
+use App\Query\Report\LanguageReport;
+use App\Query\Report\ReportService;
+use App\Query\Report\ReportServiceInterface;
+use App\Query\SearchService;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Waaseyaa\AI\Vector\Testing\FakeEmbeddingProvider;
 use Waaseyaa\AiAgent\Provider\NullLlmProvider;
@@ -1876,8 +1876,8 @@ Expected: 173+ tests still green, plus the new migration/adapter/command tests. 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/GiikenServiceProvider.php
-git commit -m "feat: wire Phase 3 services in GiikenServiceProvider
+git add src/AppServiceProvider.php
+git commit -m "feat: wire Phase 3 services in AppServiceProvider
 
 Replaces the Phase 3 TODO block with real DI bindings for:
 - CommunityRepository / KnowledgeItemRepository (via EntityTypeManager)
@@ -1897,11 +1897,11 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ### Task B12: Register SeedTestCommunityCommand via commands()
 
 **Files:**
-- Modify: `src/GiikenServiceProvider.php`
+- Modify: `src/AppServiceProvider.php`
 
 - [ ] **Step 1: Add `commands()` override**
 
-Append below `routes()` in `GiikenServiceProvider`:
+Append below `routes()` in `AppServiceProvider`:
 
 ```php
 /**
@@ -1942,10 +1942,10 @@ Expected output includes `giiken:seed:test-community`.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/GiikenServiceProvider.php
+git add src/AppServiceProvider.php
 git commit -m "feat: register giiken:seed:test-community command
 
-Exposes the seed command to the CLI via GiikenServiceProvider::commands(),
+Exposes the seed command to the CLI via AppServiceProvider::commands(),
 constructing repositories from the framework-supplied EntityTypeManager.
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
@@ -1967,7 +1967,7 @@ This test boots the full HttpKernel against in-memory SQLite, runs migrations, r
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Integration\Boot;
+namespace App\Tests\Integration\Boot;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -2153,7 +2153,7 @@ gh pr create --repo waaseyaa/giiken --title "feat: boot-to-browser — Discovery
 
 Gets \`http://127.0.0.1:8765/test-community\` rendering the Discovery homepage with real services, a real SQLite database, and a seeded test community. No hacks, no stubs in production code paths.
 
-Closes the Phase 3 service-wiring TODO block in GiikenServiceProvider.
+Closes the Phase 3 service-wiring TODO block in AppServiceProvider.
 
 Depends on framework PR: waaseyaa/framework feat/boot-to-browser-dx (ServeCommand dev env, make:public, NullLlmProvider, EntitySchemaSync).
 
@@ -2161,7 +2161,7 @@ Depends on framework PR: waaseyaa/framework feat/boot-to-browser-dx (ServeComman
 
 - **Front controller:** \`public/index.php\` scaffolded via \`waaseyaa make:public\`
 - **Migration:** \`migrations/001_ensure_entity_tables.php\` uses \`EntitySchemaSync\` to materialize community, knowledge_item, and wiki_lint_report tables from their EntityType specs
-- **DI wiring:** real bindings for \`CommunityRepository\`, \`KnowledgeItemRepository\`, \`Fts5SearchProvider\`, \`SearchService\`, \`QaService\`, \`ReportService\` in \`GiikenServiceProvider::register()\`
+- **DI wiring:** real bindings for \`CommunityRepository\`, \`KnowledgeItemRepository\`, \`Fts5SearchProvider\`, \`SearchService\`, \`QaService\`, \`ReportService\` in \`AppServiceProvider::register()\`
 - **Provider adapters:** \`FakeEmbeddingAdapter\`, \`NullLlmAdapter\` bridge framework provider implementations to Giiken's local interfaces (dev defaults; see #40)
 - **Seed command:** \`giiken:seed:test-community\` creates a community with a default \`WikiSchema\` and three public-tier sample knowledge items (idempotent)
 - **Acceptance test:** integration test that boots the kernel, runs migrations, seeds, and dispatches \`GET /test-community\`
@@ -2207,7 +2207,7 @@ gh pr view --repo waaseyaa/giiken
 | §3.1 EntitySchemaSync (Risk A contingency) | A9, A10 |
 | §3.2 public/index.php via make:public | B2 |
 | §3.2 migrations/001_ensure_entity_tables.php | B3, B4 |
-| §3.2 GiikenServiceProvider::register bindings | B11 |
+| §3.2 AppServiceProvider::register bindings | B11 |
 | §3.2 FakeEmbeddingAdapter | B5, B6 |
 | §3.2 NullLlmAdapter | B7, B8 |
 | §3.2 SeedTestCommunityCommand | B9, B10, B12 |

@@ -67,7 +67,7 @@
 | File | Changes |
 |---|---|
 | `src/Entity/KnowledgeItem/KnowledgeItem.php` | Add `toMarkdown()` method |
-| `src/GiikenServiceProvider.php` | Register IngestionHandlerRegistry, handlers, CompilationPipeline |
+| `src/AppServiceProvider.php` | Register IngestionHandlerRegistry, handlers, CompilationPipeline |
 | `tests/Unit/Entity/KnowledgeItem/KnowledgeItemTest.php` | Add toMarkdown tests (or separate test file) |
 
 ---
@@ -77,7 +77,7 @@
 **Files:**
 - Create: `src/Access/PublicIngestionPolicy.php`
 - Create: `tests/Unit/Access/PublicIngestionPolicyTest.php`
-- Modify: `src/GiikenServiceProvider.php`
+- Modify: `src/AppServiceProvider.php`
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -88,10 +88,10 @@ Create `tests/Unit/Access/PublicIngestionPolicyTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Access;
+namespace App\Tests\Unit\Access;
 
-use Giiken\Access\PublicIngestionPolicy;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Access\PublicIngestionPolicy;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -231,9 +231,9 @@ Create `src/Access/PublicIngestionPolicy.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Access;
+namespace App\Access;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 use Waaseyaa\Access\AccessPolicyInterface;
 use Waaseyaa\Access\AccessResult;
 use Waaseyaa\Access\AccountInterface;
@@ -323,9 +323,9 @@ Create `tests/Unit/Entity/KnowledgeItem/KnowledgeItemToMarkdownTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Entity\KnowledgeItem;
+namespace App\Tests\Unit\Entity\KnowledgeItem;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -490,7 +490,7 @@ Create `src/Ingestion/RawDocument.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion;
+namespace App\Ingestion;
 
 /**
  * Immutable value object returned by ingestion handlers.
@@ -524,7 +524,7 @@ Create `src/Ingestion/IngestionException.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion;
+namespace App\Ingestion;
 
 final class IngestionException extends \RuntimeException {}
 ```
@@ -536,9 +536,9 @@ Create `src/Ingestion/FileIngestionHandlerInterface.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion;
+namespace App\Ingestion;
 
-use Giiken\Entity\Community\Community;
+use App\Entity\Community\Community;
 
 interface FileIngestionHandlerInterface
 {
@@ -573,13 +573,13 @@ Create `tests/Unit/Ingestion/IngestionHandlerRegistryTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion;
+namespace App\Tests\Unit\Ingestion;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\FileIngestionHandlerInterface;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\IngestionHandlerRegistry;
-use Giiken\Ingestion\RawDocument;
+use App\Entity\Community\Community;
+use App\Ingestion\FileIngestionHandlerInterface;
+use App\Ingestion\IngestionException;
+use App\Ingestion\IngestionHandlerRegistry;
+use App\Ingestion\RawDocument;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -694,9 +694,9 @@ Create `src/Ingestion/IngestionHandlerRegistry.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion;
+namespace App\Ingestion;
 
-use Giiken\Entity\Community\Community;
+use App\Entity\Community\Community;
 
 final class IngestionHandlerRegistry
 {
@@ -757,7 +757,7 @@ Create `src/Ingestion/Converter/ConversionException.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Converter;
+namespace App\Ingestion\Converter;
 
 final class ConversionException extends \RuntimeException {}
 ```
@@ -769,7 +769,7 @@ Create `src/Ingestion/Converter/FileConverterInterface.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Converter;
+namespace App\Ingestion\Converter;
 
 interface FileConverterInterface
 {
@@ -793,10 +793,10 @@ Create `tests/Unit/Ingestion/Converter/MarkItDownConverterTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Converter;
+namespace App\Tests\Unit\Ingestion\Converter;
 
-use Giiken\Ingestion\Converter\ConversionException;
-use Giiken\Ingestion\Converter\MarkItDownConverter;
+use App\Ingestion\Converter\ConversionException;
+use App\Ingestion\Converter\MarkItDownConverter;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -889,7 +889,7 @@ Create `src/Ingestion/Converter/MarkItDownConverter.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Converter;
+namespace App\Ingestion\Converter;
 
 final class MarkItDownConverter implements FileConverterInterface
 {
@@ -1022,10 +1022,10 @@ Create `tests/Unit/Ingestion/Handler/MarkdownIngestionHandlerTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Handler;
+namespace App\Tests\Unit\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Handler\MarkdownIngestionHandler;
+use App\Entity\Community\Community;
+use App\Ingestion\Handler\MarkdownIngestionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1163,12 +1163,12 @@ Create `src/Ingestion/Handler/MarkdownIngestionHandler.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Handler;
+namespace App\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\FileIngestionHandlerInterface;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\RawDocument;
+use App\Entity\Community\Community;
+use App\Ingestion\FileIngestionHandlerInterface;
+use App\Ingestion\IngestionException;
+use App\Ingestion\RawDocument;
 use Waaseyaa\Media\FileRepositoryInterface;
 
 final class MarkdownIngestionHandler implements FileIngestionHandlerInterface
@@ -1276,11 +1276,11 @@ Create `tests/Unit/Ingestion/Handler/DocumentIngestionHandlerTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Handler;
+namespace App\Tests\Unit\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Converter\FileConverterInterface;
-use Giiken\Ingestion\Handler\DocumentIngestionHandler;
+use App\Entity\Community\Community;
+use App\Ingestion\Converter\FileConverterInterface;
+use App\Ingestion\Handler\DocumentIngestionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1362,13 +1362,13 @@ Create `src/Ingestion/Handler/DocumentIngestionHandler.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Handler;
+namespace App\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Converter\FileConverterInterface;
-use Giiken\Ingestion\FileIngestionHandlerInterface;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\RawDocument;
+use App\Entity\Community\Community;
+use App\Ingestion\Converter\FileConverterInterface;
+use App\Ingestion\FileIngestionHandlerInterface;
+use App\Ingestion\IngestionException;
+use App\Ingestion\RawDocument;
 use Waaseyaa\Media\FileRepositoryInterface;
 
 final class DocumentIngestionHandler implements FileIngestionHandlerInterface
@@ -1439,11 +1439,11 @@ Create `tests/Unit/Ingestion/Handler/CsvIngestionHandlerTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Handler;
+namespace App\Tests\Unit\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Converter\FileConverterInterface;
-use Giiken\Ingestion\Handler\CsvIngestionHandler;
+use App\Entity\Community\Community;
+use App\Ingestion\Converter\FileConverterInterface;
+use App\Ingestion\Handler\CsvIngestionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1510,13 +1510,13 @@ Create `src/Ingestion/Handler/CsvIngestionHandler.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Handler;
+namespace App\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Converter\FileConverterInterface;
-use Giiken\Ingestion\FileIngestionHandlerInterface;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\RawDocument;
+use App\Entity\Community\Community;
+use App\Ingestion\Converter\FileConverterInterface;
+use App\Ingestion\FileIngestionHandlerInterface;
+use App\Ingestion\IngestionException;
+use App\Ingestion\RawDocument;
 use Waaseyaa\Media\FileRepositoryInterface;
 
 final class CsvIngestionHandler implements FileIngestionHandlerInterface
@@ -1613,11 +1613,11 @@ Create `tests/Unit/Ingestion/Handler/HtmlIngestionHandlerTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Handler;
+namespace App\Tests\Unit\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Converter\FileConverterInterface;
-use Giiken\Ingestion\Handler\HtmlIngestionHandler;
+use App\Entity\Community\Community;
+use App\Ingestion\Converter\FileConverterInterface;
+use App\Ingestion\Handler\HtmlIngestionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1682,13 +1682,13 @@ Create `src/Ingestion/Handler/HtmlIngestionHandler.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Handler;
+namespace App\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Converter\FileConverterInterface;
-use Giiken\Ingestion\FileIngestionHandlerInterface;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\RawDocument;
+use App\Entity\Community\Community;
+use App\Ingestion\Converter\FileConverterInterface;
+use App\Ingestion\FileIngestionHandlerInterface;
+use App\Ingestion\IngestionException;
+use App\Ingestion\RawDocument;
 use Waaseyaa\Media\FileRepositoryInterface;
 
 final class HtmlIngestionHandler implements FileIngestionHandlerInterface
@@ -1768,9 +1768,9 @@ Create `src/Pipeline/CompilationPayload.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline;
+namespace App\Pipeline;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use App\Entity\KnowledgeItem\KnowledgeType;
 
 final class CompilationPayload
 {
@@ -1803,7 +1803,7 @@ Create `src/Pipeline/PipelineException.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline;
+namespace App\Pipeline;
 
 final class PipelineException extends \RuntimeException
 {
@@ -1825,7 +1825,7 @@ Create `src/Pipeline/SovereigntyConfig.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline;
+namespace App\Pipeline;
 
 final class SovereigntyConfig
 {
@@ -1850,7 +1850,7 @@ Create `src/Pipeline/Provider/LlmProviderInterface.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Provider;
+namespace App\Pipeline\Provider;
 
 interface LlmProviderInterface
 {
@@ -1872,7 +1872,7 @@ Create `src/Pipeline/Provider/EmbeddingProviderInterface.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Provider;
+namespace App\Pipeline\Provider;
 
 interface EmbeddingProviderInterface
 {
@@ -1915,10 +1915,10 @@ Create `tests/Unit/Pipeline/Step/TranscribeStepTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Pipeline\Step;
+namespace App\Tests\Unit\Pipeline\Step;
 
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\Step\TranscribeStep;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\Step\TranscribeStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -1961,9 +1961,9 @@ Create `src/Pipeline/Step/TranscribeStep.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
-use Giiken\Pipeline\CompilationPayload;
+use App\Pipeline\CompilationPayload;
 use Waaseyaa\AiPipeline\PipelineContext;
 use Waaseyaa\AiPipeline\PipelineStepInterface;
 use Waaseyaa\AiPipeline\StepResult;
@@ -2015,13 +2015,13 @@ Create `tests/Unit/Pipeline/Step/ClassifyStepTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Pipeline\Step;
+namespace App\Tests\Unit\Pipeline\Step;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\PipelineException;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Pipeline\Step\ClassifyStep;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\PipelineException;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Step\ClassifyStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -2109,12 +2109,12 @@ Create `src/Pipeline/Step/ClassifyStep.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\PipelineException;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\PipelineException;
+use App\Pipeline\Provider\LlmProviderInterface;
 use Waaseyaa\AiPipeline\PipelineContext;
 use Waaseyaa\AiPipeline\PipelineStepInterface;
 use Waaseyaa\AiPipeline\StepResult;
@@ -2195,13 +2195,13 @@ Create `tests/Unit/Pipeline/Step/StructureStepTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Pipeline\Step;
+namespace App\Tests\Unit\Pipeline\Step;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\PipelineException;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Pipeline\Step\StructureStep;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\PipelineException;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Step\StructureStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -2281,11 +2281,11 @@ Create `src/Pipeline/Step/StructureStep.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\PipelineException;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\PipelineException;
+use App\Pipeline\Provider\LlmProviderInterface;
 use Waaseyaa\AiPipeline\PipelineContext;
 use Waaseyaa\AiPipeline\PipelineStepInterface;
 use Waaseyaa\AiPipeline\StepResult;
@@ -2374,11 +2374,11 @@ Create `tests/Unit/Pipeline/Step/LinkStepTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Pipeline\Step;
+namespace App\Tests\Unit\Pipeline\Step;
 
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Step\LinkStep;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Step\LinkStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -2479,10 +2479,10 @@ Create `src/Pipeline/Step/LinkStep.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\AiPipeline\PipelineContext;
 use Waaseyaa\AiPipeline\PipelineStepInterface;
 use Waaseyaa\AiPipeline\StepResult;
@@ -2561,12 +2561,12 @@ Create `tests/Unit/Pipeline/Step/EmbedStepTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Pipeline\Step;
+namespace App\Tests\Unit\Pipeline\Step;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Step\EmbedStep;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Step\EmbedStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -2664,11 +2664,11 @@ Create `src/Pipeline/Step/EmbedStep.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\AiPipeline\PipelineContext;
 use Waaseyaa\AiPipeline\PipelineStepInterface;
 use Waaseyaa\AiPipeline\StepResult;
@@ -2736,14 +2736,14 @@ Create `tests/Unit/Pipeline/CompilationPipelineTest.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Pipeline;
+namespace App\Tests\Unit\Pipeline;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Ingestion\RawDocument;
-use Giiken\Pipeline\CompilationPipeline;
-use Giiken\Pipeline\PipelineException;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Ingestion\RawDocument;
+use App\Pipeline\CompilationPipeline;
+use App\Pipeline\PipelineException;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -2857,16 +2857,16 @@ Create `src/Pipeline/CompilationPipeline.php`:
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline;
+namespace App\Pipeline;
 
-use Giiken\Ingestion\RawDocument;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Pipeline\Step\ClassifyStep;
-use Giiken\Pipeline\Step\EmbedStep;
-use Giiken\Pipeline\Step\LinkStep;
-use Giiken\Pipeline\Step\StructureStep;
-use Giiken\Pipeline\Step\TranscribeStep;
+use App\Ingestion\RawDocument;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Step\ClassifyStep;
+use App\Pipeline\Step\EmbedStep;
+use App\Pipeline\Step\LinkStep;
+use App\Pipeline\Step\StructureStep;
+use App\Pipeline\Step\TranscribeStep;
 use Waaseyaa\AiPipeline\PipelineContext;
 use Waaseyaa\AiPipeline\PipelineStepInterface;
 use Waaseyaa\Entity\EntityRepositoryInterface;
@@ -2934,14 +2934,14 @@ git commit -m "feat: CompilationPipeline — full 5-step orchestrator (#8)"
 
 ---
 
-## Task 7: Register Everything in GiikenServiceProvider
+## Task 7: Register Everything in AppServiceProvider
 
 **Files:**
-- Modify: `src/GiikenServiceProvider.php`
+- Modify: `src/AppServiceProvider.php`
 
-- [ ] **Step 1: Update GiikenServiceProvider**
+- [ ] **Step 1: Update AppServiceProvider**
 
-Add handler and pipeline registration to `src/GiikenServiceProvider.php`:
+Add handler and pipeline registration to `src/AppServiceProvider.php`:
 
 ```php
 <?php
@@ -2950,20 +2950,20 @@ declare(strict_types=1);
 
 namespace Giiken;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Ingestion\Converter\MarkItDownConverter;
-use Giiken\Ingestion\Handler\CsvIngestionHandler;
-use Giiken\Ingestion\Handler\DocumentIngestionHandler;
-use Giiken\Ingestion\Handler\HtmlIngestionHandler;
-use Giiken\Ingestion\Handler\MarkdownIngestionHandler;
-use Giiken\Ingestion\IngestionHandlerRegistry;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Ingestion\Converter\MarkItDownConverter;
+use App\Ingestion\Handler\CsvIngestionHandler;
+use App\Ingestion\Handler\DocumentIngestionHandler;
+use App\Ingestion\Handler\HtmlIngestionHandler;
+use App\Ingestion\Handler\MarkdownIngestionHandler;
+use App\Ingestion\IngestionHandlerRegistry;
 use Waaseyaa\Entity\EntityType;
 use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
 use Waaseyaa\Routing\WaaseyaaRouter;
 
-final class GiikenServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
@@ -3014,8 +3014,8 @@ Expected: All tests PASS.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/GiikenServiceProvider.php
-git commit -m "feat: register ingestion handlers in GiikenServiceProvider (#5, #6)"
+git add src/AppServiceProvider.php
+git commit -m "feat: register ingestion handlers in AppServiceProvider (#5, #6)"
 ```
 
 ---

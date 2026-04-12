@@ -7,7 +7,7 @@ This document describes how a request moves through Giiken at runtime, where app
 - App: `giiken`
 - Framework: `waaseyaa/*`
 - Entrypoint: `public/index.php`
-- Primary app integration point: `src/GiikenServiceProvider.php`
+- Primary app integration point: `src/AppServiceProvider.php`
 
 ## 1. Boot Lifecycle
 
@@ -15,10 +15,11 @@ This document describes how a request moves through Giiken at runtime, where app
 
 `public/index.php`:
 
-1. Loads Composer autoloader.
-2. Loads `.env` with `Symfony Dotenv` (fails fast with HTTP 500 on parse/path error).
-3. Instantiates `Waaseyaa\Foundation\Kernel\HttpKernel` with project root.
-4. Calls `$kernel->handle()` and then `$response->send()`.
+1. **CLI-server static file guard:** When running under PHP's built-in server (`PHP_SAPI === 'cli-server'`), checks if the request maps to an existing file on disk and returns `false` to let the server serve it directly. No effect on production servers.
+2. Loads Composer autoloader.
+3. Loads `.env` with `Symfony Dotenv` (fails fast with HTTP 500 on parse/path error).
+4. Instantiates `Waaseyaa\Foundation\Kernel\HttpKernel` with project root.
+5. Calls `$kernel->handle()` and then `$response->send()`.
 
 ### 1.2 Kernel Boot Sequence
 
@@ -41,10 +42,10 @@ Inside `HttpKernel::handle()` -> `AbstractKernel::boot()`:
 
 ### 1.3 Where Giiken Enters
 
-The first Giiken app-level class in normal boot is `Giiken\GiikenServiceProvider`:
+The first Giiken app-level class in normal boot is `App\AppServiceProvider`:
 
 - `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
-- `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `Giiken\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
+- `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, dev `NullEmbeddingProvider` / `NullLlmProvider`, and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `App\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
 - `register()` re-binds `InertiaFullPageRendererInterface` with a project-root-based `ViteAssetManager` (`public/build` manifest or `VITE_DEV_SERVER`), sets `Inertia::setVersion('giiken')`, and refreshes `Inertia::setRenderer(...)` with a custom template closure that rewrites the data-page attribute from `data-page="true"` to `data-page="app"` so Inertia v2's client-side reader (`script[data-page="app"]`) actually finds the initial page object — workaround for waaseyaa/framework#1227
 - Frontend bundle: Vite entry `resources/js/app.ts`, production output under `public/build` (`npm run build`); set `VITE_DEV_SERVER` (e.g. `http://127.0.0.1:5173`) when using `npm run dev` for HMR
 - `commands()` contributes CLI commands (`giiken:seed:test-community`)
@@ -78,7 +79,7 @@ After boot, `HttpKernel::serveHttpRequest()` executes:
 
 ### 2.2 App Route Registration
 
-App routes are added through `GiikenServiceProvider::routes(...)`, including:
+App routes are added through `AppServiceProvider::routes(...)`, including:
 
 - Public landing (Inertia): `GET` `/` → `Discover` page (`HomeController::discover`)
 - Session HTML auth (public): `GET`/`POST` `/login`, `GET` `/logout`
@@ -121,7 +122,7 @@ Controllers should guard optional services explicitly and return `bootError` pro
 
 ### 3.1 Entity Registration
 
-Entity types are declared in `GiikenServiceProvider::register()` and attached to `EntityTypeManager`.
+Entity types are declared in `AppServiceProvider::register()` and attached to `EntityTypeManager`.
 
 ### 3.2 Repository Access
 
@@ -162,7 +163,7 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetim
 
 ### 3.2.6 Integration tests
 
-- `tests/Integration/` boots `HttpKernel` with `WAASEYAA_DB=:memory:`, runs app migrations, and asserts real repository hydration, casts, and round-trips (`ContentEntitySqlIntegrationTest`, `GiikenKernelIntegrationTestCase`). Composer **`autoload-dev`** maps `Giiken\Tests\` → `tests/` for PHPUnit.
+- `tests/Integration/` boots `HttpKernel` with `WAASEYAA_DB=:memory:`, runs app migrations, and asserts real repository hydration, casts, and round-trips (`ContentEntitySqlIntegrationTest`, `GiikenKernelIntegrationTestCase`). Composer **`autoload-dev`** maps `App\Tests\` → `tests/` for PHPUnit.
 - `ContentEntitySqlIntegrationTest` also covers `EntityInstantiator` re-hydration for all three entity types, SSR-style `<time datetime="">` formatting from ISO timestamps, `set('updated_at')` → ISO-8601 in `toArray()`, raw-SQL corrupt `wiki_lint_report.findings` normalization on load, and `toArray()` normalization after repository round-trips (enums, timestamps, JSON list columns).
 
 ### 3.3 Query + Pipeline Flow
@@ -173,7 +174,7 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetim
 - `DiscoveryController::search` pulls the user-facing search term from the `q` query-string parameter (matching the `SearchInput.vue` submit contract and `Pagination.vue` page links), constructs a `SearchQuery(query, communityId, page)`, calls `SearchService::search`, and ships `query` + `results` as Inertia props for `Pages/Discovery/Search.vue`. Empty `q` intentionally falls through to `SearchService::recentItems` so the page renders the full community feed.
 - `SearchService::hybridSearch` tokenizes multi-word queries before hitting FTS to work around `Waaseyaa\Search\Fts5SearchProvider::escapeQuery`, which quotes each term and hands them to FTS5 MATCH as an implicit AND. The tokenizer is locale-aware (see waaseyaa/giiken#67): it always drops empty tokens, but the English stopword list is applied only when `SearchQuery::$locale` is null or `'en'`. Non-English locales keep every non-empty token so Indigenous-language queries are not silently eroded. The length floor is 1, not 2, since FTS5 handles single-character tokens and short stem words are meaningful across several Indigenous languages. After tokenization the service issues one FTS `SearchRequest` per surviving term and merges the per-term hits by keeping each doc's best raw score, then adds a linear "matched-more-terms-wins" bonus (`SearchService::MULTI_TERM_MATCH_BONUS * (distinct_terms_matched - 1)`) before min-max normalization so documents hit by more of the query outrank documents hit by fewer with a comparable per-term score (see waaseyaa/giiken#68). Queries that tokenize to zero terms (pure stopwords under an English locale) fall back to a single-shot pass of the original string so the vendor escaper sees exactly what it would have seen pre-tokenization. `DiscoveryController::search` and `::ask` both pass `$community->locale()` into the `SearchQuery` so the tokenizer knows which path to take. The shared prelude (build `InboundHttpRequest`, pull `communitySlug` + `q`, look up the community) lives in the private `DiscoveryController::resolveCommunityContext` helper so both methods lead with a single line (waaseyaa/giiken#71, behavior-neutral).
 - `DiscoveryController::ask` reads the user's question from the same `q` query-string parameter (`SearchInput.vue` routes long or `?`-ending input to `/{slug}/ask` with key `q`), hands it to `QaServiceInterface::ask`, then calls `SearchService::search` with the question as the search term to build a related-items sidebar. The controller ships `question` (the original `q` value), `answer`, `citations` (each with `itemId`, `title`, `excerpt`, `knowledgeType`), `noRelevantItems`, and `relatedItems` as Inertia props for `Pages/Discovery/Ask.vue`. Ask.vue hands `answer` + `citations` + `noRelevantItems` to `Components/AnswerPanel.vue`, which parses `[N]` markers into anchored `<sup>` elements pointing at matching `#citation-N` cards rendered by `Components/CitationCard.vue`. When both `answer` is empty and `citations` is empty, or when `noRelevantItems` is true, `Components/NoAnswerState.vue` is rendered instead. Related items still render below via the existing `KnowledgeCard`.
-- `ManagementController::ingestUpload` (`POST /{communitySlug}/manage/ingestion`) handles multipart file uploads from `Pages/Management/Ingestion.vue`. The controller reads `$httpRequest->files->get('file')` as a Symfony `UploadedFile`, then calls `IngestionHandlerRegistry::handle()` with the file's pathname, MIME type, original filename, and the resolved community. The registry dispatches to the first registered handler whose `supports($mime)` returns true. Five handlers are wired in `GiikenServiceProvider::registerIngestionHandlers`: `MarkdownIngestionHandler`, `CsvIngestionHandler`, `HtmlIngestionHandler`, `DocumentIngestionHandler`, and `MediaIngestionHandler`. All five depend on a single `FileRepositoryInterface` binding (`Waaseyaa\Media\LocalFileRepository` rooted at `storage/media/`); the CSV/HTML/Document handlers also depend on `FileConverterInterface` (`MarkItDownConverter` wrapping `storage/markitdown-venv/bin/markitdown`); the Media handler additionally depends on `QueueInterface` (`Waaseyaa\Queue\SyncQueue`) so audio/video uploads enqueue a no-op `TranscribeJob` placeholder. On success the controller ships a `uploadResult` Inertia prop (original filename, MIME, media id, metadata); on failure (missing file, no matching handler, handler-level `IngestionException`) it ships `uploadError` instead. See waaseyaa/giiken#39.
+- `ManagementController::ingestUpload` (`POST /{communitySlug}/manage/ingestion`) handles multipart file uploads from `Pages/Management/Ingestion.vue`. The controller reads `$httpRequest->files->get('file')` as a Symfony `UploadedFile`, then calls `IngestionHandlerRegistry::handle()` with the file's pathname, MIME type, original filename, and the resolved community. The registry dispatches to the first registered handler whose `supports($mime)` returns true. Five handlers are wired in `AppServiceProvider::registerIngestionHandlers`: `MarkdownIngestionHandler`, `CsvIngestionHandler`, `HtmlIngestionHandler`, `DocumentIngestionHandler`, and `MediaIngestionHandler`. All five depend on a single `FileRepositoryInterface` binding (`Waaseyaa\Media\LocalFileRepository` rooted at `storage/media/`); the CSV/HTML/Document handlers also depend on `FileConverterInterface` (`MarkItDownConverter` wrapping `storage/markitdown-venv/bin/markitdown`); the Media handler additionally depends on `QueueInterface` (`Waaseyaa\Queue\SyncQueue`) so audio/video uploads enqueue a no-op `TranscribeJob` placeholder. On success the controller ships a `uploadResult` Inertia prop (original filename, MIME, media id, metadata); on failure (missing file, no matching handler, handler-level `IngestionException`) it ships `uploadError` instead. See waaseyaa/giiken#39.
 - `KnowledgeItemRepository::save` works around two framework quirks to keep FTS in sync: (1) after `Waaseyaa\EntityRepository::save` dispatches `POST_SAVE`, `SearchIndexSubscriber` indexes the entity while it still has a null auto-increment id, producing a stale `document_id` of `knowledge_item:`; and (2) `SearchService::hybridSearch` needs the real integer id to look items up. The repository reloads the new entity by uuid, calls `Fts5SearchIndexer::remove('knowledge_item:')` to scrub the stale empty-id row, then re-indexes the reloaded copy. `SearchService::hybridSearch` also casts the `array_keys($scores)` id back to string before calling `$this->repository->find()`, since PHP coerces numeric-string array keys to int. The `remove('knowledge_item:')` scrub assumes a single writer — in a concurrent setup worker A could scrub the empty-suffix row worker B just wrote before B re-indexes. Giiken is single-process SQLite today so this is latent, and the whole workaround goes away when the framework back-fills auto-increment ids (waaseyaa/giiken#57, tracking comment at waaseyaa/giiken#72).
 
 ## 4. Failure Lifecycle
@@ -197,7 +198,7 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetim
 
 Primary extension points for app work:
 
-- `src/GiikenServiceProvider.php`
+- `src/AppServiceProvider.php`
   - service registration
   - entity type registration
   - route registration
@@ -213,7 +214,7 @@ Keep these true during refactoring:
 1. `public/index.php` always sends the response (`$response->send()`).
 2. Controllers keep the active SSR dispatch signature (`array $params`, `array $query`, `AccountInterface`, `HttpRequest`) and return `Response`.
 3. Optional service dependencies are handled with explicit guard returns (no implicit null behavior).
-4. `GiikenServiceProvider` remains the single source of app route/entity registration.
+4. `AppServiceProvider` remains the single source of app route/entity registration.
 5. Boot-time failures remain deterministic and observable (log + stable error response path).
 
 ## 7. Refactor Impact Matrix
@@ -221,7 +222,7 @@ Keep these true during refactoring:
 | Area | Likely Impact | Verify With |
 |---|---|---|
 | `public/index.php` | global boot and response emission | smoke test `/`, non-zero body |
-| `src/GiikenServiceProvider.php` | routes, entity types, DI bindings, CLI commands | route smoke tests + boot + `waaseyaa list` / migrate + seed |
+| `src/AppServiceProvider.php` | routes, entity types, DI bindings, CLI commands | route smoke tests + boot + `waaseyaa list` / migrate + seed |
 | `migrations/*.php` | SQLite schema for app entities | `bin/waaseyaa migrate` + repository integration |
 | `src/Http/Controller/*` | SSR dispatch and Inertia props | unit tests + route smoke tests |
 | `src/Entity/*` and repositories | data shape, persistence behavior | unit tests + integration tests |

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
 /**
  * @param string[] $knowledgeTypeValues Empty = use each report type's default filter only.

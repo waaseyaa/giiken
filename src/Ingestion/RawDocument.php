@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion;
+namespace App\Ingestion;
 
 final readonly class RawDocument
 {

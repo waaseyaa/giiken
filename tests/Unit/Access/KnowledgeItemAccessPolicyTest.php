@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Access;
+namespace App\Tests\Unit\Access;
 
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;

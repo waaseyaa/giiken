@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
 final readonly class DateRange
 {

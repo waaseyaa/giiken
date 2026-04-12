@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion;
+namespace App\Ingestion;
 
-use Giiken\Entity\Community\Community;
+use App\Entity\Community\Community;
 
 final class IngestionHandlerRegistry
 {

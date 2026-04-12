@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Handler;
+namespace App\Tests\Unit\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Handler\MarkdownIngestionHandler;
+use App\Entity\Community\Community;
+use App\Ingestion\Handler\MarkdownIngestionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

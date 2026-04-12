@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Wiki;
+namespace App\Tests\Unit\Wiki;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Wiki\Check\BrokenLinkCheck;
-use Giiken\Wiki\Check\LintCheckInterface;
-use Giiken\Wiki\Check\OrphanPageCheck;
-use Giiken\Wiki\WikiLintJob;
-use Giiken\Wiki\WikiLintReport;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Wiki\Check\BrokenLinkCheck;
+use App\Wiki\Check\LintCheckInterface;
+use App\Wiki\Check\OrphanPageCheck;
+use App\Wiki\WikiLintJob;
+use App\Wiki\WikiLintReport;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
