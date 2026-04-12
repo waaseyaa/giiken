@@ -31,7 +31,7 @@ This is the real source of the `200 empty body` response. PHP's built-in server 
 
 `entity-storage/SqlSchemaHandler::ensureTable()` (entity-storage/src/SqlSchemaHandler.php:31) can build tables from an `EntityType` spec, but nothing calls it automatically at boot. The framework's `Migrator` / `MigrationLoader` (foundation/src/Migration/) discovers migrations from `{basePath}/migrations/*.php` and from each package manifest, and `vendor/bin/waaseyaa migrate` already runs them. Giiken has no `migrations/` directory.
 
-### 4. `GiikenServiceProvider::register()` binds nothing
+### 4. `AppServiceProvider::register()` binds nothing
 
 The DI container is already available — the base `ServiceProvider` class exposes `singleton()` and `bind()` (foundation/src/ServiceProvider/ServiceProvider.php). The service provider just has a TODO block listing every service that needs wiring:
 
@@ -93,7 +93,7 @@ A `Waaseyaa\Foundation\Migration\Migration` whose `up()` iterates every register
 
 **Open question addressed at plan-writing time:** The framework's `Migration` load pattern loads files via `require` as plain factories. The migration will need access to `EntityTypeManager` + `SqlSchemaHandler` at `up()` time. If the framework has no clean pattern for this, PR A grows by one class: `Waaseyaa\Foundation\Migration\EntitySchemaMigration` base class that receives the manager/handler via `setContext()` from the `Migrator`. See Risk A.
 
-**2c. `GiikenServiceProvider::register()` — real service wiring.**
+**2c. `AppServiceProvider::register()` — real service wiring.**
 Replace the TODO block with bindings. Final interfaces confirmed while writing the plan; expected shape:
 
 ```php
@@ -106,26 +106,26 @@ $this->singleton(KnowledgeItemRepositoryInterface::class, fn () =>
 $this->singleton(SearchProviderInterface::class, fn () =>
     new Fts5SearchProvider($this->kernelResolver(DatabaseInterface::class)));
 
-$this->singleton(Giiken\Pipeline\Provider\EmbeddingProviderInterface::class, fn () =>
+$this->singleton(App\Pipeline\Provider\EmbeddingProviderInterface::class, fn () =>
     new FakeEmbeddingAdapter(new \Waaseyaa\AiVector\Testing\FakeEmbeddingProvider()));
 
-$this->singleton(Giiken\Pipeline\Provider\LlmProviderInterface::class, fn () =>
+$this->singleton(App\Pipeline\Provider\LlmProviderInterface::class, fn () =>
     new NullLlmAdapter(new \Waaseyaa\AiAgent\Provider\NullLlmProvider()));
 
 $this->singleton(SearchService::class, fn () => new SearchService(
     $this->resolve(SearchProviderInterface::class),
-    $this->resolve(Giiken\Pipeline\Provider\EmbeddingProviderInterface::class),
+    $this->resolve(App\Pipeline\Provider\EmbeddingProviderInterface::class),
     new KnowledgeItemAccessPolicy(),
     $this->resolve(KnowledgeItemRepositoryInterface::class),
 ));
 
 $this->singleton(QaServiceInterface::class, fn () => new QaService(
     $this->resolve(SearchService::class),
-    $this->resolve(Giiken\Pipeline\Provider\LlmProviderInterface::class),
+    $this->resolve(App\Pipeline\Provider\LlmProviderInterface::class),
 ));
 
 // ReportService, ExportService, ImportService follow the same pattern — their
-// constructor signatures are documented in src/GiikenServiceProvider.php's
+// constructor signatures are documented in src/AppServiceProvider.php's
 // existing Phase 3 TODO block and will be wired verbatim. Elided here for brevity.
 $this->singleton(ReportService::class, /* see TODO block */);
 $this->singleton(ExportService::class, /* see TODO block */);
@@ -137,10 +137,10 @@ Two tiny Giiken-local adapter classes in `src/Pipeline/Provider/Adapter/` bridge
 - `FakeEmbeddingAdapter` — wraps `\Waaseyaa\AiVector\Testing\FakeEmbeddingProvider`
 - `NullLlmAdapter` — wraps `\Waaseyaa\AiAgent\Provider\NullLlmProvider`
 
-Each is ~20 lines, real, not a stub. They exist because Giiken chose to define its own provider interfaces in `Giiken\Pipeline\Provider\` rather than depending on framework interfaces directly — the adapters are the bridge.
+Each is ~20 lines, real, not a stub. They exist because Giiken chose to define its own provider interfaces in `App\Pipeline\Provider\` rather than depending on framework interfaces directly — the adapters are the bridge.
 
 **2d. `src/Console/SeedTestCommunityCommand.php`.**
-A real Symfony console command (`giiken:seed:test-community`), registered via `GiikenServiceProvider::commands()`, that:
+A real Symfony console command (`giiken:seed:test-community`), registered via `AppServiceProvider::commands()`, that:
 
 - Builds a `Community` entity with `slug='test-community'`, `name='Test Community'`, a default `WikiSchema` (default_language='en', all five `KnowledgeType` cases enabled, default llm_instructions).
 - Saves via `CommunityRepository`.
@@ -197,7 +197,7 @@ packages/ai-agent/tests/Unit/Provider/NullLlmProviderTest.php (new)
 ```
 public/index.php                                                   (new, via make:public)
 migrations/001_ensure_entity_tables.php                            (new)
-src/GiikenServiceProvider.php                                      (modify: delete TODO block, add register bindings + commands())
+src/AppServiceProvider.php                                      (modify: delete TODO block, add register bindings + commands())
 src/Pipeline/Provider/Adapter/FakeEmbeddingAdapter.php             (new, ~20 lines)
 src/Pipeline/Provider/Adapter/NullLlmAdapter.php                   (new, ~20 lines)
 src/Console/SeedTestCommunityCommand.php                           (new)
@@ -223,7 +223,7 @@ All deferred items have GitHub issues filed so nothing is lost:
 
 **Risk A — `Migration` load pattern.** The framework loads migrations via `require` as plain factories. The migration in 2b needs `EntityTypeManager` and `SqlSchemaHandler` at `up()` time. If no clean pattern exists, PR A grows by one class: a `Waaseyaa\Foundation\Migration\EntitySchemaMigration` base that the `Migrator` injects context into before calling `up()`. Mitigation: verify the pattern during plan writing; if uncertain, split Giiken's migration into "raw SQL" (schemas hard-coded) as a safe fallback.
 
-**Risk B — Giiken vs framework provider interfaces.** `Giiken\Pipeline\Provider\EmbeddingProviderInterface` and `LlmProviderInterface` are Giiken-local interfaces, not the framework's. The adapter approach in 2c handles this cleanly, but it does mean the framework's `NullLlmProvider` cannot be bound directly — it's always wrapped. Accepted as a cost of Giiken owning its own interfaces.
+**Risk B — Giiken vs framework provider interfaces.** `App\Pipeline\Provider\EmbeddingProviderInterface` and `LlmProviderInterface` are Giiken-local interfaces, not the framework's. The adapter approach in 2c handles this cleanly, but it does mean the framework's `NullLlmProvider` cannot be bound directly — it's always wrapped. Accepted as a cost of Giiken owning its own interfaces.
 
 **Risk C — `Fts5SearchProvider` may not exist.** Investigation saw `SearchProviderInterface` referenced in Giiken's `SearchService` constructor but did not confirm a concrete `Fts5SearchProvider` class ships in `waaseyaa/search`. If the concrete class is missing, options:
 

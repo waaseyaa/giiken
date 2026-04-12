@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Tests\Unit\Pipeline;
+namespace App\Tests\Unit\Pipeline;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Ingestion\RawDocument;
-use Giiken\Pipeline\CompilationPipeline;
-use Giiken\Pipeline\PipelineException;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Ingestion\RawDocument;
+use App\Pipeline\CompilationPipeline;
+use App\Pipeline\PipelineException;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

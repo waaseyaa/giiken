@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Integration\Http;
+namespace App\Tests\Integration\Http;
 
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Test;

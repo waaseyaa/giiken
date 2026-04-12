@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Export;
+namespace App\Export;
 
-use Giiken\Entity\Community\Community;
+use App\Entity\Community\Community;
 use Waaseyaa\Access\AccountInterface;
 
 interface ExportServiceInterface

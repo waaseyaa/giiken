@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query;
+namespace App\Tests\Unit\Query;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Query\QaService;
-use Giiken\Query\SearchResultItem;
-use Giiken\Query\SearchResultSet;
-use Giiken\Query\SearchService;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Query\QaService;
+use App\Query\SearchResultItem;
+use App\Query\SearchResultSet;
+use App\Query\SearchService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;

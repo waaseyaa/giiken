@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Controller;
+namespace App\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Http\Inertia\InertiaHttpResponder;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Http\Inertia\InertiaHttpResponder;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;

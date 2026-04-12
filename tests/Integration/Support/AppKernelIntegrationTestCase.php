@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Integration\Support;
+namespace App\Tests\Integration\Support;
 
-use Giiken\GiikenServiceProvider;
+use App\Provider\AppServiceProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use Waaseyaa\Database\DatabaseInterface;
@@ -20,7 +20,7 @@ use Waaseyaa\Foundation\Kernel\HttpKernel;
 /**
  * Boots the real app kernel against :memory SQLite, runs pending migrations, and exposes helpers.
  */
-abstract class GiikenKernelIntegrationTestCase extends TestCase
+abstract class AppKernelIntegrationTestCase extends TestCase
 {
     private static string $projectRoot;
     private static HttpKernel $kernel;
@@ -69,15 +69,15 @@ abstract class GiikenKernelIntegrationTestCase extends TestCase
         return self::$kernel;
     }
 
-    protected static function giikenProvider(): GiikenServiceProvider
+    protected static function giikenProvider(): AppServiceProvider
     {
         foreach (self::kernel()->getProviders() as $provider) {
-            if ($provider instanceof GiikenServiceProvider) {
+            if ($provider instanceof AppServiceProvider) {
                 return $provider;
             }
         }
 
-        self::fail('GiikenServiceProvider not registered');
+        self::fail('AppServiceProvider not registered');
     }
 
     protected static function entityTypeManager(): EntityTypeManager

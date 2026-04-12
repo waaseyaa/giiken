@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Entity;
+namespace App\Entity;
 
 interface HasCommunity
 {

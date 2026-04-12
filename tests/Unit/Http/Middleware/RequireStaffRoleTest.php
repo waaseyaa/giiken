@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Http\Middleware;
+namespace App\Tests\Unit\Http\Middleware;
 
-use Giiken\Http\Middleware\RequireStaffRole;
+use App\Http\Middleware\RequireStaffRole;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

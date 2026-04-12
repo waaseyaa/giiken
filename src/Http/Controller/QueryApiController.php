@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Controller;
+namespace App\Http\Controller;
 
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Query\QaServiceInterface;
-use Giiken\Query\Report\ReportRequest;
-use Giiken\Query\Report\ReportServiceInterface;
-use Giiken\Query\SynthesisService;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Query\QaServiceInterface;
+use App\Query\Report\ReportRequest;
+use App\Query\Report\ReportServiceInterface;
+use App\Query\SynthesisService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;

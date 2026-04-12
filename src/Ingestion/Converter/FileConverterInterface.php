@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Converter;
+namespace App\Ingestion\Converter;
 
 interface FileConverterInterface
 {

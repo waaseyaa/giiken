@@ -44,12 +44,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Giiken\\": "src/"
+            "App\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Giiken\\Tests\\": "tests/"
+            "App\\Tests\\": "tests/"
         }
     },
     "config": {
@@ -80,7 +80,7 @@
         },
         "waaseyaa": {
             "providers": [
-                "Giiken\\GiikenServiceProvider"
+                "App\\Provider\\AppServiceProvider"
             ]
         }
     },

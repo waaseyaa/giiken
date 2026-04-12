@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion;
+namespace App\Tests\Unit\Ingestion;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\FileIngestionHandlerInterface;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\IngestionHandlerRegistry;
-use Giiken\Ingestion\RawDocument;
+use App\Entity\Community\Community;
+use App\Ingestion\FileIngestionHandlerInterface;
+use App\Ingestion\IngestionException;
+use App\Ingestion\IngestionHandlerRegistry;
+use App\Ingestion\RawDocument;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

@@ -27,7 +27,7 @@ fi
 # Files that usually imply lifecycle behavior changes.
 WATCH_PATTERNS=(
   "^public/index\\.php$"
-  "^src/GiikenServiceProvider\\.php$"
+  "^src/Provider/AppServiceProvider\\.php$"
   "^src/Http/Controller/.*\\.php$"
   "^src/Http/Middleware/.*\\.php$"
   "^src/Entity/.*\\.php$"

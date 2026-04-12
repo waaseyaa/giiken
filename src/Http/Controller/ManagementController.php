@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Controller;
+namespace App\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Export\ExportServiceInterface;
-use Giiken\Http\Inertia\InertiaHttpResponder;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\IngestionHandlerRegistry;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Export\ExportServiceInterface;
+use App\Http\Inertia\InertiaHttpResponder;
+use App\Ingestion\IngestionException;
+use App\Ingestion\IngestionHandlerRegistry;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;

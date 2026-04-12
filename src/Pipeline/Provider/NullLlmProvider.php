@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Provider;
+namespace App\Pipeline\Provider;
 
 /**
  * Safe default LLM for local dev when no API keys or Ollama are configured.

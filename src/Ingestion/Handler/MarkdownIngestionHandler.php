@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Ingestion\Handler;
+namespace App\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\FileIngestionHandlerInterface;
-use Giiken\Ingestion\IngestionException;
-use Giiken\Ingestion\RawDocument;
+use App\Entity\Community\Community;
+use App\Ingestion\FileIngestionHandlerInterface;
+use App\Ingestion\IngestionException;
+use App\Ingestion\RawDocument;
 use Symfony\Component\Yaml\Yaml;
 use Waaseyaa\Media\File;
 use Waaseyaa\Media\FileRepositoryInterface;

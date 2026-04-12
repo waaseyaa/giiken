@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Entity\KnowledgeItem;
+namespace App\Entity\KnowledgeItem;
 
 use Carbon\CarbonImmutable;
-use Giiken\Entity\HasCommunity;
+use App\Entity\HasCommunity;
 use Waaseyaa\Entity\ContentEntityBase;
 use Waaseyaa\Entity\Hydration\HydratableFromStorageInterface;
 use Waaseyaa\Entity\Hydration\HydrationContext;

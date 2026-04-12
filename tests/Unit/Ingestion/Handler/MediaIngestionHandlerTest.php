@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Ingestion\Handler;
+namespace App\Tests\Unit\Ingestion\Handler;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Ingestion\Handler\MediaIngestionHandler;
-use Giiken\Ingestion\IngestionException;
+use App\Entity\Community\Community;
+use App\Ingestion\Handler\MediaIngestionHandler;
+use App\Ingestion\IngestionException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;

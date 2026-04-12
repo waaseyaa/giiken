@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Provider;
+namespace App\Pipeline\Provider;
 
 /**
  * Dev-friendly embedding + semantic search no-op (vector search returns no hits).

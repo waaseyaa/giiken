@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query\Report;
+namespace App\Tests\Unit\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\Report\DateRange;
-use Giiken\Query\Report\LandBriefReport;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\Report\DateRange;
+use App\Query\Report\LandBriefReport;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

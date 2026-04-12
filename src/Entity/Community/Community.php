@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Entity\Community;
+namespace App\Entity\Community;
 
 use Carbon\CarbonImmutable;
 use Waaseyaa\Entity\ContentEntityBase;

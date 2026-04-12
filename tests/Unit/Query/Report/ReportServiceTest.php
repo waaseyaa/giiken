@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Query\Report;
+namespace App\Tests\Unit\Query\Report;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Query\Report\DateRange;
-use Giiken\Query\Report\GovernanceSummaryReport;
-use Giiken\Query\Report\LandBriefReport;
-use Giiken\Query\Report\LanguageReport;
-use Giiken\Query\Report\ReportService;
+use App\Entity\Community\Community;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Query\Report\DateRange;
+use App\Query\Report\GovernanceSummaryReport;
+use App\Query\Report\LandBriefReport;
+use App\Query\Report\LanguageReport;
+use App\Query\Report\ReportService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;

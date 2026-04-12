@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Http\Controller;
+namespace App\Tests\Unit\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Http\Controller\ManagementController;
-use Giiken\Http\Inertia\InertiaHttpResponder;
-use Giiken\Ingestion\Handler\MediaIngestionHandler;
-use Giiken\Ingestion\IngestionHandlerRegistry;
-use Giiken\Ingestion\Job\TranscribeJob;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Http\Controller\ManagementController;
+use App\Http\Inertia\InertiaHttpResponder;
+use App\Ingestion\Handler\MediaIngestionHandler;
+use App\Ingestion\IngestionHandlerRegistry;
+use App\Ingestion\Job\TranscribeJob;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

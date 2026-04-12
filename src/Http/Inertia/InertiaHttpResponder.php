@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Inertia;
+namespace App\Http\Inertia;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;

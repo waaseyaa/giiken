@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Controller;
+namespace App\Http\Controller;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Http\Inertia\InertiaHttpResponder;
-use Giiken\Query\QaServiceInterface;
-use Giiken\Query\SearchQuery;
-use Giiken\Query\SearchResultSet;
-use Giiken\Query\SearchService;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Http\Inertia\InertiaHttpResponder;
+use App\Query\QaServiceInterface;
+use App\Query\SearchQuery;
+use App\Query\SearchResultSet;
+use App\Query\SearchService;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;

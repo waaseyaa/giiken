@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 
 /**
  * Derives access metadata for a synthesis item from cited knowledge items.

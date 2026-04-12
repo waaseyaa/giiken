@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Wiki;
+namespace App\Wiki;
 
 use Carbon\CarbonImmutable;
 use Waaseyaa\Entity\ContentEntityBase;

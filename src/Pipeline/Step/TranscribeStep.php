@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
 use Waaseyaa\AI\Pipeline\PipelineContext;
 use Waaseyaa\AI\Pipeline\PipelineStepInterface;

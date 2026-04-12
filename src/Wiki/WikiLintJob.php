@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Wiki;
+namespace App\Wiki;
 
-use Giiken\Wiki\Check\LintCheckInterface;
+use App\Wiki\Check\LintCheckInterface;
 use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
 final class WikiLintJob
@@ -20,7 +20,7 @@ final class WikiLintJob
 
     public function handle(): void
     {
-        /** @var list<\Giiken\Entity\KnowledgeItem\KnowledgeItem> $items */
+        /** @var list<\App\Entity\KnowledgeItem\KnowledgeItem> $items */
         $items = $this->repository->findBy([
             'community_id' => $this->communityId,
         ]);

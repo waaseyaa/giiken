@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Pipeline\Provider;
+namespace App\Pipeline\Provider;
 
 interface LlmProviderInterface
 {

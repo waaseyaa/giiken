@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Pipeline\Step;
+namespace App\Pipeline\Step;
 
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
 use Waaseyaa\AI\Pipeline\PipelineContext;
 use Waaseyaa\AI\Pipeline\PipelineStepInterface;
 use Waaseyaa\AI\Pipeline\StepResult;

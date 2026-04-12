@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Export;
+namespace App\Export;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use RuntimeException;
 use Waaseyaa\Access\AccountInterface;
 use ZipArchive;

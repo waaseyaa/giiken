@@ -26,7 +26,7 @@ No production code in the framework calls `new EntityRepository(...)` — only t
 1. Re-assemble all the dependencies inside its own service provider (DRY violation, duplicated plumbing across consumers), or
 2. Drop down to `EntityTypeManager::getStorage()` and bypass the repository layer entirely (losing events, validation, revisions).
 
-For giiken this is the immediate blocker on waaseyaa/giiken#42: `GiikenServiceProvider::register()` cannot cleanly bind `CommunityRepositoryInterface` or `KnowledgeItemRepositoryInterface` without first deciding how to construct the underlying `EntityRepositoryInterface`.
+For giiken this is the immediate blocker on waaseyaa/giiken#42: `AppServiceProvider::register()` cannot cleanly bind `CommunityRepositoryInterface` or `KnowledgeItemRepositoryInterface` without first deciding how to construct the underlying `EntityRepositoryInterface`.
 
 ## Approach
 
@@ -265,7 +265,7 @@ Add a section to `docs/specs/entity-system.md` titled "Wiring per-entity-type re
 - PR merges green into `waaseyaa/framework` main
 - Downstream probe from giiken returns a working repository via the factory without hand-assembling dependencies
 - waaseyaa/framework#1128 is closed
-- `GiikenServiceProvider::register()` can now cleanly bind `CommunityRepositoryInterface` and `KnowledgeItemRepositoryInterface` in a follow-up PR (#42), unblocking the boot-to-browser path
+- `AppServiceProvider::register()` can now cleanly bind `CommunityRepositoryInterface` and `KnowledgeItemRepositoryInterface` in a follow-up PR (#42), unblocking the boot-to-browser path
 
 ## Execution order
 

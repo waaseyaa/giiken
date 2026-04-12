@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Unit\Wiki\Check;
+namespace App\Tests\Unit\Wiki\Check;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Wiki\Check\BrokenLinkCheck;
-use Giiken\Wiki\Check\LintCheckInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Wiki\Check\BrokenLinkCheck;
+use App\Wiki\Check\LintCheckInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

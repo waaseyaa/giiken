@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Giiken is a sovereign indigenous knowledge management platform built on the **Waaseyaa** custom PHP framework. It implements community-based RBAC for multi-tenant knowledge governance.
 
-**PHP:** 8.4+ | **License:** GPL-2.0-or-later | **Namespace:** `Giiken\` (PSR-4)
+**PHP:** 8.4+ | **License:** GPL-2.0-or-later | **Namespace:** `App\` (PSR-4)
 
 ## Boot-to-browser status (as of 2026-04-11)
 
@@ -28,7 +28,7 @@ PHPUnit: 198/198 passing.
 
 - waaseyaa/framework#1125 — cli bin entrypoint, `app.url` default, array-controller normalization (alpha.107).
 - waaseyaa/framework#1127 — foundation→ssr dependency.
-- giiken#42 — `GiikenServiceProvider` provider registrations.
+- giiken#42 — `AppServiceProvider` provider registrations.
 - giiken#43 — entity schema migrations (`community`, `knowledge_item`, `wiki_lint_report`).
 - giiken#44 — `giiken:seed:test-community` console command.
 
@@ -92,7 +92,7 @@ Waaseyaa is a modular PHP framework split into 30+ packages (`waaseyaa/*`). Key 
 
 All domain objects extend `ContentEntityBase`. Properties are accessed via `$this->get('key')` (with `$casts` for enums, datetimes, and JSON lists) — define typed getter methods on top of that. Construct app/test instances with `EntityClass::make([...])` (or the domain constructor for `Community`); use `fromStorage()` when simulating `EntityInstantiator` / SQL hydration. Repositories wrap `EntityRepositoryInterface` with typed query methods and set `updated_at` (ISO-8601) on save.
 
-Three entity types are registered in `GiikenServiceProvider`:
+Three entity types are registered in `AppServiceProvider`:
 - `community` → `Entity\Community\Community` (multi-tenant container, owns a `WikiSchema`)
 - `knowledge_item` → `Entity\KnowledgeItem\KnowledgeItem` (primary domain object, implements `HasCommunity`)
 - `wiki_lint_report` → `Wiki\WikiLintReport` (stores lint findings per community)
@@ -138,13 +138,13 @@ Built-in checks: `BrokenLinkCheck`, `OrphanPageCheck`.
 
 ### Service Provider
 
-`GiikenServiceProvider` registers entity types with `EntityTypeManager` and defines routes via `WaaseyaaRouter`. This is the entry point for adding new entity types or wiring new ingestion handlers.
+`AppServiceProvider` registers entity types with `EntityTypeManager` and defines routes via `WaaseyaaRouter`. This is the entry point for adding new entity types or wiring new ingestion handlers.
 
 ### Lifecycle Documentation Governance
 
 - Canonical runtime flow doc: `docs/architecture/lifecycle.md`
 - CI enforces drift checks via `scripts/check-lifecycle-drift.sh`
-- If lifecycle-impacting files change (`public/index.php`, `src/GiikenServiceProvider.php`, HTTP controllers/middleware, entities/query/pipeline code), update `docs/architecture/lifecycle.md` in the same PR.
+- If lifecycle-impacting files change (`public/index.php`, `src/Provider/AppServiceProvider.php`, HTTP controllers/middleware, entities/query/pipeline code), update `docs/architecture/lifecycle.md` in the same PR.
 
 ## Testing Conventions
 

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Tests\Unit\Pipeline\Step;
+namespace App\Tests\Unit\Pipeline\Step;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Step\EmbedStep;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Step\EmbedStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

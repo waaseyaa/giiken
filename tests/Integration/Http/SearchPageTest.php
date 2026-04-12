@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Tests\Integration\Http;
+namespace App\Tests\Integration\Http;
 
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\Community\WikiSchema;
-use Giiken\Entity\KnowledgeItem\AccessTier;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\GiikenServiceProvider;
-use Giiken\Tests\Integration\Support\GiikenKernelIntegrationTestCase;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\Community\WikiSchema;
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Provider\AppServiceProvider;
+use App\Tests\Integration\Support\AppKernelIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 
 #[CoversNothing]
-final class SearchPageTest extends GiikenKernelIntegrationTestCase
+final class SearchPageTest extends AppKernelIntegrationTestCase
 {
     private static bool $seeded = false;
 
@@ -31,7 +31,7 @@ final class SearchPageTest extends GiikenKernelIntegrationTestCase
             return;
         }
 
-        /** @var GiikenServiceProvider $giiken */
+        /** @var AppServiceProvider $giiken */
         $giiken = self::giikenProvider();
 
         /** @var CommunityRepositoryInterface $communityRepo */

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Http\Middleware;
+namespace App\Http\Middleware;
 
-use Giiken\Access\CommunityRole;
+use App\Access\CommunityRole;
 use Waaseyaa\Access\AccountInterface;
 
 final class RequireStaffRole

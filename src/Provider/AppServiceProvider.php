@@ -2,47 +2,47 @@
 
 declare(strict_types=1);
 
-namespace Giiken;
+namespace App\Provider;
 
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Console\SeedTestCommunityCommand;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\Community\CommunityRepository;
-use Giiken\Entity\Community\CommunityRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepository;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Export\ExportService;
-use Giiken\Export\ExportServiceInterface;
-use Giiken\Http\Controller\DiscoveryController;
-use Giiken\Http\Controller\HomeController;
-use Giiken\Http\Controller\ManagementController;
-use Giiken\Http\Controller\QueryApiController;
-use Giiken\Http\Controller\WebLoginController;
-use Giiken\Http\Controller\WebLogoutController;
-use Giiken\Http\Inertia\InertiaHttpResponder;
-use Giiken\Ingestion\Converter\FileConverterInterface;
-use Giiken\Ingestion\Converter\MarkItDownConverter;
-use Giiken\Ingestion\Handler\CsvIngestionHandler;
-use Giiken\Ingestion\Handler\DocumentIngestionHandler;
-use Giiken\Ingestion\Handler\HtmlIngestionHandler;
-use Giiken\Ingestion\Handler\MarkdownIngestionHandler;
-use Giiken\Ingestion\Handler\MediaIngestionHandler;
-use Giiken\Ingestion\IngestionHandlerRegistry;
-use Giiken\Pipeline\Provider\EmbeddingProviderInterface;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Pipeline\Provider\NullEmbeddingProvider;
-use Giiken\Pipeline\Provider\NullLlmProvider;
-use Giiken\Query\QaService;
-use Giiken\Query\QaServiceInterface;
-use Giiken\Query\Report\GovernanceSummaryReport;
-use Giiken\Query\Report\LandBriefReport;
-use Giiken\Query\Report\LanguageReport;
-use Giiken\Query\Report\ReportService;
-use Giiken\Query\Report\ReportServiceInterface;
-use Giiken\Query\SearchService;
-use Giiken\Query\SynthesisService;
-use Giiken\Wiki\WikiLintReport;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Console\SeedTestCommunityCommand;
+use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepository;
+use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepository;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Export\ExportService;
+use App\Export\ExportServiceInterface;
+use App\Http\Controller\DiscoveryController;
+use App\Http\Controller\HomeController;
+use App\Http\Controller\ManagementController;
+use App\Http\Controller\QueryApiController;
+use App\Http\Controller\WebLoginController;
+use App\Http\Controller\WebLogoutController;
+use App\Http\Inertia\InertiaHttpResponder;
+use App\Ingestion\Converter\FileConverterInterface;
+use App\Ingestion\Converter\MarkItDownConverter;
+use App\Ingestion\Handler\CsvIngestionHandler;
+use App\Ingestion\Handler\DocumentIngestionHandler;
+use App\Ingestion\Handler\HtmlIngestionHandler;
+use App\Ingestion\Handler\MarkdownIngestionHandler;
+use App\Ingestion\Handler\MediaIngestionHandler;
+use App\Ingestion\IngestionHandlerRegistry;
+use App\Pipeline\Provider\EmbeddingProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Provider\NullEmbeddingProvider;
+use App\Pipeline\Provider\NullLlmProvider;
+use App\Query\QaService;
+use App\Query\QaServiceInterface;
+use App\Query\Report\GovernanceSummaryReport;
+use App\Query\Report\LandBriefReport;
+use App\Query\Report\LanguageReport;
+use App\Query\Report\ReportService;
+use App\Query\Report\ReportServiceInterface;
+use App\Query\SearchService;
+use App\Query\SynthesisService;
+use App\Wiki\WikiLintReport;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherContract;
 use Waaseyaa\Database\DatabaseInterface;
@@ -65,7 +65,7 @@ use Waaseyaa\Routing\WaaseyaaRouter;
 use Waaseyaa\Search\SearchIndexerInterface;
 use Waaseyaa\Search\SearchProviderInterface;
 
-final class GiikenServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /**
      * Single-segment paths that must not be treated as community slugs (framework routes, APIs, auth).

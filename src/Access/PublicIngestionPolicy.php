@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Access;
+namespace App\Access;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 use Waaseyaa\Access\AccessPolicyInterface;
 use Waaseyaa\Access\AccessResult;
 use Waaseyaa\Access\AccountInterface;

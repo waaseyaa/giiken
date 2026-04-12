@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
-use Giiken\Access\CommunityRole;
-use Giiken\Access\KnowledgeItemAccessPolicy;
-use Giiken\Entity\Community\Community;
-use Giiken\Entity\KnowledgeItem\KnowledgeItem;
-use Giiken\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
+use App\Access\CommunityRole;
+use App\Access\KnowledgeItemAccessPolicy;
+use App\Entity\Community\Community;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeType;
 use Waaseyaa\Access\AccountInterface;
 
 final class ReportService implements ReportServiceInterface

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query;
+namespace App\Query;
 
-use Giiken\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Provider\LlmProviderInterface;
 use Waaseyaa\Access\AccountInterface;
 
 final class QaService implements QaServiceInterface

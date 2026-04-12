@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Giiken\Query\Report;
+namespace App\Query\Report;
 
-use Giiken\Entity\Community\Community;
+use App\Entity\Community\Community;
 use Waaseyaa\Access\AccountInterface;
 
 interface ReportServiceInterface

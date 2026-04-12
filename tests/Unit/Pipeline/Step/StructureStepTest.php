@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
-namespace Giiken\Tests\Unit\Pipeline\Step;
+namespace App\Tests\Unit\Pipeline\Step;
 
-use Giiken\Entity\KnowledgeItem\KnowledgeType;
-use Giiken\Pipeline\CompilationPayload;
-use Giiken\Pipeline\PipelineException;
-use Giiken\Pipeline\Provider\LlmProviderInterface;
-use Giiken\Pipeline\Step\StructureStep;
+use App\Entity\KnowledgeItem\KnowledgeType;
+use App\Pipeline\CompilationPayload;
+use App\Pipeline\PipelineException;
+use App\Pipeline\Provider\LlmProviderInterface;
+use App\Pipeline\Step\StructureStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
