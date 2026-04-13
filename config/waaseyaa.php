@@ -78,6 +78,9 @@ return [
         'ollama_model' => getenv('WAASEYAA_OLLAMA_MODEL') ?: 'nomic-embed-text',
         'openai_api_key' => getenv('OPENAI_API_KEY') ?: '',
         'openai_embedding_model' => getenv('WAASEYAA_OPENAI_EMBEDDING_MODEL') ?: 'text-embedding-3-small',
+        'llm_provider' => getenv('WAASEYAA_LLM_PROVIDER') ?: '',
+        'anthropic_api_key' => getenv('ANTHROPIC_API_KEY') ?: '',
+        'anthropic_model' => getenv('WAASEYAA_ANTHROPIC_MODEL') ?: 'claude-sonnet-4-6',
         'embedding_fields' => [
             'knowledge_item' => ['title', 'body', 'summary'],
         ],

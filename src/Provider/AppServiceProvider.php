@@ -32,6 +32,7 @@ use App\Ingestion\IngestionHandlerRegistry;
 use App\Pipeline\Provider\EmbeddingProviderInterface;
 use App\Pipeline\Provider\LlmProviderInterface;
 use App\Pipeline\Provider\NullEmbeddingProvider;
+use App\Pipeline\Provider\AnthropicLlmProvider;
 use App\Pipeline\Provider\NullLlmProvider;
 use App\Query\QaService;
 use App\Query\QaServiceInterface;
@@ -127,7 +128,20 @@ final class AppServiceProvider extends ServiceProvider
         });
 
         $this->singleton(EmbeddingProviderInterface::class, static fn (): EmbeddingProviderInterface => new NullEmbeddingProvider());
-        $this->singleton(LlmProviderInterface::class, static fn (): LlmProviderInterface => new NullLlmProvider());
+        $this->singleton(LlmProviderInterface::class, static function (): LlmProviderInterface {
+            $provider = getenv('WAASEYAA_LLM_PROVIDER') ?: '';
+            $apiKey = getenv('ANTHROPIC_API_KEY') ?: '';
+
+            if ($provider === 'anthropic' && $apiKey !== '') {
+                $model = getenv('WAASEYAA_ANTHROPIC_MODEL') ?: 'claude-sonnet-4-6';
+
+                return new AnthropicLlmProvider(
+                    new \Waaseyaa\AI\Agent\Provider\AnthropicProvider($apiKey, $model),
+                );
+            }
+
+            return new NullLlmProvider();
+        });
         $this->singleton(KnowledgeItemAccessPolicy::class, static fn (): KnowledgeItemAccessPolicy => new KnowledgeItemAccessPolicy());
 
         $this->singleton(CommunityRepositoryInterface::class, function (): CommunityRepositoryInterface {
