@@ -266,7 +266,10 @@ final class AppServiceProvider extends ServiceProvider
      */
     private function registerInertiaViteRenderer(): void
     {
-        $projectRoot = dirname(__DIR__);
+        // Go up two levels from src/Provider/ to the repo root so the
+        // Vite manifest at public/build/.vite/manifest.json resolves
+        // regardless of PHP's cwd (serve, phpunit, cli).
+        $projectRoot = dirname(__DIR__, 2);
         $rawDev = $_ENV['VITE_DEV_SERVER'] ?? getenv('VITE_DEV_SERVER');
         $devServerUrl = is_string($rawDev) && $rawDev !== '' ? $rawDev : null;
 
