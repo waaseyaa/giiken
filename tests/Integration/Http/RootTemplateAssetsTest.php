@@ -28,8 +28,8 @@ final class RootTemplateAssetsTest extends TestCase
     private static string $projectRoot;
     private static HttpKernel $kernel;
     private static string $manifestPath;
-    private static ?string $manifestBackup = null;
-    private static bool $manifestDirCreated = false;
+    private static bool $stubManifestWritten = false;
+    private static bool $stubManifestDirCreated = false;
 
     public static function setUpBeforeClass(): void
     {
@@ -60,7 +60,7 @@ final class RootTemplateAssetsTest extends TestCase
             unlink($cachePath);
         }
 
-        self::restoreManifest();
+        self::cleanupStubManifest();
     }
 
     #[Test]
@@ -92,20 +92,32 @@ final class RootTemplateAssetsTest extends TestCase
         );
     }
 
+    /**
+     * Ensure a Vite manifest exists for the duration of the test.
+     *
+     * If a real `npm run build` already produced one, leave it strictly
+     * alone — no read, no backup, no write — so a torn cleanup cannot
+     * corrupt the developer's build. Only when no manifest exists (CI,
+     * fresh checkout) do we write a stub. The stub is created atomically
+     * (tmp + rename) and torn down via both `tearDownAfterClass()` and
+     * a `register_shutdown_function()` failsafe so a fatal/SIGINT cannot
+     * leave it behind.
+     */
     private static function stageManifest(): void
     {
         if (is_file(self::$manifestPath)) {
-            self::$manifestBackup = (string) file_get_contents(self::$manifestPath);
             return;
         }
 
         $manifestDir = dirname(self::$manifestPath);
         if (!is_dir($manifestDir)) {
-            mkdir($manifestDir, 0777, true);
-            self::$manifestDirCreated = true;
+            if (!mkdir($manifestDir, 0777, true) && !is_dir($manifestDir)) {
+                self::fail('Could not create manifest directory: ' . $manifestDir);
+            }
+            self::$stubManifestDirCreated = true;
         }
 
-        file_put_contents(self::$manifestPath, (string) json_encode([
+        $payload = (string) json_encode([
             'resources/js/app.ts' => [
                 'file' => 'assets/app-test.js',
                 'name' => 'app',
@@ -113,21 +125,34 @@ final class RootTemplateAssetsTest extends TestCase
                 'isEntry' => true,
                 'css' => ['assets/app-test.css'],
             ],
-        ], JSON_PRETTY_PRINT));
+        ], JSON_PRETTY_PRINT);
+
+        $tmp = self::$manifestPath . '.test.tmp';
+        if (file_put_contents($tmp, $payload) === false) {
+            self::fail('Could not write stub manifest tmp file: ' . $tmp);
+        }
+        if (!rename($tmp, self::$manifestPath)) {
+            @unlink($tmp);
+            self::fail('Could not rename stub manifest into place: ' . self::$manifestPath);
+        }
+        self::$stubManifestWritten = true;
+
+        // Failsafe: if PHPUnit is killed (SIGINT, fatal error) before
+        // tearDownAfterClass() runs, this still removes the stub on exit.
+        register_shutdown_function(static function (): void {
+            self::cleanupStubManifest();
+        });
     }
 
-    private static function restoreManifest(): void
+    private static function cleanupStubManifest(): void
     {
-        if (self::$manifestBackup !== null) {
-            file_put_contents(self::$manifestPath, self::$manifestBackup);
-            return;
+        if (self::$stubManifestWritten && is_file(self::$manifestPath)) {
+            @unlink(self::$manifestPath);
+            self::$stubManifestWritten = false;
         }
-
-        if (is_file(self::$manifestPath)) {
-            unlink(self::$manifestPath);
-        }
-        if (self::$manifestDirCreated && is_dir(dirname(self::$manifestPath))) {
+        if (self::$stubManifestDirCreated && is_dir(dirname(self::$manifestPath))) {
             @rmdir(dirname(self::$manifestPath));
+            self::$stubManifestDirCreated = false;
         }
     }
 
