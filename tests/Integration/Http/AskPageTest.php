@@ -23,8 +23,25 @@ final class AskPageTest extends AppKernelIntegrationTestCase
 {
     private static bool $seeded = false;
 
+    /** @var array<string, string|false> */
+    private static array $savedEnv = [];
+
     public static function setUpBeforeClass(): void
     {
+        // The kernel boots from `.env`. When local dev has
+        // `WAASEYAA_LLM_PROVIDER=anthropic` + `ANTHROPIC_API_KEY=…` set, the
+        // Ask controller makes a real Anthropic call during this test,
+        // which costs money and intermittently 500s (see giiken#92). We do
+        // not assert answer text here, so force the NullLlmProvider fallback
+        // by clearing both vars before the kernel boots. `tearDownAfterClass`
+        // restores whatever was there.
+        self::$savedEnv = [
+            'WAASEYAA_LLM_PROVIDER' => getenv('WAASEYAA_LLM_PROVIDER'),
+            'ANTHROPIC_API_KEY'     => getenv('ANTHROPIC_API_KEY'),
+        ];
+        putenv('WAASEYAA_LLM_PROVIDER=');
+        putenv('ANTHROPIC_API_KEY=');
+
         parent::setUpBeforeClass();
 
         if (self::$seeded) {
@@ -85,6 +102,11 @@ final class AskPageTest extends AppKernelIntegrationTestCase
     {
         self::$seeded = false;
         parent::tearDownAfterClass();
+
+        foreach (self::$savedEnv as $key => $value) {
+            putenv($value === false ? $key : sprintf('%s=%s', $key, $value));
+        }
+        self::$savedEnv = [];
     }
 
     #[Test]
@@ -98,8 +120,9 @@ final class AskPageTest extends AppKernelIntegrationTestCase
         self::assertIsString($props['answer'] ?? null);
         // Multi-word tokenization (see #61) should surface "governance" and
         // return at least one related item + citation from the seeded
-        // Governance overview. Real answer content is still from the stub
-        // LLM provider (#59), so we do not assert answer text.
+        // Governance overview. The LLM is pinned to `NullLlmProvider` for
+        // this test (see setUpBeforeClass / giiken#92), so answer text is
+        // deterministic but intentionally not asserted.
         self::assertGreaterThan(0, $props['relatedItems']['totalHits'] ?? 0);
         self::assertFalse($props['noRelevantItems'] ?? null);
         self::assertGreaterThan(0, count($props['citations'] ?? []));
