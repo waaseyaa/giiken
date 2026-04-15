@@ -259,3 +259,10 @@ After lifecycle-touching changes:
 
 Wiring the mapper (`MapperRegistry` + `NorthCloudServiceProvider` registration) will be a lifecycle-touching change and should update this doc when it lands.
 
+### 2026-04-15 — NorthCloud mapper wired into AppServiceProvider
+
+- `AppServiceProvider::registerNorthCloudMappers()` overrides the package's `MapperRegistry` singleton factory, pre-populating it with `NcHitToKnowledgeItemMapper`.
+- Default community id for NC-sourced items reads from env `GIIKEN_NC_DEFAULT_COMMUNITY_ID`.
+- `NorthCloudServiceProvider` (auto-loaded from `extra.waaseyaa.providers`) contributes the `northcloud:sync` console command and the `NorthCloudClient`, `NcSyncService`, and `NorthCloudSearchProvider` services.
+- No HTTP route or SSR dispatch change. `bin/giiken list` now surfaces `northcloud:sync`; request-lifecycle behavior is unaffected.
+

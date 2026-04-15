@@ -31,6 +31,8 @@ use App\Ingestion\Handler\HtmlIngestionHandler;
 use App\Ingestion\Handler\MarkdownIngestionHandler;
 use App\Ingestion\Handler\MediaIngestionHandler;
 use App\Ingestion\IngestionHandlerRegistry;
+use App\Ingestion\NorthCloud\NcHitToKnowledgeItemMapper;
+use Waaseyaa\NorthCloud\Sync\MapperRegistry;
 use App\Pipeline\Provider\EmbeddingProviderInterface;
 use App\Pipeline\Provider\LlmProviderInterface;
 use App\Pipeline\Provider\NullEmbeddingProvider;
@@ -242,7 +244,37 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->registerIngestionHandlers();
 
+        $this->registerNorthCloudMappers();
+
         $this->registerInertiaViteRenderer();
+    }
+
+    /**
+     * Pre-populate the NorthCloud {@see MapperRegistry} with Giiken's concrete
+     * entity mappers. The registry is created by
+     * {@see \Waaseyaa\NorthCloud\Provider\NorthCloudServiceProvider}; we
+     * override its singleton factory to ship with the app's mappers already
+     * registered, so `northcloud:sync` can find them without a separate boot
+     * hook.
+     *
+     * The default community for NC-sourced items is read from
+     * `GIIKEN_NC_DEFAULT_COMMUNITY_ID`. When unset, the mapper still loads but
+     * will produce items tied to an empty community id — callers should set
+     * the env var before running the sync command against a real DB.
+     */
+    private function registerNorthCloudMappers(): void
+    {
+        $this->singleton(MapperRegistry::class, static function (): MapperRegistry {
+            $registry = new MapperRegistry();
+
+            $defaultCommunityId = (string) (getenv('GIIKEN_NC_DEFAULT_COMMUNITY_ID') ?: '');
+
+            $registry->register(new NcHitToKnowledgeItemMapper(
+                defaultCommunityId: $defaultCommunityId,
+            ));
+
+            return $registry;
+        });
     }
 
     /**
