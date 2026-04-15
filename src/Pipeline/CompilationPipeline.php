@@ -2,6 +2,8 @@
 declare(strict_types=1);
 namespace App\Pipeline;
 
+use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeType;
 use App\Ingestion\RawDocument;
 use App\Pipeline\Provider\EmbeddingProviderInterface;
 use App\Pipeline\Provider\LlmProviderInterface;
@@ -22,14 +24,33 @@ final class CompilationPipeline
         private readonly EntityRepositoryInterface $repository,
     ) {}
 
-    public function compile(RawDocument $document, string $communityId): void
-    {
+    /**
+     * Run the 5-step compilation pipeline and return the populated payload.
+     *
+     * @param AccessTier|null   $accessTier   Override persisted `access_tier`;
+     *                                        defaults to `AccessTier::Public`.
+     * @param KnowledgeType|null $forcedType  Skip `ClassifyStep`'s LLM call
+     *                                        and force this type instead.
+     * @param bool              $dryRun       When true, run every step but do
+     *                                        not persist the `KnowledgeItem`
+     *                                        or store its embedding.
+     */
+    public function compile(
+        RawDocument $document,
+        string $communityId,
+        ?AccessTier $accessTier = null,
+        ?KnowledgeType $forcedType = null,
+        bool $dryRun = false,
+    ): CompilationPayload {
         $payload = new CompilationPayload();
         $payload->markdownContent = $document->markdownContent;
         $payload->mimeType = $document->mimeType;
         $payload->mediaId = $document->mediaId;
         $payload->communityId = $communityId;
         $payload->sourceUrl = $document->metadata['frontmatter']['source'] ?? null;
+        $payload->accessTier = $accessTier ?? AccessTier::Public;
+        $payload->knowledgeType = $forcedType;
+        $payload->dryRun = $dryRun;
 
         $steps = $this->buildSteps();
         $context = new PipelineContext(pipelineId: 'compilation', startedAt: time());
@@ -48,6 +69,8 @@ final class CompilationPipeline
             }
             $input = $result->output;
         }
+
+        return $payload;
     }
 
     /** @return PipelineStepInterface[] */
