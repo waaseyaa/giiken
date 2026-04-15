@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Provider;
 
 use App\Access\KnowledgeItemAccessPolicy;
+use App\Console\IngestFileCommand;
 use App\Console\SeedTestCommunityCommand;
+use App\Pipeline\CompilationPipeline;
 use App\Entity\Community\Community;
 use App\Entity\Community\CommunityRepository;
 use App\Entity\Community\CommunityRepositoryInterface;
@@ -218,6 +220,26 @@ final class AppServiceProvider extends ServiceProvider
             );
         });
 
+        $this->singleton(CompilationPipeline::class, function (): CompilationPipeline {
+            $etm        = $this->resolve(EntityTypeManager::class);
+            $database   = $this->resolve(DatabaseInterface::class);
+            $dispatcher = $this->resolve(PsrEventDispatcherInterface::class);
+            $driver     = new SqlStorageDriver(new SingleConnectionResolver($database), 'id');
+            $entityRepo = new WaaseyaaEntityRepository(
+                $etm->getDefinition('knowledge_item'),
+                $driver,
+                $dispatcher,
+                revisionDriver: null,
+                database: $database,
+            );
+
+            return new CompilationPipeline(
+                $this->resolve(LlmProviderInterface::class),
+                $this->resolve(EmbeddingProviderInterface::class),
+                $entityRepo,
+            );
+        });
+
         $this->registerIngestionHandlers();
 
         $this->registerInertiaViteRenderer();
@@ -233,7 +255,11 @@ final class AppServiceProvider extends ServiceProvider
      */
     private function registerIngestionHandlers(): void
     {
-        $projectRoot = dirname(__DIR__);
+        // Two levels up from src/Provider/ to the repo root — same
+        // computation as registerInertiaViteRenderer(); getting this
+        // wrong writes media files under src/storage/ instead of the
+        // real storage/ directory. See giiken#90 for the sister bug.
+        $projectRoot = dirname(__DIR__, 2);
 
         $this->singleton(FileRepositoryInterface::class, static function () use ($projectRoot): FileRepositoryInterface {
             return new LocalFileRepository($projectRoot . '/storage/media');
@@ -330,6 +356,11 @@ final class AppServiceProvider extends ServiceProvider
                 $this->resolve(CommunityRepositoryInterface::class),
                 $this->resolve(KnowledgeItemRepositoryInterface::class),
                 $entityTypeManager,
+            ),
+            new IngestFileCommand(
+                $this->resolve(CommunityRepositoryInterface::class),
+                $this->resolve(IngestionHandlerRegistry::class),
+                $this->resolve(CompilationPipeline::class),
             ),
         ];
     }
