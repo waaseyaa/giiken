@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "519ed44d713224b5b1216111ce25b0fc",
+    "content-hash": "d2b48866182e70042138a6ea68bcb10a",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -4797,18 +4797,14 @@
                     "Waaseyaa\\Access\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Access\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Access control and permission system for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/access/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/access/issues"
+                "issues": "https://github.com/waaseyaa/access/issues",
+                "source": "https://github.com/waaseyaa/access/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-12T18:29:10+00:00"
         },
@@ -4855,18 +4851,14 @@
                     "Waaseyaa\\AdminSurface\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\AdminSurface\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Canonical integration boundary for the Waaseyaa Admin SPA",
             "support": {
-                "source": "https://github.com/waaseyaa/admin-surface/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/admin-surface/issues"
+                "issues": "https://github.com/waaseyaa/admin-surface/issues",
+                "source": "https://github.com/waaseyaa/admin-surface/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-12T21:07:53+00:00"
         },
@@ -4904,18 +4896,14 @@
                     "Waaseyaa\\AI\\Agent\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\AI\\Agent\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "AI agent orchestration and tool execution for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/ai-agent/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/ai-agent/issues"
+                "issues": "https://github.com/waaseyaa/ai-agent/issues",
+                "source": "https://github.com/waaseyaa/ai-agent/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-12T16:58:18+00:00"
         },
@@ -4959,18 +4947,14 @@
                     "Waaseyaa\\AI\\Pipeline\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\AI\\Pipeline\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "AI processing pipelines with queue-based execution for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/ai-pipeline/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/ai-pipeline/issues"
+                "issues": "https://github.com/waaseyaa/ai-pipeline/issues",
+                "source": "https://github.com/waaseyaa/ai-pipeline/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T14:20:17+00:00"
         },
@@ -5007,18 +4991,14 @@
                     "Waaseyaa\\AI\\Schema\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\AI\\Schema\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "AI-friendly schema definitions and entity metadata for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/ai-schema/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/ai-schema/issues"
+                "issues": "https://github.com/waaseyaa/ai-schema/issues",
+                "source": "https://github.com/waaseyaa/ai-schema/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-09T22:44:35+00:00"
         },
@@ -5059,18 +5039,14 @@
                     "Waaseyaa\\AI\\Vector\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\AI\\Vector\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Vector embedding storage and similarity search for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/ai-vector/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/ai-vector/issues"
+                "issues": "https://github.com/waaseyaa/ai-vector/issues",
+                "source": "https://github.com/waaseyaa/ai-vector/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-09T22:54:24+00:00"
         },
@@ -5116,18 +5092,14 @@
                     "Waaseyaa\\Api\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Api\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "RESTful JSON:API resource layer for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/api/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/api/issues"
+                "issues": "https://github.com/waaseyaa/api/issues",
+                "source": "https://github.com/waaseyaa/api/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T01:18:02+00:00"
         },
@@ -5171,18 +5143,14 @@
                     "Waaseyaa\\Auth\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Auth\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Headless authentication for Waaseyaa — login, registration, 2FA, password reset",
             "support": {
-                "source": "https://github.com/waaseyaa/auth/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/auth/issues"
+                "issues": "https://github.com/waaseyaa/auth/issues",
+                "source": "https://github.com/waaseyaa/auth/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T18:25:20+00:00"
         },
@@ -5224,18 +5192,14 @@
                     "Waaseyaa\\Cache\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Cache\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Cache bins with cache tag invalidation for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/cache/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/cache/issues"
+                "issues": "https://github.com/waaseyaa/cache/issues",
+                "source": "https://github.com/waaseyaa/cache/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:25:48+00:00"
         },
@@ -5285,18 +5249,14 @@
                     "Waaseyaa\\CLI\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\CLI\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Command-line interface and console commands for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/cli/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/cli/issues"
+                "issues": "https://github.com/waaseyaa/cli/issues",
+                "source": "https://github.com/waaseyaa/cli/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-13T04:43:01+00:00"
         },
@@ -5334,18 +5294,14 @@
                     "Waaseyaa\\Config\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Config\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Configuration management as YAML with package-aware ownership for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/config/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/config/issues"
+                "issues": "https://github.com/waaseyaa/config/issues",
+                "source": "https://github.com/waaseyaa/config/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:25:48+00:00"
         },
@@ -5394,13 +5350,14 @@
                     "dev-develop/v1.1": "0.1.x-dev"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Waaseyaa core engine — entities, fields, config, plugins, routing, access.",
             "support": {
-                "source": "https://github.com/waaseyaa/core/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/core/issues"
+                "issues": "https://github.com/waaseyaa/core/issues",
+                "source": "https://github.com/waaseyaa/core/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-09T14:32:41+00:00"
         },
@@ -5437,18 +5394,14 @@
                     "Waaseyaa\\Database\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Database\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Database adapter wrapping Drupal DBAL. Interim until Doctrine migration.",
             "support": {
-                "source": "https://github.com/waaseyaa/database-legacy/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/database-legacy/issues"
+                "issues": "https://github.com/waaseyaa/database-legacy/issues",
+                "source": "https://github.com/waaseyaa/database-legacy/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:25:48+00:00"
         },
@@ -5496,18 +5449,14 @@
                     "Waaseyaa\\Entity\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Entity\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Entity type system — types, interfaces, lifecycle, queries. No storage.",
             "support": {
-                "source": "https://github.com/waaseyaa/entity/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/entity/issues"
+                "issues": "https://github.com/waaseyaa/entity/issues",
+                "source": "https://github.com/waaseyaa/entity/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-12T18:29:10+00:00"
         },
@@ -5548,18 +5497,14 @@
                     "Waaseyaa\\EntityStorage\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\EntityStorage\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Pluggable entity persistence. v0.1.0: SQL storage behind clean interfaces.",
             "support": {
-                "source": "https://github.com/waaseyaa/entity-storage/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/entity-storage/issues"
+                "issues": "https://github.com/waaseyaa/entity-storage/issues",
+                "source": "https://github.com/waaseyaa/entity-storage/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T01:18:02+00:00"
         },
@@ -5647,18 +5592,14 @@
                     "Waaseyaa\\Field\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Field\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Field type system — pluggable field types, definitions, formatters for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/field/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/field/issues"
+                "issues": "https://github.com/waaseyaa/field/issues",
+                "source": "https://github.com/waaseyaa/field/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-12T18:29:10+00:00"
         },
@@ -5707,18 +5648,14 @@
                     "Waaseyaa\\Foundation\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Foundation\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Core framework primitives: service providers, domain events, results, error handling",
             "support": {
-                "source": "https://github.com/waaseyaa/foundation/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/foundation/issues"
+                "issues": "https://github.com/waaseyaa/foundation/issues",
+                "source": "https://github.com/waaseyaa/foundation/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-13T04:31:55+00:00"
         },
@@ -5755,18 +5692,14 @@
                     "Waaseyaa\\I18n\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\I18n\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Internationalization foundation: Language, LanguageManager, LanguageContext, FallbackChain",
             "support": {
-                "source": "https://github.com/waaseyaa/i18n/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/i18n/issues"
+                "issues": "https://github.com/waaseyaa/i18n/issues",
+                "source": "https://github.com/waaseyaa/i18n/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:25:48+00:00"
         },
@@ -5808,18 +5741,14 @@
                     "Waaseyaa\\Inertia\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Inertia\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Server-side Inertia.js v3 protocol adapter for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/inertia/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/inertia/issues"
+                "issues": "https://github.com/waaseyaa/inertia/issues",
+                "source": "https://github.com/waaseyaa/inertia/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T23:06:39+00:00"
         },
@@ -5857,18 +5786,14 @@
                     "Waaseyaa\\Ingestion\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Ingestion\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Payload validation and ingestion utilities for Waaseyaa applications",
             "support": {
-                "source": "https://github.com/waaseyaa/ingestion/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/ingestion/issues"
+                "issues": "https://github.com/waaseyaa/ingestion/issues",
+                "source": "https://github.com/waaseyaa/ingestion/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:25:48+00:00"
         },
@@ -5968,18 +5893,14 @@
                     "Waaseyaa\\Media\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Media\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Media entity type and file management for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/media/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/media/issues"
+                "issues": "https://github.com/waaseyaa/media/issues",
+                "source": "https://github.com/waaseyaa/media/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T14:20:17+00:00"
         },
@@ -6016,18 +5937,14 @@
                     "Waaseyaa\\Plugin\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Plugin\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Attribute-based plugin discovery and management for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/plugin/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/plugin/issues"
+                "issues": "https://github.com/waaseyaa/plugin/issues",
+                "source": "https://github.com/waaseyaa/plugin/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:25:48+00:00"
         },
@@ -6056,14 +5973,14 @@
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-main": "0.1.x-dev",
-                    "dev-develop/v1.1": "0.1.x-dev"
-                },
                 "waaseyaa": {
                     "providers": [
                         "Waaseyaa\\Queue\\QueueServiceProvider"
                     ]
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev",
+                    "dev-develop/v1.1": "0.1.x-dev"
                 }
             },
             "autoload": {
@@ -6071,18 +5988,14 @@
                     "Waaseyaa\\Queue\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Queue\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Asynchronous task queue and job processing for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/queue/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/queue/issues"
+                "issues": "https://github.com/waaseyaa/queue/issues",
+                "source": "https://github.com/waaseyaa/queue/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:54:17+00:00"
         },
@@ -6170,18 +6083,14 @@
                     "Waaseyaa\\Routing\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Routing\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "HTTP routing and controller resolution for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/routing/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/routing/issues"
+                "issues": "https://github.com/waaseyaa/routing/issues",
+                "source": "https://github.com/waaseyaa/routing/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:54:17+00:00"
         },
@@ -6212,14 +6121,14 @@
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-main": "0.1.x-dev",
-                    "dev-develop/v1.1": "0.1.x-dev"
-                },
                 "waaseyaa": {
                     "providers": [
                         "Waaseyaa\\Search\\SearchServiceProvider"
                     ]
+                },
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev",
+                    "dev-develop/v1.1": "0.1.x-dev"
                 }
             },
             "autoload": {
@@ -6227,18 +6136,14 @@
                     "Waaseyaa\\Search\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Search\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Search provider interface and DTOs for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/search/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/search/issues"
+                "issues": "https://github.com/waaseyaa/search/issues",
+                "source": "https://github.com/waaseyaa/search/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:25:48+00:00"
         },
@@ -6290,18 +6195,14 @@
                     "Waaseyaa\\SSR\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\SSR\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Server-side rendering with Twig templates for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/ssr/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/ssr/issues"
+                "issues": "https://github.com/waaseyaa/ssr/issues",
+                "source": "https://github.com/waaseyaa/ssr/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T14:20:17+00:00"
         },
@@ -6338,18 +6239,14 @@
                     "Waaseyaa\\State\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\State\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Key-value state storage for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/state/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/state/issues"
+                "issues": "https://github.com/waaseyaa/state/issues",
+                "source": "https://github.com/waaseyaa/state/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:25:48+00:00"
         },
@@ -6392,18 +6289,14 @@
                     "Waaseyaa\\Taxonomy\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Taxonomy\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Taxonomy vocabulary and term entity types for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/taxonomy/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/taxonomy/issues"
+                "issues": "https://github.com/waaseyaa/taxonomy/issues",
+                "source": "https://github.com/waaseyaa/taxonomy/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T14:20:17+00:00"
         },
@@ -6442,18 +6335,14 @@
                     "Waaseyaa\\Testing\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Testing\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Testing utilities for Waaseyaa — base test case, entity factories, and helper traits.",
             "support": {
-                "source": "https://github.com/waaseyaa/testing/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/testing/issues"
+                "issues": "https://github.com/waaseyaa/testing/issues",
+                "source": "https://github.com/waaseyaa/testing/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T13:30:06+00:00"
         },
@@ -6490,18 +6379,14 @@
                     "Waaseyaa\\TypedData\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\TypedData\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Type system with PHP-native facade for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/typed-data/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/typed-data/issues"
+                "issues": "https://github.com/waaseyaa/typed-data/issues",
+                "source": "https://github.com/waaseyaa/typed-data/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T00:55:54+00:00"
         },
@@ -6548,18 +6433,14 @@
                     "Waaseyaa\\User\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\User\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "User entity, authentication, and session management for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/user/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/user/issues"
+                "issues": "https://github.com/waaseyaa/user/issues",
+                "source": "https://github.com/waaseyaa/user/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T14:20:17+00:00"
         },
@@ -6597,18 +6478,14 @@
                     "Waaseyaa\\Validation\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Validation\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Data validation constraints and validators for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/validation/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/validation/issues"
+                "issues": "https://github.com/waaseyaa/validation/issues",
+                "source": "https://github.com/waaseyaa/validation/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-08T15:54:17+00:00"
         },
@@ -6652,18 +6529,14 @@
                     "Waaseyaa\\Workflows\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Waaseyaa\\Workflows\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "Content moderation and editorial workflow states for Waaseyaa",
             "support": {
-                "source": "https://github.com/waaseyaa/workflows/tree/v0.1.0-alpha.140",
-                "issues": "https://github.com/waaseyaa/workflows/issues"
+                "issues": "https://github.com/waaseyaa/workflows/issues",
+                "source": "https://github.com/waaseyaa/workflows/tree/v0.1.0-alpha.140"
             },
             "time": "2026-04-10T14:20:17+00:00"
         }
