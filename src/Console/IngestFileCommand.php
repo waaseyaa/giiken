@@ -19,9 +19,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Run a real file end-to-end through the ingestion + compilation pipeline
  * and persist a `KnowledgeItem` in the given community.
  *
- * v1 scope (giiken#94): synchronous, no overrides. The pipeline hardcodes
- * `access_tier='public'` and the LLM-decided knowledge type; those
- * overrides are tracked separately in giiken#95.
+ * v1 scope (giiken#94): synchronous, no overrides. Pipeline now returns a
+ * `CompilationPayload` (giiken#95); operator-facing overrides
+ * (`--type`, `--access`, `--dry-run`) are a follow-up PR.
  */
 #[AsCommand(
     name: 'giiken:ingest:file',
@@ -102,7 +102,7 @@ final class IngestFileCommand extends Command
 
         try {
             $output->writeln('<comment>→ Running compilation pipeline (5 steps)…</comment>');
-            $this->pipeline->compile($rawDocument, (string) $community->get('id'));
+            $payload = $this->pipeline->compile($rawDocument, (string) $community->get('id'));
         } catch (PipelineException $e) {
             $output->writeln(sprintf('<error>✗ Pipeline failed: %s</error>', $e->getMessage()));
 
@@ -113,9 +113,18 @@ final class IngestFileCommand extends Command
             '<info>✓ KnowledgeItem persisted into community "%s".</info>',
             $slug,
         ));
-        $output->writeln(
-            '<comment>Note: v1 does not surface the persisted entity id — see giiken#95.</comment>',
-        );
+        $output->writeln(sprintf(
+            '  id:    <info>%s</info>',
+            $payload->entityUuid ?? '(not assigned)',
+        ));
+        $output->writeln(sprintf(
+            '  type:  <info>%s</info>',
+            $payload->knowledgeType?->value ?? '(unknown)',
+        ));
+        $output->writeln(sprintf(
+            '  tier:  <info>%s</info>',
+            $payload->accessTier->value,
+        ));
 
         return Command::SUCCESS;
     }

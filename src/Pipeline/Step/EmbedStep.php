@@ -20,6 +20,7 @@ final class EmbedStep implements PipelineStepInterface
     {
         $payload = $input['payload'];
         $entityId = bin2hex(random_bytes(16));
+        $payload->entityUuid = $entityId;
 
         $item = KnowledgeItem::make([
             'uuid'             => $entityId,
@@ -27,10 +28,14 @@ final class EmbedStep implements PipelineStepInterface
             'title'            => $payload->title,
             'content'          => $payload->content,
             'knowledge_type'   => $payload->knowledgeType?->value,
-            'access_tier'      => 'public',
+            'access_tier'      => $payload->accessTier->value,
             'source_media_ids' => json_encode([$payload->mediaId], JSON_THROW_ON_ERROR),
             'compiled_at'      => date('c'),
         ]);
+
+        if ($payload->dryRun) {
+            return StepResult::success($input);
+        }
 
         $this->repository->save($item);
 

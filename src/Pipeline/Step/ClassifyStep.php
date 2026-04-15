@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace App\Pipeline\Step;
 
 use App\Entity\KnowledgeItem\KnowledgeType;
-use App\Pipeline\CompilationPayload;
 use App\Pipeline\PipelineException;
 use App\Pipeline\Provider\LlmProviderInterface;
 use Waaseyaa\AI\Pipeline\PipelineContext;
@@ -32,6 +31,13 @@ PROMPT;
     public function process(array $input, PipelineContext $context): StepResult
     {
         $payload = $input['payload'];
+
+        // Caller forced a type (CLI `--type`, Management UI override, etc.);
+        // skip the LLM round-trip entirely.
+        if ($payload->knowledgeType !== null) {
+            return StepResult::success($input);
+        }
+
         $response = '';
 
         for ($attempt = 0; $attempt < self::MAX_RETRIES; $attempt++) {
