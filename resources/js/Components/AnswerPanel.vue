@@ -98,10 +98,17 @@ const shouldRenderNoAnswer = computed(
       <div v-if="citations.length > 0" class="mt-6 pt-4 border-t border-border">
         <p class="text-sm font-medium text-ink-muted mb-2">Sources</p>
         <div class="space-y-2">
+          <!--
+            `index` must match the token the LLM emits in the answer body
+            (`QaService` uses the DB item id there). Using `idx + 1` broke
+            alignment whenever the LLM did not cite item #1 (giiken#93):
+            a body `[2]` pointed at Sources card `#citation-1` after the
+            list was trimmed to only-cited-items.
+          -->
           <CitationCard
-            v-for="(citation, idx) in citations"
+            v-for="citation in citations"
             :key="citation.itemId"
-            :index="idx + 1"
+            :index="citation.itemId"
             :citation="citation"
             :community-slug="communitySlug"
           />

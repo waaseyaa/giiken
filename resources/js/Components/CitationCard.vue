@@ -5,7 +5,11 @@ import { KNOWLEDGE_TYPE_CONFIG } from '@/types'
 import type { Citation } from '@/types'
 
 const props = defineProps<{
-  index: number
+  // Citation token used for both the visible `[N]` label and the
+  // `#citation-N` anchor id. Must match the token the LLM emits in the
+  // answer text (see QaService::SYSTEM_PROMPT — currently the DB item id).
+  // See giiken#93 for the original mismatch bug.
+  index: number | string
   citation: Citation
   communitySlug: string
 }>()

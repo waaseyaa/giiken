@@ -8,10 +8,17 @@ exports[`AnswerPanel snapshot > renders an answer with citations 1`] = `
     <div class="mt-6 pt-4 border-t border-border">
       <p class="text-sm font-medium text-ink-muted mb-2">Sources</p>
       <div class="space-y-2">
-        <div id="citation-1" class="border border-border rounded bg-surface overflow-hidden"><button type="button" class="w-full flex items-start gap-2 text-left p-3 hover:bg-surface-raised transition-colors" aria-expanded="false" aria-controls="citation-1-body"><span class="text-primary font-medium shrink-0">[1]</span><span class="font-medium text-ink flex-1 min-w-0 truncate">Doc A</span><span class="text-xs px-2 py-0.5 rounded-full shrink-0 bg-cultural-subtle text-cultural">Cultural</span><span class="text-xs text-ink-muted shrink-0">+</span></button>
+        <!--
+            \`index\` must match the token the LLM emits in the answer body
+            (\`QaService\` uses the DB item id there). Using \`idx + 1\` broke
+            alignment whenever the LLM did not cite item #1 (giiken#93):
+            a body \`[2]\` pointed at Sources card \`#citation-1\` after the
+            list was trimmed to only-cited-items.
+          -->
+        <div id="citation-10" class="border border-border rounded bg-surface overflow-hidden"><button type="button" class="w-full flex items-start gap-2 text-left p-3 hover:bg-surface-raised transition-colors" aria-expanded="false" aria-controls="citation-10-body"><span class="text-primary font-medium shrink-0">[10]</span><span class="font-medium text-ink flex-1 min-w-0 truncate">Doc A</span><span class="text-xs px-2 py-0.5 rounded-full shrink-0 bg-cultural-subtle text-cultural">Cultural</span><span class="text-xs text-ink-muted shrink-0">+</span></button>
           <!--v-if-->
         </div>
-        <div id="citation-2" class="border border-border rounded bg-surface overflow-hidden"><button type="button" class="w-full flex items-start gap-2 text-left p-3 hover:bg-surface-raised transition-colors" aria-expanded="false" aria-controls="citation-2-body"><span class="text-primary font-medium shrink-0">[2]</span><span class="font-medium text-ink flex-1 min-w-0 truncate">Doc B</span><span class="text-xs px-2 py-0.5 rounded-full shrink-0 bg-land-subtle text-land">Land</span><span class="text-xs text-ink-muted shrink-0">+</span></button>
+        <div id="citation-11" class="border border-border rounded bg-surface overflow-hidden"><button type="button" class="w-full flex items-start gap-2 text-left p-3 hover:bg-surface-raised transition-colors" aria-expanded="false" aria-controls="citation-11-body"><span class="text-primary font-medium shrink-0">[11]</span><span class="font-medium text-ink flex-1 min-w-0 truncate">Doc B</span><span class="text-xs px-2 py-0.5 rounded-full shrink-0 bg-land-subtle text-land">Land</span><span class="text-xs text-ink-muted shrink-0">+</span></button>
           <!--v-if-->
         </div>
       </div>
