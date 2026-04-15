@@ -99,6 +99,7 @@
         "analyse": "./vendor/bin/phpstan analyse src tests --level=8 --no-progress",
         "dev": "php bin/waaseyaa serve",
         "test": "./vendor/bin/phpunit",
+        "regen-lock": "@composer update 'waaseyaa/*' --no-plugins --no-install --no-scripts",
         "post-install-cmd": [
             "@php scripts/repoint-vendor-bin.php"
         ],
