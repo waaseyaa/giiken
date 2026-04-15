@@ -13,7 +13,11 @@ function mountPanel(overrides: Partial<{
 }> = {}) {
   return mount(AnswerPanel, {
     props: {
-      answer: 'Governance is described here [1] and also here [2].',
+      // LLM cites by DB item id (see QaService::SYSTEM_PROMPT). The Sources
+      // card must reuse that same id for both the `[N]` label and the
+      // `#citation-N` anchor — otherwise `[42]` in the answer would point
+      // at `#citation-1` after the trimmed list was renumbered (giiken#93).
+      answer: 'Governance is described here [42] and also here [43].',
       citations: [
         { itemId: '42', title: 'Governance overview', excerpt: 'A sample governance note.', knowledgeType: 'governance' },
         { itemId: '43', title: 'Land rights', excerpt: 'A sample land reference.', knowledgeType: 'land' },
@@ -36,10 +40,24 @@ describe('AnswerPanel', () => {
     const wrapper = mountPanel()
     const sups = wrapper.findAll('sup')
     expect(sups).toHaveLength(2)
-    expect(sups[0].text()).toBe('[1]')
-    expect(sups[1].text()).toBe('[2]')
-    expect(sups[0].find('a').attributes('href')).toBe('#citation-1')
-    expect(sups[1].find('a').attributes('href')).toBe('#citation-2')
+    expect(sups[0].text()).toBe('[42]')
+    expect(sups[1].text()).toBe('[43]')
+    expect(sups[0].find('a').attributes('href')).toBe('#citation-42')
+    expect(sups[1].find('a').attributes('href')).toBe('#citation-43')
+  })
+
+  it('uses the citation itemId for Sources labels and anchors so inline [N] aligns (giiken#93)', () => {
+    const wrapper = mountPanel()
+    // Anchors in the answer body.
+    const hrefs = wrapper.findAll('sup a').map((a) => a.attributes('href'))
+    expect(hrefs).toEqual(['#citation-42', '#citation-43'])
+    // Matching anchor ids in the Sources card.
+    expect(wrapper.find('#citation-42').exists()).toBe(true)
+    expect(wrapper.find('#citation-43').exists()).toBe(true)
+    // And the visible label in the Sources card matches, not a renumbered [1][2].
+    const sourcesText = wrapper.text()
+    expect(sourcesText).toContain('[42]')
+    expect(sourcesText).toContain('[43]')
   })
 
   it('preserves the answer prose between superscripts', () => {
@@ -60,9 +78,9 @@ describe('AnswerPanel', () => {
     const wrapper = mountPanel()
     expect(wrapper.text()).toContain('Governance overview')
     expect(wrapper.text()).toContain('Land rights')
-    // Cards have anchor ids so superscript links resolve.
-    expect(wrapper.find('#citation-1').exists()).toBe(true)
-    expect(wrapper.find('#citation-2').exists()).toBe(true)
+    // Cards have anchor ids matching the answer's `[N]` markers.
+    expect(wrapper.find('#citation-42').exists()).toBe(true)
+    expect(wrapper.find('#citation-43').exists()).toBe(true)
   })
 
   it('shows a skeleton placeholder while loading and hides answer text', () => {
