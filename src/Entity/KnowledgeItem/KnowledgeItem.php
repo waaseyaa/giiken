@@ -6,6 +6,7 @@ namespace App\Entity\KnowledgeItem;
 
 use Carbon\CarbonImmutable;
 use App\Entity\HasCommunity;
+use App\Entity\KnowledgeItem\Source\KnowledgeItemSource;
 use Waaseyaa\Entity\ContentEntityBase;
 use Waaseyaa\Entity\Hydration\HydratableFromStorageInterface;
 use Waaseyaa\Entity\Hydration\HydrationContext;
@@ -101,6 +102,50 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
         }
     }
 
+    /**
+     * Structured provenance for this item. Never null — manual items get
+     * {@see KnowledgeItemSource::manualDefault()} and the migration backfills
+     * pre-existing rows with the same.
+     */
+    public function getSource(): KnowledgeItemSource
+    {
+        $raw = $this->get('source');
+
+        if ($raw instanceof KnowledgeItemSource) {
+            return $raw;
+        }
+
+        if (is_string($raw) && $raw !== '') {
+            try {
+                $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+                if (is_array($decoded)) {
+                    return KnowledgeItemSource::fromArray($decoded);
+                }
+            } catch (\JsonException) {
+                // fall through to default
+            }
+        }
+
+        if (is_array($raw)) {
+            return KnowledgeItemSource::fromArray($raw);
+        }
+
+        return KnowledgeItemSource::manualDefault($this->getCreatedAt() ?: null);
+    }
+
+    /**
+     * Set the structured source, writing both the JSON blob and the mirrored
+     * indexed columns so queries stay consistent.
+     */
+    public function setSource(KnowledgeItemSource $source): void
+    {
+        $this->set('source', json_encode($source->toArray(), JSON_THROW_ON_ERROR));
+
+        foreach ($source->indexedColumns() as $column => $value) {
+            $this->set($column, $value);
+        }
+    }
+
     protected function duplicateInstance(array $values): static
     {
         return static::fromStorage($values, new HydrationContext(
@@ -150,6 +195,22 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
         foreach (['updated_at'] as $key) {
             if (($values[$key] ?? null) === '') {
                 unset($values[$key]);
+            }
+        }
+
+        if (array_key_exists('source', $values)) {
+            $raw = $values['source'];
+            if (is_string($raw) && $raw !== '') {
+                try {
+                    json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+                } catch (\JsonException) {
+                    $values['source'] = json_encode(
+                        KnowledgeItemSource::manualDefault()->toArray(),
+                        JSON_THROW_ON_ERROR,
+                    );
+                }
+            } elseif (is_array($raw)) {
+                $values['source'] = json_encode($raw, JSON_THROW_ON_ERROR);
             }
         }
 

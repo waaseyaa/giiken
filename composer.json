@@ -29,6 +29,7 @@
         "waaseyaa/inertia": "^0.1.0-alpha.136",
         "waaseyaa/ingestion": "^0.1.0-alpha.136",
         "waaseyaa/media": "^0.1.0-alpha.136",
+        "waaseyaa/northcloud": "@dev",
         "waaseyaa/plugin": "^0.1.0-alpha.136",
         "waaseyaa/queue": "^0.1.0-alpha.136",
         "waaseyaa/routing": "^0.1.0-alpha.136",

@@ -248,3 +248,14 @@ After lifecycle-touching changes:
    - `/` returns 200 with non-zero body
    - `/{communitySlug}` does not regress from known behavior
 
+## 9. Change Log
+
+### 2026-04-15 — KnowledgeItem structured source (no runtime dispatch change)
+
+- Added `KnowledgeItemSource` value object + 4 indexed hot columns to `knowledge_item` (see `migrations/20260415_140000_add_knowledge_item_source_columns.php`).
+- Added `Ingestion\NorthCloud\NcHitToKnowledgeItemMapper` — not yet registered in `AppServiceProvider`; no HTTP route, console command, or pipeline step consumes it.
+- No changes to boot, routing, SSR dispatch, or request/response shape.
+- Full rationale and provenance schema in `docs/architecture/knowledge-item-source.md`.
+
+Wiring the mapper (`MapperRegistry` + `NorthCloudServiceProvider` registration) will be a lifecycle-touching change and should update this doc when it lands.
+
