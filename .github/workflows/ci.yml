@@ -21,6 +21,8 @@ jobs:
           coverage: none
 
       - name: Install dependencies
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ secrets.GITHUB_TOKEN }}"}}'
         run: composer install --no-interaction --prefer-dist
 
       - name: Setup Node
