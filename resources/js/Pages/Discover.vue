@@ -37,7 +37,7 @@ defineProps<{
       <div v-else class="bg-surface-raised border border-border rounded-lg p-8 text-center">
         <p class="text-ink-muted">
           No communities yet. Run
-          <code class="text-primary bg-primary-subtle px-2 py-0.5 rounded">./bin/waaseyaa giiken:seed:test-community</code>
+          <code class="text-primary bg-primary-subtle px-2 py-0.5 rounded">./bin/giiken giiken:seed:test-community</code>
           to seed a demo community.
         </p>
       </div>

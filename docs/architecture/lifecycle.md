@@ -55,8 +55,8 @@ The first Giiken app-level class in normal boot is `App\AppServiceProvider`:
 
 ### 1.4 Schema and local data
 
-- App SQL migrations live in `migrations/` and run via `bin/waaseyaa migrate` during bootstrap when pending.
-- Tables `community`, `knowledge_item`, and `wiki_lint_report` must exist before repository saves; optional demo data: `bin/waaseyaa giiken:seed:test-community` after migrate (also ensures demo `giiken_staff` user and community staff role when `EntityTypeManager` is available).
+- App SQL migrations live in `migrations/` and run via `bin/giiken migrate` during bootstrap when pending.
+- Tables `community`, `knowledge_item`, and `wiki_lint_report` must exist before repository saves; optional demo data: `bin/giiken giiken:seed:test-community` after migrate (also ensures demo `giiken_staff` user and community staff role when `EntityTypeManager` is available).
 
 ## 2. Request Lifecycle
 
@@ -233,7 +233,7 @@ Keep these true during refactoring:
 |---|---|---|
 | `public/index.php` | global boot and response emission | smoke test `/`, non-zero body |
 | `src/AppServiceProvider.php` | routes, entity types, DI bindings, CLI commands | route smoke tests + boot + `waaseyaa list` / migrate + seed |
-| `migrations/*.php` | SQLite schema for app entities | `bin/waaseyaa migrate` + repository integration |
+| `migrations/*.php` | SQLite schema for app entities | `bin/giiken migrate` + repository integration |
 | `src/Http/Controller/*` | SSR dispatch and Inertia props | unit tests + route smoke tests |
 | `src/Entity/*` and repositories | data shape, persistence behavior | unit tests + integration tests |
 | `src/Query/*`, `src/Pipeline/*` | search/qa/compile behavior | unit tests for services and steps |
