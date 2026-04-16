@@ -74,8 +74,9 @@ final class NcHitToKnowledgeItemMapperTest extends TestCase
             'title' => 'Robinson Huron Treaty territory infrastructure update',
         ]);
         $this->assertTrue($supported['supported']);
-        $this->assertContains($supported['details']['matched_term'] ?? null, ['robinson-huron', 'robinson huron treaty']);
-        $this->assertContains($supported['details']['matched_strength'] ?? null, ['strong', 'related']);
+        $details = $supported['details'];
+        $this->assertContains($details['matched_term'], ['robinson-huron', 'robinson huron treaty']);
+        $this->assertContains($details['matched_strength'], ['strong', 'related']);
     }
 
     #[Test]

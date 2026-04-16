@@ -85,12 +85,12 @@ final readonly class NcHitToKnowledgeItemMapper implements NcHitToEntityMapperIn
 
     public function supports(array $hit): bool
     {
-        return (bool) ($this->diagnoseSupport($hit)['supported'] ?? false);
+        return $this->diagnoseSupport($hit)['supported'];
     }
 
     /**
      * @param array<string, mixed> $hit
-     * @return array{supported: bool, reason?: string, details?: array<string, scalar|null>}
+     * @return array{supported: true, details: array{matched_term: string, matched_strength: string}}|array{supported: false, reason: string}
      */
     public function diagnoseSupport(array $hit): array
     {
