@@ -133,9 +133,9 @@ App repositories (community, knowledge items) wrap `Waaseyaa\EntityStorage\Entit
 - filter by community/slug
 - save/delete with timestamp conventions; FTS is kept in sync by the framework's `SearchIndexSubscriber` listening on `POST_SAVE`
 
-### 3.2.1 Framework pin (Waaseyaa alpha.120+)
+### 3.2.1 Framework pin (Waaseyaa alpha.144+)
 
-Giiken requires **`waaseyaa/*` ^0.1.0-alpha.120** and `nesbot/carbon` so datetime fields can use the framework’s `datetime_immutable` cast with `domain: carbon_immutable`. Default **storage** shape for that cast (no explicit `storage: unix`) is **ISO-8601 strings** (`DateTimeInterface::ATOM`). Repositories set `updated_at` with `CarbonImmutable::now()->toIso8601String()` so values round-trip through casts and `EntityRepository::save()`.
+Giiken requires **`waaseyaa/*` ^0.1.0-alpha.144** and `nesbot/carbon` so datetime fields can use the framework’s `datetime_immutable` cast with `domain: carbon_immutable`. Default **storage** shape for that cast (no explicit `storage: unix`) is **ISO-8601 strings** (`DateTimeInterface::ATOM`). Repositories set `updated_at` with `CarbonImmutable::now()->toIso8601String()` so values round-trip through casts and `EntityRepository::save()`.
 
 ### 3.2.2 `Community` entity
 

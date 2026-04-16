@@ -10,7 +10,7 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 
 ## Boot-to-browser status (as of 2026-04-11)
 
-✅ **Phase A green.** Boot, migrations, seed, and SSR dispatch all work end-to-end on `waaseyaa/* ^0.1.0-alpha.120`.
+✅ **Phase A green.** Boot, migrations, seed, and SSR dispatch all work end-to-end on `waaseyaa/* ^0.1.0-alpha.144`.
 
 Verified smoke path:
 
