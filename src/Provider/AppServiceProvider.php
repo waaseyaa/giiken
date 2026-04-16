@@ -244,37 +244,36 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->registerIngestionHandlers();
 
-        $this->registerNorthCloudMappers();
-
         $this->registerInertiaViteRenderer();
     }
 
     /**
-     * Pre-populate the NorthCloud {@see MapperRegistry} with Giiken's concrete
-     * entity mappers. The registry is created by
-     * {@see \Waaseyaa\NorthCloud\Provider\NorthCloudServiceProvider}; we
-     * override its singleton factory to ship with the app's mappers already
-     * registered, so `northcloud:sync` can find them without a separate boot
-     * hook.
+     * Register Giiken's NorthCloud mapper into the package-owned registry.
      *
-     * The default community for NC-sourced items is read from
-     * `GIIKEN_NC_DEFAULT_COMMUNITY_ID`. When unset, the mapper still loads but
-     * will produce items tied to an empty community id — callers should set
-     * the env var before running the sync command against a real DB.
+     * The {@see MapperRegistry} binding is owned by the northcloud package
+     * provider; we resolve it and add our mapper so `northcloud:sync` can find
+     * it.
      */
     private function registerNorthCloudMappers(): void
     {
-        $this->singleton(MapperRegistry::class, static function (): MapperRegistry {
-            $registry = new MapperRegistry();
+        $defaultCommunityId = (string) (getenv('GIIKEN_NC_DEFAULT_COMMUNITY_ID') ?: '');
 
-            $defaultCommunityId = (string) (getenv('GIIKEN_NC_DEFAULT_COMMUNITY_ID') ?: '');
+        try {
+            $registry = $this->resolve(MapperRegistry::class);
+        } catch (\Throwable) {
+            // NorthCloud package not present/loaded — nothing to register.
+            return;
+        }
 
-            $registry->register(new NcHitToKnowledgeItemMapper(
-                defaultCommunityId: $defaultCommunityId,
-            ));
+        foreach ($registry->all() as $mapper) {
+            if ($mapper instanceof NcHitToKnowledgeItemMapper) {
+                return;
+            }
+        }
 
-            return $registry;
-        });
+        $registry->register(new NcHitToKnowledgeItemMapper(
+            defaultCommunityId: $defaultCommunityId,
+        ));
     }
 
     /**
@@ -383,6 +382,8 @@ final class AppServiceProvider extends ServiceProvider
         DatabaseInterface $database,
         SymfonyEventDispatcherContract $dispatcher,
     ): array {
+        $this->registerNorthCloudMappers();
+
         return [
             new SeedTestCommunityCommand(
                 $this->resolve(CommunityRepositoryInterface::class),

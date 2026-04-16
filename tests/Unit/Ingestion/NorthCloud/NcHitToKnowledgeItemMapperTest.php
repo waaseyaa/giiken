@@ -23,9 +23,16 @@ final class NcHitToKnowledgeItemMapperTest extends TestCase
         $mapper = new NcHitToKnowledgeItemMapper(defaultCommunityId: 'c1');
 
         $this->assertTrue($mapper->supports([
-            'url' => 'https://example.test/a',
+            'url' => 'https://example.test/sudbury-a',
             'topics' => ['indigenous', 'governance'],
+            'title' => 'Sudbury governance update',
         ]));
+
+        $this->assertTrue($mapper->supports([
+            'url' => 'https://example.test/robinson-huron-update',
+            'topics' => ['indigenous', 'services'],
+            'title' => 'Robinson Huron Treaty territory infrastructure update',
+        ]), 'related treaty-region signal passes strict regional filter');
 
         $this->assertFalse(
             $mapper->supports(['url' => 'https://example.test/a', 'topics' => ['news']]),
@@ -39,6 +46,36 @@ final class NcHitToKnowledgeItemMapperTest extends TestCase
             $mapper->supports(['url' => 'https://example.test/a']),
             'missing topics is ignored',
         );
+        $this->assertFalse(
+            $mapper->supports([
+                'url' => 'https://example.test/a',
+                'topics' => ['indigenous'],
+                'title' => 'National Indigenous arts roundup',
+            ]),
+            'indigenous-only but non-regional stories are ignored',
+        );
+    }
+
+    #[Test]
+    public function diagnoseSupportReturnsReasonAndSignalDetails(): void
+    {
+        $mapper = new NcHitToKnowledgeItemMapper(defaultCommunityId: 'c1');
+
+        $missingUrl = $mapper->diagnoseSupport([
+            'topics' => ['indigenous'],
+            'title' => 'Sagamok update',
+        ]);
+        $this->assertFalse($missingUrl['supported']);
+        $this->assertSame('missing_url', $missingUrl['reason']);
+
+        $supported = $mapper->diagnoseSupport([
+            'url' => 'https://example.test/robinson-huron-treaty',
+            'topics' => ['indigenous'],
+            'title' => 'Robinson Huron Treaty territory infrastructure update',
+        ]);
+        $this->assertTrue($supported['supported']);
+        $this->assertContains($supported['details']['matched_term'] ?? null, ['robinson-huron', 'robinson huron treaty']);
+        $this->assertContains($supported['details']['matched_strength'] ?? null, ['strong', 'related']);
     }
 
     #[Test]

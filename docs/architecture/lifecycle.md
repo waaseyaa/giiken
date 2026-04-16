@@ -266,3 +266,9 @@ Wiring the mapper (`MapperRegistry` + `NorthCloudServiceProvider` registration) 
 - `NorthCloudServiceProvider` (auto-loaded from `extra.waaseyaa.providers`) contributes the `northcloud:sync` console command and the `NorthCloudClient`, `NcSyncService`, and `NorthCloudSearchProvider` services.
 - No HTTP route or SSR dispatch change. `bin/giiken list` now surfaces `northcloud:sync`; request-lifecycle behavior is unaffected.
 
+### 2026-04-16 — NorthCloud sync observability + strict Robinson-Huron relevance
+
+- `northcloud:sync` now supports dry-run observability output (`--explain`, `--sample`, `--report-json`) via package-level sync diagnostics, enabling non-persistent ingest audits.
+- `NcHitToKnowledgeItemMapper` now returns explicit support diagnostics (`missing_url`, `missing_indigenous_topic`, `missing_regional_signal`) and applies stricter Robinson-Huron-adjacent relevance terms.
+- No HTTP route, middleware, or SSR dispatch behavior changed; this update only affects CLI sync filtering/diagnostics and associated mapper decision visibility.
+

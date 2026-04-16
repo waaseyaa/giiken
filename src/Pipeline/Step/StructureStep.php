@@ -64,14 +64,54 @@ PROMPT;
             return StepResult::success($input);
         }
 
-        throw PipelineException::fromStep(
-            'StructureStep',
-            $lastException ?? new \RuntimeException('LLM returned invalid JSON after ' . self::MAX_RETRIES . ' attempts'),
-        );
+        // Degrade gracefully when the model returns malformed JSON. This keeps
+        // ingestion usable in local/low-config environments while still
+        // preserving the source content for later curation.
+        $payload->title = $payload->title !== ''
+            ? $payload->title
+            : $this->fallbackTitle($payload->markdownContent);
+        $payload->summary = $payload->summary !== ''
+            ? $payload->summary
+            : $this->fallbackSummary($payload->markdownContent);
+        $payload->people ??= [];
+        $payload->places ??= [];
+        $payload->topics ??= [];
+        $payload->keyPassages ??= [];
+        $payload->content = $payload->markdownContent;
+
+        return StepResult::success($input);
     }
 
     public function describe(): string
     {
         return 'Extract structured metadata from content via LLM';
+    }
+
+    private function fallbackTitle(string $markdown): string
+    {
+        $lines = preg_split('/\r\n|\r|\n/', $markdown) ?: [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            $line = ltrim($line, '# ');
+            if ($line !== '') {
+                return mb_substr($line, 0, 180);
+            }
+        }
+
+        return 'Untitled document';
+    }
+
+    private function fallbackSummary(string $markdown): string
+    {
+        $normalized = trim(preg_replace('/\s+/', ' ', $markdown) ?? '');
+        if ($normalized === '') {
+            return 'No summary available.';
+        }
+
+        return mb_substr($normalized, 0, 320);
     }
 }

@@ -14,6 +14,7 @@ use App\Entity\KnowledgeItem\Source\Rights;
 use App\Entity\KnowledgeItem\Source\SourceOrigin;
 use App\Entity\KnowledgeItem\Source\SourceReference;
 use Waaseyaa\Foundation\SlugGenerator;
+use Waaseyaa\NorthCloud\Sync\NcHitSupportDiagnosticsInterface;
 use Waaseyaa\NorthCloud\Sync\NcHitToEntityMapperInterface;
 
 /**
@@ -27,8 +28,46 @@ use Waaseyaa\NorthCloud\Sync\NcHitToEntityMapperInterface;
  * Dedup is by `source_reference_url` (indexed column mirrored from the
  * structured source blob).
  */
-final readonly class NcHitToKnowledgeItemMapper implements NcHitToEntityMapperInterface
+final readonly class NcHitToKnowledgeItemMapper implements NcHitToEntityMapperInterface, NcHitSupportDiagnosticsInterface
 {
+    /**
+     * Geographic and treaty-context terms that strongly indicate relevance to
+     * Sagamok Anishnawbek and nearby governance/land issues.
+     *
+     * @var list<string>
+     */
+    private const SAGAMOK_RELEVANCE_TERMS = [
+        'sagamok',
+        'anishnawbek',
+        'anishinabek nation',
+        'anishinaabe',
+        'anishinaabeg',
+        'serpent river',
+        'robinson-huron',
+        'north shore',
+        'elliot lake',
+        'blind river',
+        'sudbury',
+        'manitoulin',
+    ];
+
+    /**
+     * Robinson-Huron-adjacent phrases for strict regional intake.
+     *
+     * @var list<string>
+     */
+    private const RELATED_RELEVANCE_TERMS = [
+        'robinson huron treaty',
+        'robinson huron',
+        'treaty territory',
+        'anishinabek territory',
+        'mississauga first nation',
+        'serpent river first nation',
+        'north channel',
+        'spanish river',
+        'la cloche',
+    ];
+
     public function __construct(
         private string $defaultCommunityId,
         private string $pipelineVersion = '0.1.0',
@@ -46,18 +85,54 @@ final readonly class NcHitToKnowledgeItemMapper implements NcHitToEntityMapperIn
 
     public function supports(array $hit): bool
     {
+        return (bool) ($this->diagnoseSupport($hit)['supported'] ?? false);
+    }
+
+    /**
+     * @param array<string, mixed> $hit
+     * @return array{supported: bool, reason?: string, details?: array<string, scalar|null>}
+     */
+    public function diagnoseSupport(array $hit): array
+    {
         $url = (string) ($hit['url'] ?? '');
         if ($url === '') {
-            return false;
+            return [
+                'supported' => false,
+                'reason' => 'missing_url',
+            ];
         }
 
         $topics = $hit['topics'] ?? [];
         if (!is_array($topics)) {
-            return false;
+            return [
+                'supported' => false,
+                'reason' => 'invalid_topics',
+            ];
         }
 
         // Only pull items explicitly tagged as indigenous content.
-        return in_array('indigenous', array_map(strval(...), $topics), true);
+        if (!in_array('indigenous', array_map(strval(...), $topics), true)) {
+            return [
+                'supported' => false,
+                'reason' => 'missing_indigenous_topic',
+            ];
+        }
+
+        $signal = $this->findRegionalSignal($hit);
+        if ($signal === null) {
+            return [
+                'supported' => false,
+                'reason' => 'missing_regional_signal',
+            ];
+        }
+
+        return [
+            'supported' => true,
+            'details' => [
+                'matched_term' => $signal['term'],
+                'matched_strength' => $signal['strength'],
+            ],
+        ];
     }
 
     /**
@@ -136,5 +211,34 @@ final readonly class NcHitToKnowledgeItemMapper implements NcHitToEntityMapperIn
         }
 
         return date('c');
+    }
+
+    /**
+     * @param array<string, mixed> $hit
+     * @return array{term: string, strength: string}|null
+     */
+    private function findRegionalSignal(array $hit): ?array
+    {
+        $haystack = mb_strtolower(implode(' ', [
+            (string) ($hit['title'] ?? ''),
+            (string) ($hit['snippet'] ?? ''),
+            (string) ($hit['body'] ?? ''),
+            (string) ($hit['url'] ?? ''),
+            implode(' ', array_map(strval(...), is_array($hit['topics'] ?? null) ? $hit['topics'] : [])),
+        ]));
+
+        foreach (self::SAGAMOK_RELEVANCE_TERMS as $term) {
+            if (str_contains($haystack, $term)) {
+                return ['term' => $term, 'strength' => 'strong'];
+            }
+        }
+
+        foreach (self::RELATED_RELEVANCE_TERMS as $term) {
+            if (str_contains($haystack, $term)) {
+                return ['term' => $term, 'strength' => 'related'];
+            }
+        }
+
+        return null;
     }
 }
