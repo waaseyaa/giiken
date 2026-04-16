@@ -179,10 +179,7 @@ final class AppServiceProvider extends ServiceProvider
                 database: $database,
             );
 
-            return new KnowledgeItemRepository(
-                $entityRepo,
-                $this->resolve(SearchIndexerInterface::class),
-            );
+            return new KnowledgeItemRepository($entityRepo);
         });
 
         $this->singleton(SearchService::class, function (): SearchService {
