@@ -32,4 +32,15 @@ final class AppServiceProviderTest extends TestCase
     {
         $this->assertTrue(method_exists(AppServiceProvider::class, 'routes'));
     }
+
+    #[Test]
+    public function boot_fails_loudly_when_northcloud_registry_is_unavailable(): void
+    {
+        $provider = new AppServiceProvider();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('NorthCloud MapperRegistry could not be resolved');
+
+        $provider->boot();
+    }
 }

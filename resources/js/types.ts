@@ -44,6 +44,9 @@ export interface SearchResult {
   summary: string
   knowledgeType: KnowledgeType | null
   score: number
+  accessTier?: AccessTier
+  sourceOrigin?: string
+  createdAt?: string
 }
 
 export interface SearchResultSet {

@@ -3,6 +3,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Pipeline;
 
 use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use App\Entity\KnowledgeItem\KnowledgeType;
 use App\Ingestion\RawDocument;
 use App\Pipeline\CompilationPayload;
@@ -13,8 +15,6 @@ use App\Pipeline\Provider\LlmProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Waaseyaa\Entity\EntityInterface;
-use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
 #[CoversClass(CompilationPipeline::class)]
 final class CompilationPipelineTest extends TestCase
@@ -47,23 +47,16 @@ final class CompilationPipelineTest extends TestCase
         };
 
         $savedItems = [];
-        $repo = new class($savedItems) implements EntityRepositoryInterface {
+        $repo = new class($savedItems) implements KnowledgeItemRepositoryInterface {
             /**
-             * @param array<EntityInterface> $savedItems
+             * @param array<KnowledgeItem> $savedItems
              * @phpstan-ignore-next-line
              */
             public function __construct(private array &$savedItems) {}
-            public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
-            public function findMany(array $ids, ?string $langcode = null, bool $fallback = false): array { return []; }
-            public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
-            public function save(EntityInterface $entity, bool $validate = true): int { $this->savedItems[] = $entity; return 1; }
-            public function delete(EntityInterface $entity): void {}
-            public function exists(string $id): bool { return false; }
-            public function count(array $criteria = []): int { return 0; }
-            public function loadRevision(string $entityId, int $revisionId): ?EntityInterface { return null; }
-            public function rollback(string $entityId, int $targetRevisionId): EntityInterface { throw new \RuntimeException('Not implemented'); }
-            public function saveMany(array $entities, bool $validate = true): array { return []; }
-            public function deleteMany(array $entities): int { return 0; }
+            public function find(string $id): ?KnowledgeItem { return null; }
+            public function findByCommunity(string $communityId): array { return []; }
+            public function save(KnowledgeItem $item): void { $this->savedItems[] = $item; }
+            public function delete(KnowledgeItem $item): void {}
         };
 
         $embeddings = new class implements EmbeddingProviderInterface {
@@ -196,24 +189,17 @@ final class CompilationPipelineTest extends TestCase
     }
 
     /**
-     * @param array<EntityInterface> $savedItems
+     * @param array<KnowledgeItem> $savedItems
      */
-    private function makeCollectingRepo(array &$savedItems): EntityRepositoryInterface
+    private function makeCollectingRepo(array &$savedItems): KnowledgeItemRepositoryInterface
     {
-        return new class($savedItems) implements EntityRepositoryInterface {
+        return new class($savedItems) implements KnowledgeItemRepositoryInterface {
             /** @phpstan-ignore-next-line */
             public function __construct(private array &$savedItems) {}
-            public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
-            public function findMany(array $ids, ?string $langcode = null, bool $fallback = false): array { return []; }
-            public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
-            public function save(EntityInterface $entity, bool $validate = true): int { $this->savedItems[] = $entity; return 1; }
-            public function delete(EntityInterface $entity): void {}
-            public function exists(string $id): bool { return false; }
-            public function count(array $criteria = []): int { return 0; }
-            public function loadRevision(string $entityId, int $revisionId): ?EntityInterface { return null; }
-            public function rollback(string $entityId, int $targetRevisionId): EntityInterface { throw new \RuntimeException('Not implemented'); }
-            public function saveMany(array $entities, bool $validate = true): array { return []; }
-            public function deleteMany(array $entities): int { return 0; }
+            public function find(string $id): ?KnowledgeItem { return null; }
+            public function findByCommunity(string $communityId): array { return []; }
+            public function save(KnowledgeItem $item): void { $this->savedItems[] = $item; }
+            public function delete(KnowledgeItem $item): void {}
         };
     }
 
@@ -254,18 +240,11 @@ final class CompilationPipelineTest extends TestCase
         $llm = new class implements LlmProviderInterface {
             public function complete(string $s, string $u): string { return 'invalid_type'; }
         };
-        $repo = new class implements EntityRepositoryInterface {
-            public function find(string $id, ?string $langcode = null, bool $fallback = false): ?EntityInterface { return null; }
-            public function findMany(array $ids, ?string $langcode = null, bool $fallback = false): array { return []; }
-            public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null): array { return []; }
-            public function save(EntityInterface $entity, bool $validate = true): int { return 1; }
-            public function delete(EntityInterface $entity): void {}
-            public function exists(string $id): bool { return false; }
-            public function count(array $criteria = []): int { return 0; }
-            public function loadRevision(string $entityId, int $revisionId): ?EntityInterface { return null; }
-            public function rollback(string $entityId, int $targetRevisionId): EntityInterface { throw new \RuntimeException('Not implemented'); }
-            public function saveMany(array $entities, bool $validate = true): array { return []; }
-            public function deleteMany(array $entities): int { return 0; }
+        $repo = new class implements KnowledgeItemRepositoryInterface {
+            public function find(string $id): ?KnowledgeItem { return null; }
+            public function findByCommunity(string $communityId): array { return []; }
+            public function save(KnowledgeItem $item): void {}
+            public function delete(KnowledgeItem $item): void {}
         };
         $embeddings = new class implements EmbeddingProviderInterface {
             public function embed(string $text): array { return []; }

@@ -14,5 +14,8 @@ final readonly class SearchResultItem
         public string $summary,
         public ?KnowledgeType $knowledgeType,
         public float $score,
+        public string $accessTier = 'members',
+        public string $sourceOrigin = 'manual',
+        public string $createdAt = '',
     ) {}
 }

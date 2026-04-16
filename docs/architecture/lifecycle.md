@@ -253,11 +253,9 @@ After lifecycle-touching changes:
 ### 2026-04-15 — KnowledgeItem structured source (no runtime dispatch change)
 
 - Added `KnowledgeItemSource` value object + 4 indexed hot columns to `knowledge_item` (see `migrations/20260415_140000_add_knowledge_item_source_columns.php`).
-- Added `Ingestion\NorthCloud\NcHitToKnowledgeItemMapper` — not yet registered in `AppServiceProvider`; no HTTP route, console command, or pipeline step consumes it.
-- No changes to boot, routing, SSR dispatch, or request/response shape.
+- Added `Ingestion\NorthCloud\NcHitToKnowledgeItemMapper` as the reference mapper for NC-sourced provenance; it is registered into the package `MapperRegistry` from `AppServiceProvider::boot()` (see changelog entry below). No HTTP route or pipeline step consumes the mapper directly — `northcloud:sync` does.
+- No changes to boot, routing, SSR dispatch, or request/response shape for normal web requests beyond provider boot wiring noted in the NorthCloud entries.
 - Full rationale and provenance schema in `docs/architecture/knowledge-item-source.md`.
-
-Wiring the mapper (`MapperRegistry` + `NorthCloudServiceProvider` registration) will be a lifecycle-touching change and should update this doc when it lands.
 
 ### 2026-04-15 — NorthCloud mapper wired into AppServiceProvider
 
@@ -265,6 +263,13 @@ Wiring the mapper (`MapperRegistry` + `NorthCloudServiceProvider` registration) 
 - Default community id for NC-sourced items reads from env `GIIKEN_NC_DEFAULT_COMMUNITY_ID`.
 - `NorthCloudServiceProvider` (auto-loaded from `extra.waaseyaa.providers`) contributes the `northcloud:sync` console command and the `NorthCloudClient`, `NcSyncService`, and `NorthCloudSearchProvider` services.
 - No HTTP route or SSR dispatch change. `bin/giiken list` now surfaces `northcloud:sync`; request-lifecycle behavior is unaffected.
+
+### 2026-04-16 — NorthCloud mapper registration made fail-loud
+
+- `AppServiceProvider::registerNorthCloudMappers()` now resolves the package-owned `MapperRegistry` during `boot()` and throws a descriptive `RuntimeException` if the registry binding is unavailable.
+- Failure is additionally logged through `LoggerInterface` when available so missing package-manifest/provider wiring is visible in logs.
+- Added integration coverage to assert `NcHitToKnowledgeItemMapper` is registered exactly once in the live kernel (`tests/Integration/Ingestion/NorthCloud/NorthCloudMapperRegistrationTest.php`).
+- No route, controller, or SSR dispatch changes; this is startup wiring hardening only.
 
 ### 2026-04-16 — NorthCloud sync observability + strict Robinson-Huron relevance
 

@@ -63,7 +63,10 @@
     },
     "scripts": {
         "analyse": "./vendor/bin/phpstan analyse src tests --level=8 --no-progress",
-        "dev": "php bin/giiken serve",
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "bash bin/dev.sh"
+        ],
         "test": "./vendor/bin/phpunit",
         "regen-lock": "@composer update 'waaseyaa/*' --no-plugins --no-install --no-scripts",
         "post-install-cmd": [

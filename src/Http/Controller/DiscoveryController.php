@@ -36,11 +36,14 @@ final class DiscoveryController
     {
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
+        $page = max(1, (int) $inbound->queryParam('page', 1));
 
         if ($this->searchService === null || $this->communityRepo === null) {
             return $this->page('Discovery/Index', [
                 'community' => null,
                 'recentItems' => $this->emptyResultSet(),
+                'page' => $page,
+                'hasMore' => false,
                 'bootError' => 'Discovery services are not configured yet.',
             ], $httpRequest, $account);
         }
@@ -53,17 +56,22 @@ final class DiscoveryController
             return $this->page('Discovery/Index', [
                 'community' => null,
                 'recentItems' => $this->emptyResultSet(),
+                'page' => $page,
+                'hasMore' => false,
             ], $httpRequest, $account);
         }
 
         $recent = $searchService->search(
-            new SearchQuery(query: '', communityId: (string) $community->get('id')),
+            new SearchQuery(query: '', communityId: (string) $community->get('id'), filters: $this->buildSearchFilters($community), page: $page, locale: $community->locale()),
             $account,
         );
 
         return $this->page('Discovery/Index', [
             'community' => $this->serializeCommunity($community),
             'recentItems' => $this->serializeResultSet($recent),
+            'page' => $page,
+            'hasMore' => $page < $recent->totalPages,
+            'pageTitle' => $community->name() . ' | Discover',
         ], $httpRequest, $account);
     }
 
@@ -96,6 +104,7 @@ final class DiscoveryController
         $ctx = $this->resolveCommunityContext($params, $query, $httpRequest, $communityRepo);
         $searchQuery = $ctx['queryValue'];
         $page = max(1, (int) $ctx['inbound']->queryParam('page', 1));
+        $selectedType = trim((string) $ctx['inbound']->queryParam('type', ''));
         $community = $ctx['community'];
 
         if ($community === null) {
@@ -111,6 +120,7 @@ final class DiscoveryController
             new SearchQuery(
                 query: $searchQuery,
                 communityId: (string) $community->get('id'),
+                filters: $this->buildSearchFilters($community, $selectedType),
                 page: $page,
                 locale: $community->locale(),
             ),
@@ -121,7 +131,9 @@ final class DiscoveryController
             'community' => $this->serializeCommunity($community),
             'query' => $searchQuery,
             'results' => $this->serializeResultSet($results),
+            'selectedType' => $selectedType,
             'page' => $page,
+            'pageTitle' => $community->name() . ' | Search',
         ], $httpRequest, $account);
     }
 
@@ -173,6 +185,7 @@ final class DiscoveryController
             new SearchQuery(
                 query: $question,
                 communityId: $communityId,
+                filters: $this->buildSearchFilters($community),
                 pageSize: 5,
                 locale: $community->locale(),
             ),
@@ -192,6 +205,7 @@ final class DiscoveryController
             ], $qaResponse->citations),
             'noRelevantItems' => $qaResponse->noRelevantItems,
             'relatedItems' => $this->serializeResultSet($related),
+            'pageTitle' => $community->name() . ' | Ask',
         ], $httpRequest, $account);
     }
 
@@ -237,6 +251,7 @@ final class DiscoveryController
                 'createdAt' => $item->getCreatedAt(),
                 'updatedAt' => $item->getUpdatedAt(),
             ],
+            'pageTitle' => $community->name() . ' | ' . $item->getTitle(),
         ], $httpRequest, $account);
     }
 
@@ -312,10 +327,34 @@ final class DiscoveryController
                 'summary' => $item->summary,
                 'knowledgeType' => $item->knowledgeType?->value,
                 'score' => $item->score,
+                'accessTier' => $item->accessTier,
+                'sourceOrigin' => $item->sourceOrigin,
+                'createdAt' => $item->createdAt,
             ], $resultSet->items),
             'totalHits' => $resultSet->totalHits,
             'totalPages' => $resultSet->totalPages,
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function buildSearchFilters(Community $community, string $selectedType = ''): array
+    {
+        $filters = [];
+        if ($this->isSagamokCommunity($community)) {
+            $filters['sagamok_curated'] = '1';
+        }
+        if ($selectedType !== '') {
+            $filters['knowledge_type'] = $selectedType;
+        }
+
+        return $filters;
+    }
+
+    private function isSagamokCommunity(Community $community): bool
+    {
+        return $community->slug() === 'sagamok-anishnawbek';
     }
 
     /**

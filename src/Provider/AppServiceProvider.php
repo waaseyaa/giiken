@@ -6,6 +6,7 @@ namespace App\Provider;
 
 use App\Access\KnowledgeItemAccessPolicy;
 use App\Console\IngestFileCommand;
+use App\Console\SearchReindexCommand;
 use App\Console\SeedTestCommunityCommand;
 use App\Pipeline\CompilationPipeline;
 use App\Entity\Community\Community;
@@ -55,6 +56,7 @@ use Waaseyaa\Entity\EntityType;
 use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\Foundation\Asset\ViteAssetManager;
 use Waaseyaa\Foundation\Http\Inertia\InertiaFullPageRendererInterface;
+use Waaseyaa\Foundation\Log\LoggerInterface;
 use Waaseyaa\EntityStorage\Connection\SingleConnectionResolver;
 use Waaseyaa\EntityStorage\Driver\SqlStorageDriver;
 use Waaseyaa\EntityStorage\EntityRepository as WaaseyaaEntityRepository;
@@ -223,22 +225,10 @@ final class AppServiceProvider extends ServiceProvider
         });
 
         $this->singleton(CompilationPipeline::class, function (): CompilationPipeline {
-            $etm        = $this->resolve(EntityTypeManager::class);
-            $database   = $this->resolve(DatabaseInterface::class);
-            $dispatcher = $this->resolve(PsrEventDispatcherInterface::class);
-            $driver     = new SqlStorageDriver(new SingleConnectionResolver($database), 'id');
-            $entityRepo = new WaaseyaaEntityRepository(
-                $etm->getDefinition('knowledge_item'),
-                $driver,
-                $dispatcher,
-                revisionDriver: null,
-                database: $database,
-            );
-
             return new CompilationPipeline(
                 $this->resolve(LlmProviderInterface::class),
                 $this->resolve(EmbeddingProviderInterface::class),
-                $entityRepo,
+                $this->resolve(KnowledgeItemRepositoryInterface::class),
             );
         });
 
@@ -258,11 +248,27 @@ final class AppServiceProvider extends ServiceProvider
     {
         $defaultCommunityId = (string) (getenv('GIIKEN_NC_DEFAULT_COMMUNITY_ID') ?: '');
 
+        if (!class_exists(MapperRegistry::class)) {
+            return;
+        }
+
         try {
             $registry = $this->resolve(MapperRegistry::class);
-        } catch (\Throwable) {
-            // NorthCloud package not present/loaded — nothing to register.
-            return;
+        } catch (\Throwable $exception) {
+            $message = 'NorthCloud MapperRegistry could not be resolved during AppServiceProvider::boot(). '
+                . 'NcHitToKnowledgeItemMapper was not registered, so northcloud:sync cannot map hits into Giiken entities. '
+                . 'Ensure Waaseyaa\\NorthCloud\\Provider\\NorthCloudServiceProvider is present in the package manifest, then run ./bin/giiken optimize:manifest.';
+
+            try {
+                $logger = $this->resolve(LoggerInterface::class);
+                if ($logger instanceof LoggerInterface) {
+                    $logger->error($message, ['exception' => $exception]);
+                }
+            } catch (\Throwable) {
+                // Logging is best-effort; the thrown exception below is the hard signal.
+            }
+
+            throw new \RuntimeException($message, previous: $exception);
         }
 
         foreach ($registry->all() as $mapper) {
@@ -377,17 +383,26 @@ final class AppServiceProvider extends ServiceProvider
         $this->singleton(InertiaFullPageRendererInterface::class, static fn (): InertiaFullPageRendererInterface => $renderer);
     }
 
+    public function boot(): void
+    {
+        // Register NC mappers after all providers are loaded so the package
+        // MapperRegistry binding exists in both HTTP and CLI runtimes.
+        $this->registerNorthCloudMappers();
+    }
+
     public function commands(
         EntityTypeManager $entityTypeManager,
         DatabaseInterface $database,
         SymfonyEventDispatcherContract $dispatcher,
     ): array {
-        $this->registerNorthCloudMappers();
-
         return [
             new SeedTestCommunityCommand(
                 $this->resolve(CommunityRepositoryInterface::class),
                 $this->resolve(KnowledgeItemRepositoryInterface::class),
+                $entityTypeManager,
+            ),
+            new SearchReindexCommand(
+                $this->resolve(SearchIndexerInterface::class),
                 $entityTypeManager,
             ),
             new IngestFileCommand(

@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Console;
 use App\Console\IngestFileCommand;
 use App\Entity\Community\Community;
 use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use App\Ingestion\IngestionHandlerRegistry;
 use App\Pipeline\CompilationPipeline;
 use App\Pipeline\Provider\EmbeddingProviderInterface;
@@ -17,7 +18,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
-use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
 
 /**
  * Unit tests for the failure paths of {@see IngestFileCommand}. The happy
@@ -105,7 +105,7 @@ final class IngestFileCommandTest extends TestCase
         $pipeline = new CompilationPipeline(
             $this->createMock(LlmProviderInterface::class),
             $this->createMock(EmbeddingProviderInterface::class),
-            $this->createMock(EntityRepositoryInterface::class),
+            $this->createMock(KnowledgeItemRepositoryInterface::class),
         );
 
         return new IngestFileCommand($communityRepo, $registry, $pipeline);

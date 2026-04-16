@@ -4,7 +4,6 @@ namespace App\Tests\Unit\Pipeline\Step;
 
 use App\Entity\KnowledgeItem\KnowledgeType;
 use App\Pipeline\CompilationPayload;
-use App\Pipeline\PipelineException;
 use App\Pipeline\Provider\LlmProviderInterface;
 use App\Pipeline\Step\StructureStep;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -81,7 +80,7 @@ final class StructureStepTest extends TestCase
     }
 
     #[Test]
-    public function it_throws_after_exhausting_retries(): void
+    public function it_falls_back_when_json_remains_invalid_after_retries(): void
     {
         $llm = new class implements LlmProviderInterface {
             public function complete(string $s, string $u): string { return 'not json'; }
@@ -93,8 +92,15 @@ final class StructureStepTest extends TestCase
         $payload->knowledgeType = KnowledgeType::Cultural;
         $context = new PipelineContext(pipelineId: 'test', startedAt: time());
 
-        $this->expectException(PipelineException::class);
-        $this->expectExceptionMessage('StructureStep');
-        $step->process(['payload' => $payload], $context);
+        $result = $step->process(['payload' => $payload], $context);
+
+        $this->assertTrue($result->success);
+        $this->assertSame('Content', $payload->title);
+        $this->assertSame('Content', $payload->summary);
+        $this->assertSame([], $payload->people);
+        $this->assertSame([], $payload->places);
+        $this->assertSame([], $payload->topics);
+        $this->assertSame([], $payload->keyPassages);
+        $this->assertSame('Content', $payload->content);
     }
 }

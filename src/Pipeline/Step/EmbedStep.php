@@ -5,6 +5,7 @@ namespace App\Pipeline\Step;
 use App\Entity\KnowledgeItem\Source\Attribution;
 use App\Entity\KnowledgeItem\Source\CopyrightStatus;
 use App\Entity\KnowledgeItem\KnowledgeItem;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use App\Entity\KnowledgeItem\Source\KnowledgeItemSource;
 use App\Entity\KnowledgeItem\Source\OriginType;
 use App\Entity\KnowledgeItem\Source\Rights;
@@ -15,12 +16,11 @@ use Waaseyaa\AI\Pipeline\PipelineContext;
 use Waaseyaa\AI\Pipeline\PipelineStepInterface;
 use Waaseyaa\AI\Pipeline\StepResult;
 use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
-
 final class EmbedStep implements PipelineStepInterface
 {
     public function __construct(
         private readonly EmbeddingProviderInterface $embeddings,
-        private readonly EntityRepositoryInterface $repository,
+        private readonly KnowledgeItemRepositoryInterface|EntityRepositoryInterface $repository,
     ) {}
 
     public function process(array $input, PipelineContext $context): StepResult

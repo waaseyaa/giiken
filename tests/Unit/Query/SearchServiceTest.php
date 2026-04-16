@@ -567,6 +567,64 @@ final class SearchServiceTest extends TestCase
         self::assertSame('what is the', $seen);
     }
 
+    #[Test]
+    public function hybrid_search_falls_back_to_repository_match_when_index_returns_no_hits(): void
+    {
+        $this->ftsProvider->method('search')->willReturn(SearchResult::empty());
+        $this->embeddingProvider->method('search')->willReturn([]);
+
+        $governance = KnowledgeItem::make([
+            'id' => 'gov-1',
+            'community_id' => self::COMMUNITY,
+            'title' => 'Sagamok governance baseline',
+            'content' => 'Governance and leadership reference brief.',
+            'access_tier' => AccessTier::Public->value,
+            'created_at' => '2026-01-01T00:00:00+00:00',
+        ]);
+        $this->repository
+            ->method('findByCommunity')
+            ->with(self::COMMUNITY)
+            ->willReturn([$governance]);
+        $this->repository
+            ->method('find')
+            ->willReturn(null);
+
+        $result = $this->service->search(
+            new SearchQuery(query: 'governance', communityId: self::COMMUNITY),
+            $this->memberAccount(),
+        );
+
+        self::assertCount(1, $result->items);
+        self::assertSame('gov-1', $result->items[0]->id);
+    }
+
+    #[Test]
+    public function card_summary_strips_markdown_and_deduplicates_title_prefix(): void
+    {
+        $item = KnowledgeItem::make([
+            'id' => 'brief-1',
+            'community_id' => self::COMMUNITY,
+            'title' => 'Sagamok Anishnawbek language and culture (starter brief)',
+            'content' => "# Sagamok Anishnawbek language and culture (starter brief)\n\n## Scope\nStarter cultural and language context item for Giiken local compilation.\n\n- Keep attribution.\n- Respect protocol.",
+            'access_tier' => AccessTier::Public->value,
+            'created_at' => '2026-01-01T00:00:00+00:00',
+        ]);
+
+        $this->repository
+            ->method('findByCommunity')
+            ->with(self::COMMUNITY)
+            ->willReturn([$item]);
+
+        $result = $this->service->search(
+            new SearchQuery(query: '', communityId: self::COMMUNITY),
+            $this->memberAccount(),
+        );
+
+        self::assertCount(1, $result->items);
+        self::assertStringStartsWith('Scope Starter cultural and language context item for Giiken local compilation.', $result->items[0]->summary);
+        self::assertStringNotContainsString('#', $result->items[0]->summary);
+    }
+
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------

@@ -57,6 +57,7 @@ class SearchService
         );
 
         $accessible = $this->filterAccessible($all, $account);
+        $accessible = $this->applyQueryFilters($accessible, $query);
 
         return $this->paginate(
             items: $accessible,
@@ -132,6 +133,15 @@ class SearchService
             }
             $accessible[] = $item;
         }
+        $accessible = $this->applyQueryFilters($accessible, $query);
+
+        if ($accessible === []) {
+            [$fallbackItems, $fallbackScores] = $this->fallbackSearchFromRepository($query, $account);
+            if ($fallbackItems !== []) {
+                $accessible = $fallbackItems;
+                $scores = $fallbackScores;
+            }
+        }
 
         return $this->paginate(
             items: $accessible,
@@ -157,12 +167,15 @@ class SearchService
         $slice      = array_slice($items, $offset, $pageSize);
 
         $resultItems = array_map(
-            static fn (KnowledgeItem $item): SearchResultItem => new SearchResultItem(
+            fn (KnowledgeItem $item): SearchResultItem => new SearchResultItem(
                 id: (string) ($item->get('id') ?? ''),
                 title: $item->getTitle(),
-                summary: $item->getContent(),
+                summary: $this->buildCardSummary($item),
                 knowledgeType: $item->getKnowledgeType(),
                 score: $scoreMap[(string) ($item->get('id') ?? '')] ?? 0.0,
+                accessTier: $item->getAccessTier()->value,
+                sourceOrigin: (string) ($item->get('source_origin_type') ?? 'manual'),
+                createdAt: $item->getCreatedAt(),
             ),
             $slice,
         );
@@ -343,5 +356,188 @@ class SearchService
             public function isAuthenticated(): bool { return false; }
             public function hasPermission(string $permission): bool { return false; }
         };
+    }
+
+    /**
+     * @param KnowledgeItem[] $items
+     * @return KnowledgeItem[]
+     */
+    private function applyQueryFilters(array $items, SearchQuery $query): array
+    {
+        $filtered = $items;
+
+        $typeFilter = trim((string) ($query->filters['knowledge_type'] ?? ''));
+        if ($typeFilter !== '') {
+            $filtered = array_values(array_filter(
+                $filtered,
+                static fn (KnowledgeItem $item): bool => $item->getKnowledgeType()?->value === $typeFilter,
+            ));
+        }
+
+        $sagamokCurated = (string) ($query->filters['sagamok_curated'] ?? '') === '1';
+        if ($sagamokCurated) {
+            $filtered = $this->filterSagamokNoise($filtered);
+        }
+
+        return $filtered;
+    }
+
+    /**
+     * Reduce obvious local-test noise for the Sagamok slice.
+     *
+     * @param KnowledgeItem[] $items
+     * @return KnowledgeItem[]
+     */
+    private function filterSagamokNoise(array $items): array
+    {
+        $placeholderTitles = [
+            'welcome to giiken' => true,
+            'governance overview' => true,
+            'land and territory' => true,
+        ];
+        $keywords = ['sagamok', 'anishnawbek', 'anishinabek nation', 'anishinaabe', 'robinson-huron', 'north shore'];
+
+        $deduped = [];
+        $seenNorthCloudTitles = [];
+        foreach ($items as $item) {
+            $title = trim($item->getTitle());
+            $normalizedTitle = mb_strtolower($title);
+
+            if (isset($placeholderTitles[$normalizedTitle])) {
+                continue;
+            }
+
+            $origin = (string) ($item->get('source_origin_type') ?? 'manual');
+            if ($origin === 'northcloud') {
+                if (isset($seenNorthCloudTitles[$normalizedTitle])) {
+                    continue;
+                }
+
+                $haystack = mb_strtolower(
+                    $item->getTitle() . ' ' .
+                    $item->getContent() . ' ' .
+                    (string) ($item->get('source_reference_url') ?? ''),
+                );
+
+                $matches = false;
+                foreach ($keywords as $keyword) {
+                    if (str_contains($haystack, $keyword)) {
+                        $matches = true;
+                        break;
+                    }
+                }
+
+                if (!$matches) {
+                    continue;
+                }
+
+                $seenNorthCloudTitles[$normalizedTitle] = true;
+            }
+
+            $deduped[] = $item;
+        }
+
+        return $deduped;
+    }
+
+    /**
+     * Safety net when the FTS index is stale/missing rows: run a lightweight
+     * in-repository lexical match so discovery does not appear empty.
+     *
+     * @return array{0: KnowledgeItem[], 1: array<string, float>}
+     */
+    private function fallbackSearchFromRepository(SearchQuery $query, AccountInterface $account): array
+    {
+        $terms = $this->tokenizeForFts($query->query, $query->locale);
+        if ($terms === []) {
+            $raw = trim(mb_strtolower($query->query));
+            if ($raw !== '') {
+                $terms = [$raw];
+            }
+        }
+        if ($terms === []) {
+            return [[], []];
+        }
+
+        $all = $this->repository->findByCommunity($query->communityId);
+        $candidates = $this->applyQueryFilters($this->filterAccessible($all, $account), $query);
+
+        /** @var array<string, KnowledgeItem> $itemsById */
+        $itemsById = [];
+        /** @var array<string, float> $scoreMap */
+        $scoreMap = [];
+        foreach ($candidates as $item) {
+            $id = (string) ($item->get('id') ?? '');
+            if ($id === '') {
+                continue;
+            }
+
+            $haystack = mb_strtolower($item->getTitle() . ' ' . $item->getContent());
+            $matches = 0;
+            foreach ($terms as $term) {
+                if ($term !== '' && str_contains($haystack, $term)) {
+                    $matches++;
+                }
+            }
+            if ($matches === 0) {
+                continue;
+            }
+
+            $itemsById[$id] = $item;
+            $scoreMap[$id] = $matches / count($terms);
+        }
+
+        arsort($scoreMap);
+        $orderedItems = [];
+        foreach (array_keys($scoreMap) as $id) {
+            $orderedItems[] = $itemsById[$id];
+        }
+
+        return [$orderedItems, $scoreMap];
+    }
+
+    private function buildCardSummary(KnowledgeItem $item): string
+    {
+        $content = trim($item->getContent());
+        if ($content === '') {
+            return 'No summary available.';
+        }
+
+        $clean = $this->stripMarkdownNoise($content);
+        $title = trim($item->getTitle());
+        $normalizedTitle = $title !== '' ? $this->stripMarkdownNoise($title) : '';
+        if ($normalizedTitle !== '' && mb_stripos($clean, $normalizedTitle) === 0) {
+            $clean = trim((string) mb_substr($clean, mb_strlen($normalizedTitle)));
+            $clean = ltrim($clean, ":-| \t\n\r\0\x0B");
+        }
+
+        if ($clean === '') {
+            $clean = $this->stripMarkdownNoise($title . ' ' . $content);
+        }
+        if ($clean === '') {
+            return 'No summary available.';
+        }
+
+        $limit = 220;
+        if (mb_strlen($clean) <= $limit) {
+            return $clean;
+        }
+
+        return rtrim((string) mb_substr($clean, 0, $limit - 1)) . '…';
+    }
+
+    private function stripMarkdownNoise(string $text): string
+    {
+        $plain = str_replace(["\r\n", "\r"], "\n", $text);
+        $plain = preg_replace('/```.*?```/su', ' ', $plain) ?? $plain;
+        $plain = preg_replace('/`([^`]+)`/u', '$1', $plain) ?? $plain;
+        $plain = preg_replace('/\[(.*?)\]\((.*?)\)/u', '$1', $plain) ?? $plain;
+        $plain = preg_replace('/^\s{0,3}#{1,6}\s*/mu', '', $plain) ?? $plain;
+        $plain = preg_replace('/^\s*[-*+]\s+/mu', '', $plain) ?? $plain;
+        $plain = preg_replace('/^\s*\d+\.\s+/mu', '', $plain) ?? $plain;
+        $plain = preg_replace('/[*_]{1,3}([^*_]+)[*_]{1,3}/u', '$1', $plain) ?? $plain;
+        $plain = preg_replace('/\s+/u', ' ', $plain) ?? $plain;
+
+        return trim($plain);
     }
 }

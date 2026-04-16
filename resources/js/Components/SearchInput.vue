@@ -5,6 +5,7 @@ import { router } from '@inertiajs/vue3'
 const props = defineProps<{
   communitySlug: string
   initialQuery?: string
+  mode?: 'auto' | 'search' | 'ask'
 }>()
 
 const query = ref(props.initialQuery ?? '')
@@ -13,7 +14,12 @@ function submit() {
   const q = query.value.trim()
   if (!q) return
 
-  const isQuestion = q.includes('?') || q.split(/\s+/).length > 5
+  const explicitMode = props.mode ?? 'auto'
+  const isQuestion = explicitMode === 'ask'
+    ? true
+    : explicitMode === 'search'
+      ? false
+      : q.includes('?') || q.split(/\s+/).length > 5
   const route = isQuestion
     ? `/${props.communitySlug}/ask`
     : `/${props.communitySlug}/search`
@@ -31,7 +37,7 @@ function submit() {
       class="flex-1 px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-base"
     />
     <button type="submit" class="px-6 py-3 bg-primary text-on-primary rounded-lg hover:bg-primary-hover font-medium">
-      Ask →
+      {{ (mode ?? 'auto') === 'search' ? 'Search →' : (mode ?? 'auto') === 'ask' ? 'Ask →' : 'Go →' }}
     </button>
   </form>
 </template>

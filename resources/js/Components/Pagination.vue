@@ -6,11 +6,19 @@ const props = defineProps<{
   totalPages: number
   baseUrl: string
   query?: string
+  extraQuery?: Record<string, string | number | undefined>
 }>()
 
 function pageUrl(page: number): string {
   const params = new URLSearchParams()
   if (props.query) params.set('q', props.query)
+  if (props.extraQuery) {
+    Object.entries(props.extraQuery).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.set(key, String(value))
+      }
+    })
+  }
   params.set('page', String(page))
   return `${props.baseUrl}?${params.toString()}`
 }

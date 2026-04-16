@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import DiscoveryLayout from '@/Layouts/DiscoveryLayout.vue'
-import { Link } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 import { KNOWLEDGE_TYPE_CONFIG } from '@/types'
 import type { Community, KnowledgeItem } from '@/types'
 
 const props = defineProps<{
   community: Community
   item: KnowledgeItem
+  pageTitle?: string
 }>()
 
 const typeConfig = props.item.knowledgeType ? KNOWLEDGE_TYPE_CONFIG[props.item.knowledgeType] : null
 </script>
 
 <template>
+  <Head :title="pageTitle ?? `${community.name} | ${item.title}`" />
   <DiscoveryLayout :community="community">
     <div class="max-w-3xl mx-auto px-6 py-8">
       <Link :href="`/${community.slug}`" class="text-sm text-primary hover:underline mb-4 inline-block">

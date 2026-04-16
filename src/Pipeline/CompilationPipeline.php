@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace App\Pipeline;
 
 use App\Entity\KnowledgeItem\AccessTier;
+use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use App\Entity\KnowledgeItem\KnowledgeType;
 use App\Ingestion\RawDocument;
 use App\Pipeline\Provider\EmbeddingProviderInterface;
@@ -14,14 +15,12 @@ use App\Pipeline\Step\StructureStep;
 use App\Pipeline\Step\TranscribeStep;
 use Waaseyaa\AI\Pipeline\PipelineContext;
 use Waaseyaa\AI\Pipeline\PipelineStepInterface;
-use Waaseyaa\Entity\Repository\EntityRepositoryInterface;
-
 final class CompilationPipeline
 {
     public function __construct(
         private readonly LlmProviderInterface $llm,
         private readonly EmbeddingProviderInterface $embeddings,
-        private readonly EntityRepositoryInterface $repository,
+        private readonly KnowledgeItemRepositoryInterface $repository,
     ) {}
 
     /**
