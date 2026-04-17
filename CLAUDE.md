@@ -10,14 +10,14 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 
 ## Boot-to-browser status (as of 2026-04-11)
 
-✅ **Phase A green.** Boot, migrations, seed, and SSR dispatch all work end-to-end on `waaseyaa/* ^0.1.0-alpha.144`.
+✅ **Phase A green.** Boot, migrations, seed, and SSR dispatch all work end-to-end on `waaseyaa/* ^0.1.0-alpha.145`.
 
 Verified smoke path:
 
 ```
-./bin/giiken migrate                              # 1 migration applied
-./bin/giiken giiken:seed:test-community           # community + 3 knowledge items
-./bin/giiken serve                                # or php -S 127.0.0.1:8080 -t public public/index.php
+./vendor/bin/waaseyaa migrate                     # 1 migration applied
+./vendor/bin/waaseyaa giiken:seed:test-community  # community + 3 knowledge items
+./vendor/bin/waaseyaa serve                       # or php -S 127.0.0.1:8080 -t public public/index.php
 curl http://127.0.0.1:8080/                       # 200, Inertia "Discover"
 curl http://127.0.0.1:8080/test-community         # 200, Inertia "Discovery/Index" with seeded items
 ```
@@ -31,14 +31,6 @@ PHPUnit: 238/238 passing.
 - giiken#42 — `AppServiceProvider` provider registrations.
 - giiken#43 — entity schema migrations (`community`, `knowledge_item`, `wiki_lint_report`).
 - giiken#44 — `giiken:seed:test-community` console command.
-
-### `./bin/giiken` is the canonical CLI entry point
-
-`./bin/giiken` is the giiken-local entry that loads `.env` and uses the project root. Use it for everything: `./bin/giiken migrate`, `./bin/giiken serve`, etc.
-
-**Why not `./bin/waaseyaa`?** The `waaseyaa/cli` package declares `bin/waaseyaa` as a Composer bin entry. On `composer install` / `update`, Composer writes a proxy into the consumer's bin directory — which for giiken is `./bin/`. That silently overwrites any hand-written `bin/waaseyaa` wrapper with a proxy that does **not** load `.env` and resolves `projectRoot` relative to its own vendor location. That path lands in `vendor/waaseyaa/cli/storage/waaseyaa.sqlite` and falls through to `APP_ENV=production`, tripping the `DatabaseBootstrapper` "must already exist" guard. Renaming the local wrapper to `bin/giiken` removes the collision entirely.
-
-`composer.json` runs a `post-install-cmd` / `post-update-cmd` that invokes `scripts/repoint-vendor-bin.php`, which replaces `vendor/bin/waaseyaa` with a symlink to `../../bin/giiken`. That way muscle-memory invocations of `./vendor/bin/waaseyaa` still load `.env` correctly. The canonical command is `./bin/giiken`. This is a workaround for waaseyaa/framework#1226; once that lands, delete `scripts/repoint-vendor-bin.php`, the two composer hook entries, and this paragraph.
 
 ## Commands
 

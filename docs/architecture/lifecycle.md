@@ -17,9 +17,10 @@ This document describes how a request moves through Giiken at runtime, where app
 
 1. **CLI-server static file guard:** When running under PHP's built-in server (`PHP_SAPI === 'cli-server'`), checks if the request maps to an existing file on disk and returns `false` to let the server serve it directly. No effect on production servers.
 2. Loads Composer autoloader.
-3. Loads `.env` with `Symfony Dotenv` (fails fast with HTTP 500 on parse/path error).
-4. Instantiates `Waaseyaa\Foundation\Kernel\HttpKernel` with project root.
-5. Calls `$kernel->handle()` and then `$response->send()`.
+3. Instantiates `Waaseyaa\Foundation\Kernel\HttpKernel` with project root (`dirname(__DIR__)`).
+4. Calls `$kernel->handle()->send()`.
+
+`.env` loading is owned by the kernel (`AbstractKernel::boot()` invokes `EnvLoader::load()`), not the entry point — see §1.2 step 1.
 
 ### 1.2 Kernel Boot Sequence
 
@@ -202,7 +203,7 @@ No request path, routing, or boot sequence is affected by adding or swapping the
 
 ### 4.3 Config-time failures
 
-`public/index.php` catches dotenv format/path errors before kernel boot and returns a plain HTTP 500 message.
+`.env` parse and path errors raise inside `EnvLoader::load()` during `AbstractKernel::boot()`. `HttpKernel::handle()` catches bootstrap exceptions and emits a plain HTTP 500 response; `ConsoleKernel::handle()` renders them to stderr and exits non-zero.
 
 ## 5. Extension Points
 
