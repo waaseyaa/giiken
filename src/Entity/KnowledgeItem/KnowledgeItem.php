@@ -377,10 +377,7 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
      */
     public function toSearchDocument(): array
     {
-        return [
-            'title' => $this->getTitle(),
-            'body'  => $this->getContent(),
-        ];
+        return (new KnowledgeItemSearchDocumentFactory())->make($this);
     }
 
     /**
@@ -388,12 +385,7 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
      */
     public function toSearchMetadata(): array
     {
-        return [
-            'entity_type'    => 'knowledge_item',
-            'community_id'   => $this->getCommunityId(),
-            'knowledge_type' => $this->getKnowledgeType()?->value ?? '',
-            'access_tier'    => $this->getAccessTier()->value,
-        ];
+        return (new KnowledgeItemSearchMetadataFactory())->make($this);
     }
 
     /**
@@ -404,35 +396,6 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
      */
     public function toMarkdown(): string
     {
-        $lines = [];
-        $lines[] = "# {$this->getTitle()}";
-        $lines[] = '';
-
-        $metaParts = [];
-
-        $knowledgeType = $this->getKnowledgeType();
-        if ($knowledgeType !== null) {
-            $metaParts[] = '**Type:** ' . ucfirst($knowledgeType->value);
-        }
-
-        $metaParts[] = '**Access:** ' . ucfirst($this->getAccessTier()->value);
-
-        $compiledAt = $this->getCompiledAt();
-        if ($compiledAt !== '') {
-            $metaParts[] = '**Compiled:** ' . $compiledAt;
-        }
-
-        $lines[] = implode(' | ', $metaParts);
-        $lines[] = '';
-        $lines[] = $this->getContent();
-
-        $sourceMediaIds = $this->getSourceMediaIds();
-        if ($sourceMediaIds !== []) {
-            $lines[] = '';
-            $lines[] = '---';
-            $lines[] = 'Sources: ' . implode(', ', $sourceMediaIds);
-        }
-
-        return implode("\n", $lines);
+        return (new KnowledgeItemMarkdownPresenter())->render($this);
     }
 }
