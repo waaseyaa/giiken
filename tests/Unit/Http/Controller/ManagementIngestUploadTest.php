@@ -11,6 +11,8 @@ use App\Http\Inertia\InertiaHttpResponder;
 use App\Ingestion\Handler\MediaIngestionHandler;
 use App\Ingestion\IngestionHandlerRegistry;
 use App\Ingestion\Job\TranscribeJob;
+use App\Ingestion\Upload\UploadValidatorInterface;
+use App\Ingestion\Upload\ValidatedUpload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -60,7 +62,7 @@ final class ManagementIngestUploadTest extends TestCase
         $communityRepo = $this->createMock(CommunityRepositoryInterface::class);
         $communityRepo->method('findBySlug')->with('test-community')->willReturn($community);
 
-        $controller = $this->makeController($communityRepo, $registry);
+        $controller = $this->makeController($communityRepo, $registry, $this->acceptingValidator('audio/mpeg'));
 
         $request = $this->requestWithUpload(
             uri:              '/test-community/manage/ingest',
@@ -108,7 +110,7 @@ final class ManagementIngestUploadTest extends TestCase
         $communityRepo = $this->createMock(CommunityRepositoryInterface::class);
         $communityRepo->method('findBySlug')->with('test-community')->willReturn($community);
 
-        $controller = $this->makeController($communityRepo, $registry);
+        $controller = $this->makeController($communityRepo, $registry, $this->acceptingValidator('audio/mpeg'));
 
         // No file attached.
         $request = HttpRequest::create('/test-community/manage/ingest', 'POST');
@@ -145,7 +147,7 @@ final class ManagementIngestUploadTest extends TestCase
         $communityRepo = $this->createMock(CommunityRepositoryInterface::class);
         $communityRepo->method('findBySlug')->with('test-community')->willReturn($community);
 
-        $controller = $this->makeController($communityRepo, $registry);
+        $controller = $this->makeController($communityRepo, $registry, $this->acceptingValidator('application/zip'));
 
         $request = $this->requestWithUpload(
             uri:              '/test-community/manage/ingest',
@@ -185,7 +187,7 @@ final class ManagementIngestUploadTest extends TestCase
         $communityRepo = $this->createMock(CommunityRepositoryInterface::class);
         $communityRepo->method('findBySlug')->with('test-community')->willReturn($community);
 
-        $controller = $this->makeController($communityRepo, $registry);
+        $controller = $this->makeController($communityRepo, $registry, $this->acceptingValidator('audio/mpeg'));
         $request = $this->requestWithUpload(
             uri: '/test-community/manage/ingest',
             fileContents: 'ID3 fake mp3 bytes',
@@ -207,7 +209,11 @@ final class ManagementIngestUploadTest extends TestCase
     // Helpers
     // ------------------------------------------------------------------
 
-    private function makeController(CommunityRepositoryInterface $communityRepo, IngestionHandlerRegistry $registry): ManagementController
+    private function makeController(
+        CommunityRepositoryInterface $communityRepo,
+        IngestionHandlerRegistry $registry,
+        ?UploadValidatorInterface $uploadValidator = null,
+    ): ManagementController
     {
         $renderer = new class implements InertiaFullPageRendererInterface {
             /** @param array<string, mixed> $pageObject */
@@ -222,7 +228,28 @@ final class ManagementIngestUploadTest extends TestCase
             inertiaHttp: new InertiaHttpResponder($renderer),
             exportService: null,
             handlerRegistry: $registry,
+            roleResolver: null,
+            uploadValidator: $uploadValidator,
         );
+    }
+
+    private function acceptingValidator(string $mimeType): UploadValidatorInterface
+    {
+        return new class($mimeType) implements UploadValidatorInterface {
+            public function __construct(
+                private readonly string $mimeType,
+            ) {}
+
+            public function validate(UploadedFile $upload): ValidatedUpload
+            {
+                return new ValidatedUpload(
+                    path: $upload->getPathname(),
+                    originalFilename: (string) $upload->getClientOriginalName(),
+                    mimeType: $this->mimeType,
+                    sizeBytes: (int) $upload->getSize(),
+                );
+            }
+        };
     }
 
     private function requestWithUpload(

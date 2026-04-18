@@ -13,6 +13,7 @@ use App\Export\ExportServiceInterface;
 use App\Http\Inertia\InertiaHttpResponder;
 use App\Ingestion\IngestionException;
 use App\Ingestion\IngestionHandlerRegistry;
+use App\Ingestion\Upload\UploadValidatorInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
@@ -29,6 +30,7 @@ final class ManagementController
         private readonly ?ExportServiceInterface $exportService = null,
         private readonly ?IngestionHandlerRegistry $handlerRegistry = null,
         private readonly ?CommunityRoleResolverInterface $roleResolver = null,
+        private readonly ?UploadValidatorInterface $uploadValidator = null,
     ) {}
 
     /**
@@ -153,7 +155,7 @@ final class ManagementController
      */
     public function ingestUpload(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
-        if ($this->communityRepo === null || $this->handlerRegistry === null) {
+        if ($this->communityRepo === null || $this->handlerRegistry === null || $this->uploadValidator === null) {
             return $this->page('Management/Ingestion', [
                 'community' => null,
                 'bootError' => 'Ingestion services are not configured yet.',
@@ -187,13 +189,12 @@ final class ManagementController
             ], $httpRequest, $account);
         }
 
-        $mimeType = (string) ($upload->getClientMimeType() ?: $upload->getMimeType());
-
         try {
+            $validatedUpload = $this->uploadValidator->validate($upload);
             $raw = $this->handlerRegistry->handle(
-                filePath:         $upload->getPathname(),
-                mimeType:         $mimeType,
-                originalFilename: $upload->getClientOriginalName(),
+                filePath:         $validatedUpload->path,
+                mimeType:         $validatedUpload->mimeType,
+                originalFilename: $validatedUpload->originalFilename,
                 community:        $community,
             );
         } catch (IngestionException $e) {

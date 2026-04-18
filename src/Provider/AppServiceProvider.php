@@ -35,6 +35,8 @@ use App\Ingestion\Handler\MarkdownIngestionHandler;
 use App\Ingestion\Handler\MediaIngestionHandler;
 use App\Ingestion\IngestionHandlerRegistry;
 use App\Ingestion\NorthCloud\NcHitToKnowledgeItemMapper;
+use App\Ingestion\Upload\UploadValidatorInterface;
+use App\Ingestion\Upload\UploadedFileValidator;
 use Waaseyaa\NorthCloud\Sync\MapperRegistry;
 use App\Pipeline\Provider\EmbeddingProviderInterface;
 use App\Pipeline\Provider\LlmProviderInterface;
@@ -151,6 +153,19 @@ final class AppServiceProvider extends ServiceProvider
             return new NullLlmProvider();
         });
         $this->singleton(CommunityRoleResolverInterface::class, static fn (): CommunityRoleResolverInterface => new CommunityRoleResolver());
+        $this->singleton(UploadValidatorInterface::class, function (): UploadValidatorInterface {
+            /** @var mixed $maxBytes */
+            $maxBytes = $this->config['upload_max_bytes'] ?? 0;
+            /** @var mixed $allowedMimeTypes */
+            $allowedMimeTypes = $this->config['upload_allowed_mime_types'] ?? [];
+
+            return new UploadedFileValidator(
+                maxBytes: is_int($maxBytes) ? $maxBytes : 0,
+                allowedMimeTypes: is_array($allowedMimeTypes)
+                    ? array_values(array_filter($allowedMimeTypes, static fn (mixed $value): bool => is_string($value) && $value !== ''))
+                    : [],
+            );
+        });
         $this->singleton(KnowledgeItemAccessPolicy::class, function (): KnowledgeItemAccessPolicy {
             return new KnowledgeItemAccessPolicy($this->resolve(CommunityRoleResolverInterface::class));
         });
