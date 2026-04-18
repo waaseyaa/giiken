@@ -102,8 +102,72 @@ final class ImportService implements ImportServiceInterface
             throw new RuntimeException("Cannot open ZIP archive: {$archivePath}");
         }
 
-        $zip->extractTo($targetDir);
-        $zip->close();
+        try {
+            for ($index = 0; $index < $zip->numFiles; $index++) {
+                $entryName = $zip->getNameIndex($index);
+                if (!is_string($entryName)) {
+                    throw new RuntimeException('Archive contains an unreadable entry name.');
+                }
+
+                $relativePath = $this->validateArchiveEntryPath($entryName);
+                $destination = $targetDir . '/' . $relativePath;
+
+                if (str_ends_with($entryName, '/')) {
+                    if (!is_dir($destination) && !mkdir($concurrentDirectory = $destination, 0700, true) && !is_dir($concurrentDirectory)) {
+                        throw new RuntimeException("Failed to create archive directory: {$relativePath}");
+                    }
+
+                    continue;
+                }
+
+                $destinationDir = dirname($destination);
+                if (!is_dir($destinationDir) && !mkdir($concurrentDirectory = $destinationDir, 0700, true) && !is_dir($concurrentDirectory)) {
+                    throw new RuntimeException("Failed to create archive directory: {$relativePath}");
+                }
+
+                $stream = $zip->getStream($entryName);
+                if ($stream === false) {
+                    throw new RuntimeException("Failed to read archive entry: {$relativePath}");
+                }
+
+                $targetHandle = fopen($destination, 'wb');
+                if ($targetHandle === false) {
+                    fclose($stream);
+                    throw new RuntimeException("Failed to write archive entry: {$relativePath}");
+                }
+
+                stream_copy_to_stream($stream, $targetHandle);
+                fclose($stream);
+                fclose($targetHandle);
+            }
+        } finally {
+            $zip->close();
+        }
+    }
+
+    private function validateArchiveEntryPath(string $entryName): string
+    {
+        $normalized = str_replace('\\', '/', trim($entryName));
+        if ($normalized === '') {
+            throw new RuntimeException('Archive contains an empty path entry.');
+        }
+
+        if (
+            str_starts_with($normalized, '/')
+            || preg_match('/^[A-Za-z]:\//', $normalized) === 1
+            || str_contains($normalized, "\0")
+        ) {
+            throw new RuntimeException("Archive contains unsafe path: {$entryName}");
+        }
+
+        $segments = array_values(array_filter(explode('/', $normalized), static fn (string $segment): bool => $segment !== ''));
+        foreach ($segments as $segment) {
+            if ($segment === '.' || $segment === '..') {
+                throw new RuntimeException("Archive contains unsafe path: {$entryName}");
+            }
+        }
+
+        return implode('/', $segments);
     }
 
     private function findFile(string $dir, string $filename): ?string

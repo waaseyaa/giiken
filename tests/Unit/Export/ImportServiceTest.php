@@ -160,6 +160,66 @@ final class ImportServiceTest extends TestCase
         }
     }
 
+    #[Test]
+    public function import_rejects_archive_with_parent_directory_traversal(): void
+    {
+        $tmpZip = $this->createArchive([
+            '../community.yaml' => "name: Test\nslug: test\nlocale: en\n",
+        ]);
+
+        $communityRepository = new class implements CommunityRepositoryInterface {
+            public function find(string $id): ?Community { return null; }
+            public function findBySlug(string $slug): ?Community { return null; }
+            public function findAll(?int $limit = null): array { return []; }
+            public function save(Community $community): void {}
+            public function delete(Community $community): void {}
+        };
+
+        $importService = new ImportService(
+            communityRepository: $communityRepository,
+            itemRepository: $this->itemRepository,
+        );
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('unsafe path');
+
+        try {
+            $importService->import($tmpZip, $this->adminAccount('comm-1'));
+        } finally {
+            @unlink($tmpZip);
+        }
+    }
+
+    #[Test]
+    public function import_rejects_archive_with_absolute_path_entry(): void
+    {
+        $tmpZip = $this->createArchive([
+            '/tmp/community.yaml' => "name: Test\nslug: test\nlocale: en\n",
+        ]);
+
+        $communityRepository = new class implements CommunityRepositoryInterface {
+            public function find(string $id): ?Community { return null; }
+            public function findBySlug(string $slug): ?Community { return null; }
+            public function findAll(?int $limit = null): array { return []; }
+            public function save(Community $community): void {}
+            public function delete(Community $community): void {}
+        };
+
+        $importService = new ImportService(
+            communityRepository: $communityRepository,
+            itemRepository: $this->itemRepository,
+        );
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('unsafe path');
+
+        try {
+            $importService->import($tmpZip, $this->adminAccount('comm-1'));
+        } finally {
+            @unlink($tmpZip);
+        }
+    }
+
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
@@ -203,5 +263,23 @@ final class ImportServiceTest extends TestCase
             public function isAuthenticated(): bool { return true; }
             public function hasPermission(string $permission): bool { return false; }
         };
+    }
+
+    /**
+     * @param array<string, string> $entries
+     */
+    private function createArchive(array $entries): string
+    {
+        $tmpZip = sys_get_temp_dir() . '/giiken-import-test-' . uniqid('', true) . '.zip';
+        $zip = new \ZipArchive();
+        $zip->open($tmpZip, \ZipArchive::CREATE);
+
+        foreach ($entries as $path => $contents) {
+            $zip->addFromString($path, $contents);
+        }
+
+        $zip->close();
+
+        return $tmpZip;
     }
 }
