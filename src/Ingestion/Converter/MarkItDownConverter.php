@@ -18,7 +18,9 @@ final class MarkItDownConverter implements FileConverterInterface
     ];
 
     public function __construct(
-        private readonly string $venvPath,
+        private readonly string $binaryPath,
+        private readonly ?MarkItDownRunnerInterface $runner = null,
+        private readonly int $timeoutSeconds = 30,
     ) {}
 
     public function supports(string $mimeType): bool
@@ -32,29 +34,15 @@ final class MarkItDownConverter implements FileConverterInterface
             throw new ConversionException("File does not exist: {$filePath}");
         }
 
-        $binary = $this->venvPath . '/bin/markitdown';
-
-        if (!file_exists($binary)) {
-            throw new ConversionException("MarkItDown binary not found at: {$binary}. Run bin/setup-markitdown.sh");
+        if (!file_exists($this->binaryPath) || !is_executable($this->binaryPath)) {
+            throw new ConversionException("MarkItDown binary not found or not executable at: {$this->binaryPath}. Run bin/setup-markitdown.sh");
         }
 
-        $command = sprintf(
-            '%s %s 2>&1',
-            escapeshellarg($binary),
-            escapeshellarg($filePath),
+        $markdown = ($this->runner ?? new ProcOpenMarkItDownRunner())->run(
+            $this->binaryPath,
+            $filePath,
+            $this->timeoutSeconds,
         );
-
-        $output = [];
-        $exitCode = 0;
-        exec($command, $output, $exitCode);
-
-        if ($exitCode !== 0) {
-            throw new ConversionException(
-                "MarkItDown conversion failed (exit {$exitCode}): " . implode("\n", $output)
-            );
-        }
-
-        $markdown = implode("\n", $output);
 
         if (trim($markdown) === '') {
             throw new ConversionException("MarkItDown produced empty output for: {$filePath}");

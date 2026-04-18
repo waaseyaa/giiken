@@ -68,6 +68,11 @@ return [
         ],
     ],
 
+    'ingestion' => [
+        'markitdown_binary' => getenv('GIIKEN_MARKITDOWN_BINARY') ?: __DIR__ . '/../storage/markitdown-venv/bin/markitdown',
+        'command_timeout_seconds' => (int) (getenv('GIIKEN_INGESTION_COMMAND_TIMEOUT_SECONDS') ?: 30),
+    ],
+
     // Sovereignty profile: 'local' | 'self_hosted' | 'northops'
     // Controls defaults for storage, embeddings, llm_provider, transcriber,
     // vector_store, and queue_backend.

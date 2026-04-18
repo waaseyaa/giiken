@@ -31,6 +31,8 @@ use App\Http\RateLimit\FileRequestRateLimiter;
 use App\Http\RateLimit\RequestRateLimiterInterface;
 use App\Ingestion\Converter\FileConverterInterface;
 use App\Ingestion\Converter\MarkItDownConverter;
+use App\Ingestion\Converter\MarkItDownRunnerInterface;
+use App\Ingestion\Converter\ProcOpenMarkItDownRunner;
 use App\Ingestion\Handler\CsvIngestionHandler;
 use App\Ingestion\Handler\DocumentIngestionHandler;
 use App\Ingestion\Handler\HtmlIngestionHandler;
@@ -342,9 +344,19 @@ final class AppServiceProvider extends ServiceProvider
         });
 
         $this->singleton(QueueInterface::class, static fn (): QueueInterface => new SyncQueue());
+        $this->singleton(MarkItDownRunnerInterface::class, static fn (): MarkItDownRunnerInterface => new ProcOpenMarkItDownRunner());
 
-        $this->singleton(FileConverterInterface::class, static function () use ($projectRoot): FileConverterInterface {
-            return new MarkItDownConverter($projectRoot . '/storage/markitdown-venv');
+        $this->singleton(FileConverterInterface::class, function () use ($projectRoot): FileConverterInterface {
+            /** @var mixed $binaryPath */
+            $binaryPath = $this->config['ingestion']['markitdown_binary'] ?? ($projectRoot . '/storage/markitdown-venv/bin/markitdown');
+            /** @var mixed $timeoutSeconds */
+            $timeoutSeconds = $this->config['ingestion']['command_timeout_seconds'] ?? 30;
+
+            return new MarkItDownConverter(
+                binaryPath: is_string($binaryPath) ? $binaryPath : ($projectRoot . '/storage/markitdown-venv/bin/markitdown'),
+                runner: $this->resolve(MarkItDownRunnerInterface::class),
+                timeoutSeconds: is_int($timeoutSeconds) ? $timeoutSeconds : 30,
+            );
         });
 
         $this->singleton(IngestionHandlerRegistry::class, function (): IngestionHandlerRegistry {
