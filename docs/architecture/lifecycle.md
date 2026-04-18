@@ -43,9 +43,9 @@ Inside `HttpKernel::handle()` -> `AbstractKernel::boot()`:
 
 ### 1.3 Where Giiken Enters
 
-The first Giiken app-level classes in normal boot are the providers listed in `composer.json > extra.waaseyaa.providers`. `App\Provider\AppServiceProvider` still owns residual boot + command wiring, while specialized providers now own focused concerns such as authz, routes, and frontend bootstrapping:
+The first Giiken app-level classes in normal boot are the providers listed in `composer.json > extra.waaseyaa.providers`. `App\Provider\AppServiceProvider` still owns residual boot + command wiring, while specialized providers now own focused concerns such as entities, authz, routes, and frontend bootstrapping:
 
-- `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
+- `App\Provider\EntitiesProvider::register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`) and the app repository bindings for `CommunityRepositoryInterface` / `KnowledgeItemRepositoryInterface`
 - `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, `NullEmbeddingProvider`; `LlmProviderInterface` is wired conditionally — if `WAASEYAA_LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set at boot time, the singleton resolves to `AnthropicLlmProvider` (wrapping `Waaseyaa\AI\Agent\Provider\AnthropicProvider`), otherwise falls back to `NullLlmProvider`; and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `App\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
 - `App\Provider\FrontendProvider::register()` binds `InertiaHttpResponder`, re-binds `InertiaFullPageRendererInterface` with a project-root-based `ViteAssetManager` (`public/build` manifest or `VITE_DEV_SERVER`), sets `Inertia::setVersion('giiken')`, and refreshes `Inertia::setRenderer(...)` with a custom template closure that rewrites the data-page attribute from `data-page="true"` to `data-page="app"` so Inertia v2's client-side reader (`script[data-page="app"]`) actually finds the initial page object — workaround for waaseyaa/framework#1227. The project root is computed as `dirname(__DIR__, 2)` from `src/Provider/`; getting that wrong (e.g. `dirname(__DIR__)`) silently disables asset emission, producing a blank `<head>` and an empty `#app` on every route — regression-guarded by `tests/Integration/Http/RootTemplateAssetsTest.php` (giiken#90).
 - `App\Provider\AuthzProvider::register()` binds the shared `CommunityRoleResolverInterface` and `KnowledgeItemAccessPolicy`, so community-role parsing and item access checks boot independently from repository/query wiring.
@@ -125,7 +125,7 @@ Controllers should guard optional services explicitly and return `bootError` pro
 
 ### 3.1 Entity Registration
 
-Entity types are declared in `AppServiceProvider::register()` and attached to `EntityTypeManager`.
+Entity types are declared in `EntitiesProvider::register()` and attached to `EntityTypeManager`.
 
 ### 3.2 Repository Access
 
@@ -242,6 +242,7 @@ Keep these true during refactoring:
 | `src/Provider/RoutesProvider.php` | HTTP route registration | route smoke tests |
 | `src/Provider/FrontendProvider.php` | Inertia responder + root template/Vite asset wiring | root-template asset integration tests |
 | `src/Provider/AuthzProvider.php` | community role resolver + knowledge item access policy | authz policy + management/report authz tests |
+| `src/Provider/EntitiesProvider.php` | entity type registration + app repository bindings | entity integration + repository-backed route tests |
 | `src/AppServiceProvider.php` | residual boot hooks + CLI commands | boot + `waaseyaa list` / migrate + seed |
 | `migrations/*.php` | SQLite schema for app entities | `bin/giiken migrate` + repository integration |
 | `src/Http/Controller/*` | SSR dispatch and Inertia props | unit tests + route smoke tests |

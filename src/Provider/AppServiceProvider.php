@@ -11,11 +11,7 @@ use App\Console\IngestFileCommand;
 use App\Console\SearchReindexCommand;
 use App\Console\SeedTestCommunityCommand;
 use App\Pipeline\CompilationPipeline;
-use App\Entity\Community\Community;
-use App\Entity\Community\CommunityRepository;
 use App\Entity\Community\CommunityRepositoryInterface;
-use App\Entity\KnowledgeItem\KnowledgeItem;
-use App\Entity\KnowledgeItem\KnowledgeItemRepository;
 use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use App\Export\ExportService;
 use App\Export\ExportServiceInterface;
@@ -50,16 +46,11 @@ use App\Query\Report\ReportService;
 use App\Query\Report\ReportServiceInterface;
 use App\Query\SearchService;
 use App\Query\SynthesisService;
-use App\Wiki\WikiLintReport;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherContract;
 use Waaseyaa\Database\DatabaseInterface;
-use Waaseyaa\Entity\EntityType;
 use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\Foundation\Log\LoggerInterface;
-use Waaseyaa\EntityStorage\Connection\SingleConnectionResolver;
-use Waaseyaa\EntityStorage\Driver\SqlStorageDriver;
-use Waaseyaa\EntityStorage\EntityRepository as WaaseyaaEntityRepository;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
 use Waaseyaa\Media\FileRepositoryInterface;
 use Waaseyaa\Media\LocalFileRepository;
@@ -72,39 +63,6 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->entityType(new EntityType(
-            id: 'community',
-            label: 'Community',
-            class: Community::class,
-            keys: [
-                'id'    => 'id',
-                'uuid'  => 'uuid',
-                'label' => 'name',
-            ],
-        ));
-
-        $this->entityType(new EntityType(
-            id: 'knowledge_item',
-            label: 'Knowledge Item',
-            class: KnowledgeItem::class,
-            keys: [
-                'id'    => 'id',
-                'uuid'  => 'uuid',
-                'label' => 'title',
-            ],
-        ));
-
-        $this->entityType(new EntityType(
-            id: 'wiki_lint_report',
-            label: 'Wiki Lint Report',
-            class: WikiLintReport::class,
-            keys: [
-                'id'    => 'id',
-                'uuid'  => 'uuid',
-                'label' => 'title',
-            ],
-        ));
-
         $this->singleton(PsrEventDispatcherInterface::class, function (): PsrEventDispatcherInterface {
             $dispatcher = $this->resolve(SymfonyEventDispatcherContract::class);
             if (!$dispatcher instanceof PsrEventDispatcherInterface) {
@@ -160,38 +118,6 @@ final class AppServiceProvider extends ServiceProvider
                     : [],
             );
         });
-        $this->singleton(CommunityRepositoryInterface::class, function (): CommunityRepositoryInterface {
-            $etm        = $this->resolve(EntityTypeManager::class);
-            $database   = $this->resolve(DatabaseInterface::class);
-            $dispatcher = $this->resolve(PsrEventDispatcherInterface::class);
-            $driver     = new SqlStorageDriver(new SingleConnectionResolver($database), 'id');
-            $entityRepo = new WaaseyaaEntityRepository(
-                $etm->getDefinition('community'),
-                $driver,
-                $dispatcher,
-                revisionDriver: null,
-                database: $database,
-            );
-
-            return new CommunityRepository($entityRepo);
-        });
-
-        $this->singleton(KnowledgeItemRepositoryInterface::class, function (): KnowledgeItemRepositoryInterface {
-            $etm        = $this->resolve(EntityTypeManager::class);
-            $database   = $this->resolve(DatabaseInterface::class);
-            $dispatcher = $this->resolve(PsrEventDispatcherInterface::class);
-            $driver     = new SqlStorageDriver(new SingleConnectionResolver($database), 'id');
-            $entityRepo = new WaaseyaaEntityRepository(
-                $etm->getDefinition('knowledge_item'),
-                $driver,
-                $dispatcher,
-                revisionDriver: null,
-                database: $database,
-            );
-
-            return new KnowledgeItemRepository($entityRepo);
-        });
-
         $this->singleton(SearchService::class, function (): SearchService {
             return new SearchService(
                 $this->resolve(SearchProviderInterface::class),
