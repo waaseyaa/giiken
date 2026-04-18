@@ -26,6 +26,10 @@ use Waaseyaa\Entity\EntityInterface;
 #[PolicyAttribute('knowledge_item')]
 final class KnowledgeItemAccessPolicy implements AccessPolicyInterface
 {
+    public function __construct(
+        private readonly ?CommunityRoleResolverInterface $roleResolver = null,
+    ) {}
+
     public function appliesTo(string $entityTypeId): bool
     {
         return $entityTypeId === 'knowledge_item';
@@ -69,22 +73,7 @@ final class KnowledgeItemAccessPolicy implements AccessPolicyInterface
      */
     private function resolveRole(string $communityId, AccountInterface $account): CommunityRole
     {
-        $prefix = "giiken.community.{$communityId}.";
-
-        foreach ($account->getRoles() as $roleStr) {
-            if (!str_starts_with($roleStr, $prefix)) {
-                continue;
-            }
-
-            $slug = substr($roleStr, strlen($prefix));
-            $communityRole = CommunityRole::tryFrom($slug);
-
-            if ($communityRole !== null) {
-                return $communityRole;
-            }
-        }
-
-        return CommunityRole::Public;
+        return ($this->roleResolver ?? new CommunityRoleResolver())->resolve($communityId, $account);
     }
 
     /**

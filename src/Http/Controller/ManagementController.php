@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controller;
 
+use App\Access\CommunityRole;
+use App\Access\CommunityRoleResolver;
+use App\Access\CommunityRoleResolverInterface;
 use App\Entity\Community\Community;
 use App\Entity\Community\CommunityRepositoryInterface;
 use App\Export\ExportServiceInterface;
@@ -25,6 +28,7 @@ final class ManagementController
         private readonly ?InertiaHttpResponder $inertiaHttp = null,
         private readonly ?ExportServiceInterface $exportService = null,
         private readonly ?IngestionHandlerRegistry $handlerRegistry = null,
+        private readonly ?CommunityRoleResolverInterface $roleResolver = null,
     ) {}
 
     /**
@@ -43,6 +47,10 @@ final class ManagementController
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
+        $authorization = $this->authorizeStaffAccess($community, $account);
+        if ($authorization !== null) {
+            return $authorization;
+        }
 
         return $this->page('Management/Dashboard', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
@@ -67,6 +75,10 @@ final class ManagementController
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
+        $authorization = $this->authorizeStaffAccess($community, $account);
+        if ($authorization !== null) {
+            return $authorization;
+        }
 
         return $this->page('Management/Reports', [
             'community'   => $community !== null ? $this->serializeCommunity($community) : null,
@@ -91,6 +103,10 @@ final class ManagementController
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
+        $authorization = $this->authorizeStaffAccess($community, $account);
+        if ($authorization !== null) {
+            return $authorization;
+        }
 
         return $this->page('Management/Users', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
@@ -114,6 +130,10 @@ final class ManagementController
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
+        $authorization = $this->authorizeStaffAccess($community, $account);
+        if ($authorization !== null) {
+            return $authorization;
+        }
 
         return $this->page('Management/Ingestion', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
@@ -153,6 +173,11 @@ final class ManagementController
             return $this->page('Management/Ingestion', $baseProps + [
                 'uploadError' => 'Community not found.',
             ], $httpRequest, $account);
+        }
+
+        $authorization = $this->authorizeStaffAccess($community, $account);
+        if ($authorization !== null) {
+            return $authorization;
         }
 
         $upload = $httpRequest->files->get('file');
@@ -203,6 +228,10 @@ final class ManagementController
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
         $community = $this->communityRepo->findBySlug($communitySlug);
+        $authorization = $this->authorizeStaffAccess($community, $account);
+        if ($authorization !== null) {
+            return $authorization;
+        }
 
         return $this->page('Management/Export', [
             'community' => $community !== null ? $this->serializeCommunity($community) : null,
@@ -231,6 +260,11 @@ final class ManagementController
         $community     = $this->communityRepo->findBySlug($communitySlug);
         if ($community === null) {
             return new Response('Community not found.', 404);
+        }
+
+        $authorization = $this->authorizeStaffAccess($community, $account);
+        if ($authorization !== null) {
+            return $authorization;
         }
 
         try {
@@ -262,6 +296,24 @@ final class ManagementController
             $httpRequest,
             $account,
         );
+    }
+
+    private function authorizeStaffAccess(?Community $community, AccountInterface $account): ?Response
+    {
+        if ($community === null) {
+            return new Response('Community not found.', 404, [
+                'Content-Type' => 'text/plain; charset=UTF-8',
+            ]);
+        }
+
+        $role = ($this->roleResolver ?? new CommunityRoleResolver())->resolve((string) $community->get('id'), $account);
+        if ($role->rank() >= CommunityRole::Staff->rank()) {
+            return null;
+        }
+
+        return new Response('Forbidden.', 403, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+        ]);
     }
 
     /**

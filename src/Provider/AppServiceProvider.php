@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Provider;
 
+use App\Access\CommunityRoleResolver;
+use App\Access\CommunityRoleResolverInterface;
 use App\Access\KnowledgeItemAccessPolicy;
 use App\Console\IngestFileCommand;
 use App\Console\SearchReindexCommand;
@@ -148,7 +150,10 @@ final class AppServiceProvider extends ServiceProvider
 
             return new NullLlmProvider();
         });
-        $this->singleton(KnowledgeItemAccessPolicy::class, static fn (): KnowledgeItemAccessPolicy => new KnowledgeItemAccessPolicy());
+        $this->singleton(CommunityRoleResolverInterface::class, static fn (): CommunityRoleResolverInterface => new CommunityRoleResolver());
+        $this->singleton(KnowledgeItemAccessPolicy::class, function (): KnowledgeItemAccessPolicy {
+            return new KnowledgeItemAccessPolicy($this->resolve(CommunityRoleResolverInterface::class));
+        });
 
         $this->singleton(CommunityRepositoryInterface::class, function (): CommunityRepositoryInterface {
             $etm        = $this->resolve(EntityTypeManager::class);
@@ -207,6 +212,7 @@ final class AppServiceProvider extends ServiceProvider
                 ],
                 $this->resolve(KnowledgeItemRepositoryInterface::class),
                 $this->resolve(KnowledgeItemAccessPolicy::class),
+                $this->resolve(CommunityRoleResolverInterface::class),
             );
         });
 

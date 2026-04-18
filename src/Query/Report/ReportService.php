@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Query\Report;
 
 use App\Access\CommunityRole;
+use App\Access\CommunityRoleResolver;
+use App\Access\CommunityRoleResolverInterface;
 use App\Access\KnowledgeItemAccessPolicy;
 use App\Entity\Community\Community;
 use App\Entity\KnowledgeItem\KnowledgeItem;
@@ -44,6 +46,7 @@ final class ReportService implements ReportServiceInterface
         array $renderers,
         private readonly KnowledgeItemRepositoryInterface $repository,
         private readonly KnowledgeItemAccessPolicy $accessPolicy,
+        private readonly ?CommunityRoleResolverInterface $roleResolver = null,
     ) {
         foreach ($renderers as $renderer) {
             $this->renderers[$renderer->getType()] = $renderer;
@@ -178,19 +181,6 @@ final class ReportService implements ReportServiceInterface
 
     private function resolveRole(AccountInterface $account, string $communityId): CommunityRole
     {
-        $prefix = "giiken.community.{$communityId}.";
-
-        foreach ($account->getRoles() as $role) {
-            if (str_starts_with($role, $prefix)) {
-                $slug        = substr($role, strlen($prefix));
-                $communityRole = CommunityRole::tryFrom($slug);
-
-                if ($communityRole !== null) {
-                    return $communityRole;
-                }
-            }
-        }
-
-        return CommunityRole::Public;
+        return ($this->roleResolver ?? new CommunityRoleResolver())->resolve($communityId, $account);
     }
 }

@@ -72,7 +72,7 @@ final class ManagementIngestUploadTest extends TestCase
         $response = $controller->ingestUpload(
             params: ['communitySlug' => 'test-community'],
             query: [],
-            account: $this->anonymousAccount(),
+            account: $this->staffAccount(),
             httpRequest: $request,
         );
 
@@ -118,7 +118,7 @@ final class ManagementIngestUploadTest extends TestCase
         $response = $controller->ingestUpload(
             params: ['communitySlug' => 'test-community'],
             query: [],
-            account: $this->anonymousAccount(),
+            account: $this->staffAccount(),
             httpRequest: $request,
         );
 
@@ -157,7 +157,7 @@ final class ManagementIngestUploadTest extends TestCase
         $response = $controller->ingestUpload(
             params: ['communitySlug' => 'test-community'],
             query: [],
-            account: $this->anonymousAccount(),
+            account: $this->staffAccount(),
             httpRequest: $request,
         );
 
@@ -166,6 +166,41 @@ final class ManagementIngestUploadTest extends TestCase
         self::assertSame('Management/Ingestion', $payload['component']);
         self::assertNotEmpty($payload['props']['uploadError'] ?? null);
         self::assertStringContainsString('application/zip', (string) $payload['props']['uploadError']);
+    }
+
+    #[Test]
+    public function upload_forbids_authenticated_member_without_staff_role(): void
+    {
+        $fileRepo = new LocalFileRepository($this->storageRoot);
+        $registry = new IngestionHandlerRegistry();
+        $registry->register(new MediaIngestionHandler($fileRepo, new InMemoryQueue()));
+
+        $community = Community::make([
+            'id' => 'comm-1',
+            'slug' => 'test-community',
+            'name' => 'Test Community',
+            'locale' => 'en',
+        ]);
+
+        $communityRepo = $this->createMock(CommunityRepositoryInterface::class);
+        $communityRepo->method('findBySlug')->with('test-community')->willReturn($community);
+
+        $controller = $this->makeController($communityRepo, $registry);
+        $request = $this->requestWithUpload(
+            uri: '/test-community/manage/ingest',
+            fileContents: 'ID3 fake mp3 bytes',
+            originalFilename: 'field-notes.mp3',
+            mimeType: 'audio/mpeg',
+        );
+
+        $response = $controller->ingestUpload(
+            params: ['communitySlug' => 'test-community'],
+            query: [],
+            account: $this->memberAccount(),
+            httpRequest: $request,
+        );
+
+        self::assertSame(403, $response->getStatusCode());
     }
 
     // ------------------------------------------------------------------
@@ -221,12 +256,22 @@ final class ManagementIngestUploadTest extends TestCase
         return $request;
     }
 
-    private function anonymousAccount(): AccountInterface
+    private function memberAccount(): AccountInterface
     {
         return new class implements AccountInterface {
-            public function id(): int|string { return '0'; }
-            public function getRoles(): array { return []; }
-            public function isAuthenticated(): bool { return false; }
+            public function id(): int|string { return 'user-1'; }
+            public function getRoles(): array { return ['giiken.community.comm-1.member']; }
+            public function isAuthenticated(): bool { return true; }
+            public function hasPermission(string $permission): bool { return false; }
+        };
+    }
+
+    private function staffAccount(): AccountInterface
+    {
+        return new class implements AccountInterface {
+            public function id(): int|string { return 'user-1'; }
+            public function getRoles(): array { return ['giiken.community.comm-1.staff']; }
+            public function isAuthenticated(): bool { return true; }
             public function hasPermission(string $permission): bool { return false; }
         };
     }

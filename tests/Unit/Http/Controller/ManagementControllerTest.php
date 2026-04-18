@@ -23,12 +23,14 @@ final class ManagementControllerTest extends TestCase
     private ManagementController $controller;
     /** @var CommunityRepositoryInterface&MockObject */
     private CommunityRepositoryInterface $communityRepo;
-    private AccountInterface $account;
+    private AccountInterface $memberAccount;
+    private AccountInterface $staffAccount;
 
     protected function setUp(): void
     {
         $this->communityRepo = $this->createMock(CommunityRepositoryInterface::class);
-        $this->account = $this->createMock(AccountInterface::class);
+        $this->memberAccount = $this->makeAccount(['giiken.community.comm-1.member']);
+        $this->staffAccount = $this->makeAccount(['giiken.community.comm-1.staff']);
 
         $this->controller = new ManagementController(
             $this->communityRepo,
@@ -66,12 +68,42 @@ final class ManagementControllerTest extends TestCase
         $response = $this->controller->dashboard(
             ['communitySlug' => 'test-community'],
             [],
-            $this->account,
+            $this->staffAccount,
             new HttpRequest(),
         );
         self::assertInstanceOf(Response::class, $response);
         $page = $this->decodePage($response);
         self::assertSame('Management/Dashboard', $page['component']);
+    }
+
+    #[Test]
+    public function dashboard_forbids_authenticated_member_without_staff_role(): void
+    {
+        $this->communityRepo->method('findBySlug')->willReturn($this->makeCommunity());
+
+        $response = $this->controller->dashboard(
+            ['communitySlug' => 'test-community'],
+            [],
+            $this->memberAccount,
+            new HttpRequest(),
+        );
+
+        self::assertSame(403, $response->getStatusCode());
+    }
+
+    #[Test]
+    public function dashboard_allows_staff_role(): void
+    {
+        $this->communityRepo->method('findBySlug')->willReturn($this->makeCommunity());
+
+        $response = $this->controller->dashboard(
+            ['communitySlug' => 'test-community'],
+            [],
+            $this->staffAccount,
+            new HttpRequest(),
+        );
+
+        self::assertSame(200, $response->getStatusCode());
     }
 
     #[Test]
@@ -81,7 +113,7 @@ final class ManagementControllerTest extends TestCase
         $response = $this->controller->reports(
             ['communitySlug' => 'test-community'],
             [],
-            $this->account,
+            $this->staffAccount,
             new HttpRequest(),
         );
         self::assertInstanceOf(Response::class, $response);
@@ -96,7 +128,7 @@ final class ManagementControllerTest extends TestCase
         $response = $this->controller->exportPage(
             ['communitySlug' => 'test-community'],
             [],
-            $this->account,
+            $this->staffAccount,
             new HttpRequest(),
         );
         self::assertInstanceOf(Response::class, $response);
@@ -155,5 +187,23 @@ final class ManagementControllerTest extends TestCase
             'contact_email'       => 'test@example.com',
             'wiki_schema'         => [],
         ]);
+    }
+
+    /**
+     * @param array<int, string> $roles
+     */
+    private function makeAccount(array $roles): AccountInterface
+    {
+        return new class($roles) implements AccountInterface {
+            /**
+             * @param array<int, string> $roles
+             */
+            public function __construct(private readonly array $roles) {}
+
+            public function id(): int|string { return 'user-1'; }
+            public function getRoles(): array { return $this->roles; }
+            public function isAuthenticated(): bool { return true; }
+            public function hasPermission(string $permission): bool { return false; }
+        };
     }
 }

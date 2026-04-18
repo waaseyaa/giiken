@@ -5,11 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Access\CommunityRole;
+use App\Access\CommunityRoleResolver;
+use App\Access\CommunityRoleResolverInterface;
 use Waaseyaa\Access\AccountInterface;
 
 final class RequireStaffRole
 {
     private const MINIMUM_RANK = 3; // Staff
+
+    public function __construct(
+        private readonly ?CommunityRoleResolverInterface $roleResolver = null,
+    ) {}
 
     public function check(?AccountInterface $account, string $communityId): bool
     {
@@ -17,21 +23,8 @@ final class RequireStaffRole
             return false;
         }
 
-        $prefix = "giiken.community.{$communityId}.";
+        $role = ($this->roleResolver ?? new CommunityRoleResolver())->resolve($communityId, $account);
 
-        foreach ($account->getRoles() as $role) {
-            if (!str_starts_with($role, $prefix)) {
-                continue;
-            }
-
-            $roleSlug      = substr($role, strlen($prefix));
-            $communityRole = CommunityRole::tryFrom($roleSlug);
-
-            if ($communityRole !== null && $communityRole->rank() >= self::MINIMUM_RANK) {
-                return true;
-            }
-        }
-
-        return false;
+        return $role->rank() >= self::MINIMUM_RANK;
     }
 }
