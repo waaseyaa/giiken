@@ -42,10 +42,16 @@ exports[`CitationCard snapshot > renders a citation 1`] = `
 exports[`KnowledgeCard snapshots > renders cultural variant 1`] = `
 "<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
   <div class="flex items-start gap-3">
-    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-cultural"></div>
+    <div class="w-6 h-6 rounded-full mt-0.5 shrink-0 text-[11px] font-semibold flex items-center justify-center text-on-primary bg-cultural">C</div>
     <div class="min-w-0">
-      <h3 class="font-semibold text-ink truncate">cultural item</h3>
-      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A cultural knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-cultural-subtle text-cultural">Cultural</span>
+      <h3 class="font-semibold text-ink leading-tight line-clamp-2">cultural item</h3>
+      <p class="text-[11px] text-ink-muted mt-1">Unknown source
+        <!--v-if-->
+      </p>
+      <p class="text-sm text-ink-muted mt-2 line-clamp-2 sm:line-clamp-3 xl:line-clamp-4">A cultural knowledge item.</p>
+      <div class="flex flex-wrap gap-1 mt-2"><span class="inline-block text-xs px-2 py-0.5 rounded-full bg-cultural-subtle text-cultural">Cultural</span>
+        <!--v-if-->
+      </div>
     </div>
   </div>
 </a>"
@@ -54,10 +60,16 @@ exports[`KnowledgeCard snapshots > renders cultural variant 1`] = `
 exports[`KnowledgeCard snapshots > renders event variant 1`] = `
 "<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
   <div class="flex items-start gap-3">
-    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-event"></div>
+    <div class="w-6 h-6 rounded-full mt-0.5 shrink-0 text-[11px] font-semibold flex items-center justify-center text-on-primary bg-event">E</div>
     <div class="min-w-0">
-      <h3 class="font-semibold text-ink truncate">event item</h3>
-      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A event knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-event-subtle text-event">Event</span>
+      <h3 class="font-semibold text-ink leading-tight line-clamp-2">event item</h3>
+      <p class="text-[11px] text-ink-muted mt-1">Unknown source
+        <!--v-if-->
+      </p>
+      <p class="text-sm text-ink-muted mt-2 line-clamp-2 sm:line-clamp-3 xl:line-clamp-4">A event knowledge item.</p>
+      <div class="flex flex-wrap gap-1 mt-2"><span class="inline-block text-xs px-2 py-0.5 rounded-full bg-event-subtle text-event">Event</span>
+        <!--v-if-->
+      </div>
     </div>
   </div>
 </a>"
@@ -66,10 +78,16 @@ exports[`KnowledgeCard snapshots > renders event variant 1`] = `
 exports[`KnowledgeCard snapshots > renders governance variant 1`] = `
 "<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
   <div class="flex items-start gap-3">
-    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-governance"></div>
+    <div class="w-6 h-6 rounded-full mt-0.5 shrink-0 text-[11px] font-semibold flex items-center justify-center text-on-primary bg-governance">G</div>
     <div class="min-w-0">
-      <h3 class="font-semibold text-ink truncate">governance item</h3>
-      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A governance knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-governance-subtle text-governance">Governance</span>
+      <h3 class="font-semibold text-ink leading-tight line-clamp-2">governance item</h3>
+      <p class="text-[11px] text-ink-muted mt-1">Unknown source
+        <!--v-if-->
+      </p>
+      <p class="text-sm text-ink-muted mt-2 line-clamp-2 sm:line-clamp-3 xl:line-clamp-4">A governance knowledge item.</p>
+      <div class="flex flex-wrap gap-1 mt-2"><span class="inline-block text-xs px-2 py-0.5 rounded-full bg-governance-subtle text-governance">Governance</span>
+        <!--v-if-->
+      </div>
     </div>
   </div>
 </a>"
@@ -78,10 +96,16 @@ exports[`KnowledgeCard snapshots > renders governance variant 1`] = `
 exports[`KnowledgeCard snapshots > renders land variant 1`] = `
 "<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
   <div class="flex items-start gap-3">
-    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-land"></div>
+    <div class="w-6 h-6 rounded-full mt-0.5 shrink-0 text-[11px] font-semibold flex items-center justify-center text-on-primary bg-land">L</div>
     <div class="min-w-0">
-      <h3 class="font-semibold text-ink truncate">land item</h3>
-      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A land knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-land-subtle text-land">Land</span>
+      <h3 class="font-semibold text-ink leading-tight line-clamp-2">land item</h3>
+      <p class="text-[11px] text-ink-muted mt-1">Unknown source
+        <!--v-if-->
+      </p>
+      <p class="text-sm text-ink-muted mt-2 line-clamp-2 sm:line-clamp-3 xl:line-clamp-4">A land knowledge item.</p>
+      <div class="flex flex-wrap gap-1 mt-2"><span class="inline-block text-xs px-2 py-0.5 rounded-full bg-land-subtle text-land">Land</span>
+        <!--v-if-->
+      </div>
     </div>
   </div>
 </a>"
@@ -90,10 +114,16 @@ exports[`KnowledgeCard snapshots > renders land variant 1`] = `
 exports[`KnowledgeCard snapshots > renders relationship variant 1`] = `
 "<a href="/test-community/item/1" class="block p-4 bg-surface-raised rounded-lg border border-border hover:shadow-md transition-shadow">
   <div class="flex items-start gap-3">
-    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0 bg-relationship"></div>
+    <div class="w-6 h-6 rounded-full mt-0.5 shrink-0 text-[11px] font-semibold flex items-center justify-center text-on-primary bg-relationship">R</div>
     <div class="min-w-0">
-      <h3 class="font-semibold text-ink truncate">relationship item</h3>
-      <p class="text-sm text-ink-muted mt-1 line-clamp-2">A relationship knowledge item.</p><span class="inline-block text-xs px-2 py-0.5 rounded-full mt-2 bg-relationship-subtle text-relationship">Relationship</span>
+      <h3 class="font-semibold text-ink leading-tight line-clamp-2">relationship item</h3>
+      <p class="text-[11px] text-ink-muted mt-1">Unknown source
+        <!--v-if-->
+      </p>
+      <p class="text-sm text-ink-muted mt-2 line-clamp-2 sm:line-clamp-3 xl:line-clamp-4">A relationship knowledge item.</p>
+      <div class="flex flex-wrap gap-1 mt-2"><span class="inline-block text-xs px-2 py-0.5 rounded-full bg-relationship-subtle text-relationship">Relationship</span>
+        <!--v-if-->
+      </div>
     </div>
   </div>
 </a>"
@@ -120,7 +150,7 @@ exports[`SearchHero snapshots > renders with single community (no select) 1`] = 
 </header>"
 `;
 
-exports[`SearchInput snapshot > renders default state 1`] = `"<form class="flex gap-2 w-full max-w-2xl"><input type="text" placeholder="Search or ask a question..." class="flex-1 px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-base"><button type="submit" class="px-6 py-3 bg-primary text-on-primary rounded-lg hover:bg-primary-hover font-medium"> Ask → </button></form>"`;
+exports[`SearchInput snapshot > renders default state 1`] = `"<form class="flex gap-2 w-full max-w-2xl"><input type="text" placeholder="Search or ask a question..." class="flex-1 px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-base"><button type="submit" class="px-6 py-3 bg-primary text-on-primary rounded-lg hover:bg-primary-hover font-medium">Search →</button></form>"`;
 
 exports[`TypeFilter snapshots > renders with cultural active 1`] = `"<div class="flex gap-2 flex-wrap"><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-primary-subtle text-primary"> All </button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-cultural text-on-primary">Cultural</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-governance-subtle text-governance">Governance</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-land-subtle text-land">Land</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-relationship-subtle text-relationship">Relationship</button><button class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-event-subtle text-event">Event</button></div>"`;
 
