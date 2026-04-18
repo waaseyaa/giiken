@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controller;
 
 use App\Entity\Community\CommunityRepositoryInterface;
+use App\Http\Api\Ask\AskRequestValidator;
+use App\Http\RateLimit\RequestRateLimiterInterface;
 use App\Query\QaServiceInterface;
 use App\Query\Report\ReportRequest;
 use App\Query\Report\ReportServiceInterface;
@@ -24,6 +26,8 @@ final class QueryApiController
         private readonly ?QaServiceInterface $qaService = null,
         private readonly ?ReportServiceInterface $reportService = null,
         private readonly ?SynthesisService $synthesisService = null,
+        private readonly ?AskRequestValidator $askRequestValidator = null,
+        private readonly ?RequestRateLimiterInterface $askRateLimiter = null,
     ) {}
 
     /**
@@ -47,19 +51,33 @@ final class QueryApiController
             return new JsonResponse(['error' => 'Invalid JSON body.'], 400);
         }
 
-        $communitySlug = (string) ($body['communitySlug'] ?? '');
-        $question      = trim((string) ($body['question'] ?? ''));
-        if ($communitySlug === '' || $question === '') {
-            return new JsonResponse(['error' => 'communitySlug and question are required.'], 422);
+        try {
+            $requestData = ($this->askRequestValidator ?? new AskRequestValidator(2_000))->validate($body);
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 422);
         }
 
-        $community = $this->communityRepo->findBySlug($communitySlug);
+        $community = $this->communityRepo->findBySlug($requestData->communitySlug);
         if ($community === null) {
             return new JsonResponse(['error' => 'Community not found.'], 404);
         }
 
+        $remoteAddress = (string) ($httpRequest->server->get('REMOTE_ADDR') ?? 'unknown');
+        $rateLimitKey = 'ask:' . $requestData->communitySlug . ':' . $remoteAddress;
+        $rateLimit = ($this->askRateLimiter ?? null)?->consume($rateLimitKey);
+        if ($rateLimit !== null && !$rateLimit->allowed) {
+            return new JsonResponse([
+                'error' => 'Rate limit exceeded. Retry later.',
+                'retryAfterSeconds' => $rateLimit->retryAfterSeconds,
+            ], 429, [
+                'Retry-After' => (string) $rateLimit->retryAfterSeconds,
+                'X-RateLimit-Limit' => (string) $rateLimit->limit,
+                'X-RateLimit-Remaining' => '0',
+            ]);
+        }
+
         $communityId = (string) $community->get('id');
-        $qa          = $this->qaService->ask($question, $communityId, $account);
+        $qa          = $this->qaService->ask($requestData->question, $communityId, $account);
 
         return new JsonResponse([
             'answer'            => $qa->answer,
@@ -70,6 +88,9 @@ final class QueryApiController
                 'excerpt' => $c->excerpt,
             ], $qa->citations),
             'noRelevantItems'   => $qa->noRelevantItems,
+        ], 200, $rateLimit === null ? [] : [
+            'X-RateLimit-Limit' => (string) $rateLimit->limit,
+            'X-RateLimit-Remaining' => (string) $rateLimit->remaining,
         ]);
     }
 

@@ -25,7 +25,10 @@ use App\Http\Controller\ManagementController;
 use App\Http\Controller\QueryApiController;
 use App\Http\Controller\WebLoginController;
 use App\Http\Controller\WebLogoutController;
+use App\Http\Api\Ask\AskRequestValidator;
 use App\Http\Inertia\InertiaHttpResponder;
+use App\Http\RateLimit\FileRequestRateLimiter;
+use App\Http\RateLimit\RequestRateLimiterInterface;
 use App\Ingestion\Converter\FileConverterInterface;
 use App\Ingestion\Converter\MarkItDownConverter;
 use App\Ingestion\Handler\CsvIngestionHandler;
@@ -153,6 +156,24 @@ final class AppServiceProvider extends ServiceProvider
             return new NullLlmProvider();
         });
         $this->singleton(CommunityRoleResolverInterface::class, static fn (): CommunityRoleResolverInterface => new CommunityRoleResolver());
+        $this->singleton(AskRequestValidator::class, function (): AskRequestValidator {
+            /** @var mixed $maxQuestionLength */
+            $maxQuestionLength = $this->config['api']['ask']['question_max_length'] ?? 2_000;
+
+            return new AskRequestValidator(is_int($maxQuestionLength) ? $maxQuestionLength : 2_000);
+        });
+        $this->singleton(RequestRateLimiterInterface::class, function (): RequestRateLimiterInterface {
+            /** @var mixed $maxAttempts */
+            $maxAttempts = $this->config['api']['ask']['rate_limit']['max_attempts'] ?? 10;
+            /** @var mixed $windowSeconds */
+            $windowSeconds = $this->config['api']['ask']['rate_limit']['window_seconds'] ?? 60;
+
+            return new FileRequestRateLimiter(
+                storageDirectory: dirname(__DIR__, 2) . '/storage/framework/rate-limits/ask',
+                maxAttempts: is_int($maxAttempts) ? $maxAttempts : 10,
+                windowSeconds: is_int($windowSeconds) ? $windowSeconds : 60,
+            );
+        });
         $this->singleton(UploadValidatorInterface::class, function (): UploadValidatorInterface {
             /** @var mixed $maxBytes */
             $maxBytes = $this->config['upload_max_bytes'] ?? 0;

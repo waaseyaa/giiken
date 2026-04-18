@@ -58,6 +58,16 @@ return [
 
     'cors_origins' => ['http://localhost:3000', 'http://127.0.0.1:3000'],
 
+    'api' => [
+        'ask' => [
+            'question_max_length' => (int) (getenv('GIIKEN_API_ASK_QUESTION_MAX_LENGTH') ?: 2000),
+            'rate_limit' => [
+                'max_attempts' => (int) (getenv('GIIKEN_API_ASK_RATE_LIMIT_MAX_ATTEMPTS') ?: 10),
+                'window_seconds' => (int) (getenv('GIIKEN_API_ASK_RATE_LIMIT_WINDOW_SECONDS') ?: 60),
+            ],
+        ],
+    ],
+
     // Sovereignty profile: 'local' | 'self_hosted' | 'northops'
     // Controls defaults for storage, embeddings, llm_provider, transcriber,
     // vector_store, and queue_backend.
