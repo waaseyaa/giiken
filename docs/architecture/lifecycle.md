@@ -7,7 +7,7 @@ This document describes how a request moves through Giiken at runtime, where app
 - App: `giiken`
 - Framework: `waaseyaa/*`
 - Entrypoint: `public/index.php`
-- Primary app integration point: `src/AppServiceProvider.php`
+- Primary app integration points: `src/Provider/*.php` (with `AppServiceProvider` still carrying residual boot + console responsibilities)
 
 ## 1. Boot Lifecycle
 
@@ -43,7 +43,7 @@ Inside `HttpKernel::handle()` -> `AbstractKernel::boot()`:
 
 ### 1.3 Where Giiken Enters
 
-The first Giiken app-level class in normal boot is `App\AppServiceProvider`:
+The first Giiken app-level classes in normal boot are the providers listed in `composer.json > extra.waaseyaa.providers`. `App\Provider\AppServiceProvider` still owns residual boot + command wiring, while specialized providers now own focused concerns such as routes:
 
 - `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
 - `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, `NullEmbeddingProvider`; `LlmProviderInterface` is wired conditionally — if `WAASEYAA_LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set at boot time, the singleton resolves to `AnthropicLlmProvider` (wrapping `Waaseyaa\AI\Agent\Provider\AnthropicProvider`), otherwise falls back to `NullLlmProvider`; and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `App\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
@@ -51,7 +51,7 @@ The first Giiken app-level class in normal boot is `App\AppServiceProvider`:
 - Frontend bundle: Vite entry `resources/js/app.ts`, production output under `public/build` (`npm run build`); set `VITE_DEV_SERVER` (e.g. `http://127.0.0.1:5173`) when using `npm run dev` for HMR
 - `register()` also binds `CompilationPipeline` as a singleton (built from the configured `LlmProviderInterface`, `EmbeddingProviderInterface`, and a raw `knowledge_item` `WaaseyaaEntityRepository`) so CLI and future HTTP ingestion surfaces share a single pipeline instance
 - `commands()` contributes CLI commands (`giiken:seed:test-community`, `giiken:ingest:file` — see giiken#94)
-- `routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `POST` `/logout`)
+- `App\Provider\RoutesProvider::routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `POST` `/logout`)
 - `HomeController::discover` (`GET /`) injects `CommunityRepositoryInterface` and ships the result of `findAll()` as the `communities` Inertia prop for `Pages/Discover.vue`, which renders a community card grid linking into `/{slug}` Discovery pages
 
 ### 1.4 Schema and local data
@@ -81,7 +81,7 @@ After boot, `HttpKernel::serveHttpRequest()` executes:
 
 ### 2.2 App Route Registration
 
-App routes are added through `AppServiceProvider::routes(...)`, including:
+App routes are added through `RoutesProvider::routes(...)`, including:
 
 - Public landing (Inertia): `GET` `/` → `Discover` page (`HomeController::discover`)
 - Session HTML auth (public): `GET`/`POST` `/login`, `POST` `/logout`
@@ -230,7 +230,7 @@ Keep these true during refactoring:
 1. `public/index.php` always sends the response (`$response->send()`).
 2. Controllers keep the active SSR dispatch signature (`array $params`, `array $query`, `AccountInterface`, `HttpRequest`) and return `Response`.
 3. Optional service dependencies are handled with explicit guard returns (no implicit null behavior).
-4. `AppServiceProvider` remains the single source of app route/entity registration.
+4. Route registration stays centralized in `RoutesProvider`, and entity registration stays centralized in its dedicated provider rather than drifting back into mixed-responsibility providers.
 5. Boot-time failures remain deterministic and observable (log + stable error response path).
 
 ## 7. Refactor Impact Matrix
@@ -238,7 +238,8 @@ Keep these true during refactoring:
 | Area | Likely Impact | Verify With |
 |---|---|---|
 | `public/index.php` | global boot and response emission | smoke test `/`, non-zero body |
-| `src/AppServiceProvider.php` | routes, entity types, DI bindings, CLI commands | route smoke tests + boot + `waaseyaa list` / migrate + seed |
+| `src/Provider/RoutesProvider.php` | HTTP route registration | route smoke tests |
+| `src/AppServiceProvider.php` | residual boot hooks + CLI commands | boot + `waaseyaa list` / migrate + seed |
 | `migrations/*.php` | SQLite schema for app entities | `bin/giiken migrate` + repository integration |
 | `src/Http/Controller/*` | SSR dispatch and Inertia props | unit tests + route smoke tests |
 | `src/Entity/*` and repositories | data shape, persistence behavior | unit tests + integration tests |
