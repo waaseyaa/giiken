@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controller;
 
+use App\Access\KnowledgeItemAccessPolicy;
 use App\Entity\Community\Community;
 use App\Entity\Community\CommunityRepositoryInterface;
+use App\Entity\KnowledgeItem\KnowledgeItem;
 use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use App\Http\Inertia\InertiaHttpResponder;
 use App\Query\QaServiceInterface;
@@ -25,6 +27,7 @@ final class DiscoveryController
         private readonly ?QaServiceInterface $qaService = null,
         private readonly ?CommunityRepositoryInterface $communityRepo = null,
         private readonly ?KnowledgeItemRepositoryInterface $itemRepo = null,
+        private readonly ?KnowledgeItemAccessPolicy $accessPolicy = null,
         private readonly ?InertiaHttpResponder $inertiaHttp = null,
     ) {}
 
@@ -231,7 +234,9 @@ final class DiscoveryController
         $itemId = (string) $inbound->routeParam('itemId', '');
 
         $community = $communityRepo->findBySlug($communitySlug);
-        $item = $itemRepo->find($itemId);
+        $item = $community !== null
+            ? $this->loadDisplayableItem($itemRepo, $community, $itemId, $account)
+            : null;
         if ($community === null || $item === null) {
             return $this->page('Discovery/Show', [
                 'community' => $community !== null ? $this->serializeCommunity($community) : null,
@@ -253,6 +258,25 @@ final class DiscoveryController
             ],
             'pageTitle' => $community->name() . ' | ' . $item->getTitle(),
         ], $httpRequest, $account);
+    }
+
+    private function loadDisplayableItem(
+        KnowledgeItemRepositoryInterface $itemRepo,
+        Community $community,
+        string $itemId,
+        AccountInterface $account,
+    ): ?KnowledgeItem {
+        $communityId = (string) $community->get('id');
+        $item = $itemRepo->findByCommunityAndId($communityId, $itemId);
+        if ($item === null) {
+            return null;
+        }
+
+        if ($this->accessPolicy === null) {
+            return $item;
+        }
+
+        return $this->accessPolicy->access($item, 'view', $account)->isAllowed() ? $item : null;
     }
 
     /**

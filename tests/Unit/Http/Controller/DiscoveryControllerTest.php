@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Http\Controller;
 
+use App\Access\KnowledgeItemAccessPolicy;
 use App\Entity\Community\Community;
 use App\Entity\Community\CommunityRepositoryInterface;
 use App\Entity\KnowledgeItem\KnowledgeItem;
@@ -38,6 +39,7 @@ final class DiscoveryControllerTest extends TestCase
     private CommunityRepositoryInterface $communityRepo;
     /** @var KnowledgeItemRepositoryInterface&MockObject */
     private KnowledgeItemRepositoryInterface $itemRepo;
+    private KnowledgeItemAccessPolicy $accessPolicy;
     private AccountInterface $account;
 
     protected function setUp(): void
@@ -47,12 +49,18 @@ final class DiscoveryControllerTest extends TestCase
         $this->communityRepo = $this->createMock(CommunityRepositoryInterface::class);
         $this->itemRepo = $this->createMock(KnowledgeItemRepositoryInterface::class);
         $this->account = $this->createMock(AccountInterface::class);
+        $this->account->method('getRoles')->willReturn([]);
+        $this->account->method('isAuthenticated')->willReturn(false);
+        $this->account->method('id')->willReturn('0');
+        $this->account->method('hasPermission')->willReturn(false);
+        $this->accessPolicy = new KnowledgeItemAccessPolicy();
 
         $this->controller = new DiscoveryController(
             $this->searchService,
             $this->qaService,
             $this->communityRepo,
             $this->itemRepo,
+            $this->accessPolicy,
             $this->createInertiaResponder(),
         );
     }
@@ -275,7 +283,10 @@ final class DiscoveryControllerTest extends TestCase
             'knowledge_type' => 'cultural',
             'access_tier' => 'public',
         ]);
-        $this->itemRepo->method('find')->willReturn($item);
+        $this->itemRepo
+            ->method('findByCommunityAndId')
+            ->with('comm-1', '1')
+            ->willReturn($item);
 
         $response = $this->controller->show(
             ['communitySlug' => 'test-community', 'itemId' => '1'],
@@ -288,6 +299,37 @@ final class DiscoveryControllerTest extends TestCase
         $page = $this->decodePage($response);
         self::assertSame('Discovery/Show', $page['component']);
         self::assertSame('Test Item', $page['props']['item']['title'] ?? null);
+    }
+
+    #[Test]
+    public function show_returns_null_item_when_access_is_denied(): void
+    {
+        $community = $this->makeCommunity();
+        $this->communityRepo->method('findBySlug')->willReturn($community);
+
+        $item = KnowledgeItem::make([
+            'id' => '1',
+            'community_id' => 'comm-1',
+            'title' => 'Restricted Item',
+            'content' => 'Restricted content',
+            'knowledge_type' => 'cultural',
+            'access_tier' => 'restricted',
+        ]);
+        $this->itemRepo
+            ->method('findByCommunityAndId')
+            ->with('comm-1', '1')
+            ->willReturn($item);
+
+        $response = $this->controller->show(
+            ['communitySlug' => 'test-community', 'itemId' => '1'],
+            [],
+            $this->account,
+            new HttpRequest(),
+        );
+
+        self::assertInstanceOf(Response::class, $response);
+        $page = $this->decodePage($response);
+        self::assertNull($page['props']['item'] ?? null);
     }
 
     private function makeCommunity(): Community

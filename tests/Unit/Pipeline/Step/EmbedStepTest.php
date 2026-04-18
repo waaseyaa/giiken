@@ -40,6 +40,7 @@ final class EmbedStepTest extends TestCase
             /** @phpstan-ignore-next-line */
             public function __construct(private ?KnowledgeItem &$savedItem) {}
             public function find(string $id): ?KnowledgeItem { return null; }
+            public function findByCommunityAndId(string $communityId, string $id): ?KnowledgeItem { return null; }
             public function findByCommunity(string $communityId): array { return []; }
             public function save(KnowledgeItem $item): void { $this->savedItem = $item; }
             public function delete(KnowledgeItem $item): void {}
@@ -90,6 +91,7 @@ final class EmbedStepTest extends TestCase
         };
         $repo = new class implements KnowledgeItemRepositoryInterface {
             public function find(string $id): ?KnowledgeItem { return null; }
+            public function findByCommunityAndId(string $communityId, string $id): ?KnowledgeItem { return null; }
             public function findByCommunity(string $communityId): array { return []; }
             public function save(KnowledgeItem $item): void {}
             public function delete(KnowledgeItem $item): void {}

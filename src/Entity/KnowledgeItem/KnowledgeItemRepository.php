@@ -20,6 +20,17 @@ final class KnowledgeItemRepository implements KnowledgeItemRepositoryInterface
         return $entity instanceof KnowledgeItem ? $entity : null;
     }
 
+    public function findByCommunityAndId(string $communityId, string $id): ?KnowledgeItem
+    {
+        $results = $this->repository->findBy([
+            'id' => $id,
+            'community_id' => $communityId,
+        ], limit: 1);
+        $entity = reset($results);
+
+        return $entity instanceof KnowledgeItem ? $entity : null;
+    }
+
     /**
      * @return KnowledgeItem[]
      */

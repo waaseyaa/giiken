@@ -8,6 +8,8 @@ interface KnowledgeItemRepositoryInterface
 {
     public function find(string $id): ?KnowledgeItem;
 
+    public function findByCommunityAndId(string $communityId, string $id): ?KnowledgeItem;
+
     /** @return KnowledgeItem[] */
     public function findByCommunity(string $communityId): array;
 
