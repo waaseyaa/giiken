@@ -79,6 +79,7 @@
         },
         "waaseyaa": {
             "providers": [
+                "App\\Provider\\AuthzProvider",
                 "App\\Provider\\FrontendProvider",
                 "App\\Provider\\RoutesProvider",
                 "App\\Provider\\AppServiceProvider"

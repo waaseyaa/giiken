@@ -43,11 +43,12 @@ Inside `HttpKernel::handle()` -> `AbstractKernel::boot()`:
 
 ### 1.3 Where Giiken Enters
 
-The first Giiken app-level classes in normal boot are the providers listed in `composer.json > extra.waaseyaa.providers`. `App\Provider\AppServiceProvider` still owns residual boot + command wiring, while specialized providers now own focused concerns such as routes and frontend bootstrapping:
+The first Giiken app-level classes in normal boot are the providers listed in `composer.json > extra.waaseyaa.providers`. `App\Provider\AppServiceProvider` still owns residual boot + command wiring, while specialized providers now own focused concerns such as authz, routes, and frontend bootstrapping:
 
 - `register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`)
 - `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, `NullEmbeddingProvider`; `LlmProviderInterface` is wired conditionally — if `WAASEYAA_LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set at boot time, the singleton resolves to `AnthropicLlmProvider` (wrapping `Waaseyaa\AI\Agent\Provider\AnthropicProvider`), otherwise falls back to `NullLlmProvider`; and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `App\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
 - `App\Provider\FrontendProvider::register()` binds `InertiaHttpResponder`, re-binds `InertiaFullPageRendererInterface` with a project-root-based `ViteAssetManager` (`public/build` manifest or `VITE_DEV_SERVER`), sets `Inertia::setVersion('giiken')`, and refreshes `Inertia::setRenderer(...)` with a custom template closure that rewrites the data-page attribute from `data-page="true"` to `data-page="app"` so Inertia v2's client-side reader (`script[data-page="app"]`) actually finds the initial page object — workaround for waaseyaa/framework#1227. The project root is computed as `dirname(__DIR__, 2)` from `src/Provider/`; getting that wrong (e.g. `dirname(__DIR__)`) silently disables asset emission, producing a blank `<head>` and an empty `#app` on every route — regression-guarded by `tests/Integration/Http/RootTemplateAssetsTest.php` (giiken#90).
+- `App\Provider\AuthzProvider::register()` binds the shared `CommunityRoleResolverInterface` and `KnowledgeItemAccessPolicy`, so community-role parsing and item access checks boot independently from repository/query wiring.
 - Frontend bundle: Vite entry `resources/js/app.ts`, production output under `public/build` (`npm run build`); set `VITE_DEV_SERVER` (e.g. `http://127.0.0.1:5173`) when using `npm run dev` for HMR
 - `register()` also binds `CompilationPipeline` as a singleton (built from the configured `LlmProviderInterface`, `EmbeddingProviderInterface`, and a raw `knowledge_item` `WaaseyaaEntityRepository`) so CLI and future HTTP ingestion surfaces share a single pipeline instance
 - `commands()` contributes CLI commands (`giiken:seed:test-community`, `giiken:ingest:file` — see giiken#94)
@@ -240,6 +241,7 @@ Keep these true during refactoring:
 | `public/index.php` | global boot and response emission | smoke test `/`, non-zero body |
 | `src/Provider/RoutesProvider.php` | HTTP route registration | route smoke tests |
 | `src/Provider/FrontendProvider.php` | Inertia responder + root template/Vite asset wiring | root-template asset integration tests |
+| `src/Provider/AuthzProvider.php` | community role resolver + knowledge item access policy | authz policy + management/report authz tests |
 | `src/AppServiceProvider.php` | residual boot hooks + CLI commands | boot + `waaseyaa list` / migrate + seed |
 | `migrations/*.php` | SQLite schema for app entities | `bin/giiken migrate` + repository integration |
 | `src/Http/Controller/*` | SSR dispatch and Inertia props | unit tests + route smoke tests |

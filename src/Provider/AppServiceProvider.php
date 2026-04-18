@@ -129,7 +129,6 @@ final class AppServiceProvider extends ServiceProvider
 
             return new NullLlmProvider();
         });
-        $this->singleton(CommunityRoleResolverInterface::class, static fn (): CommunityRoleResolverInterface => new CommunityRoleResolver());
         $this->singleton(AskRequestValidator::class, function (): AskRequestValidator {
             /** @var mixed $maxQuestionLength */
             $maxQuestionLength = $this->config['api']['ask']['question_max_length'] ?? 2_000;
@@ -161,10 +160,6 @@ final class AppServiceProvider extends ServiceProvider
                     : [],
             );
         });
-        $this->singleton(KnowledgeItemAccessPolicy::class, function (): KnowledgeItemAccessPolicy {
-            return new KnowledgeItemAccessPolicy($this->resolve(CommunityRoleResolverInterface::class));
-        });
-
         $this->singleton(CommunityRepositoryInterface::class, function (): CommunityRepositoryInterface {
             $etm        = $this->resolve(EntityTypeManager::class);
             $database   = $this->resolve(DatabaseInterface::class);
