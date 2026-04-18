@@ -13,19 +13,8 @@ use App\Console\SeedTestCommunityCommand;
 use App\Pipeline\CompilationPipeline;
 use App\Entity\Community\CommunityRepositoryInterface;
 use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
-use App\Ingestion\Converter\FileConverterInterface;
-use App\Ingestion\Converter\MarkItDownConverter;
-use App\Ingestion\Converter\MarkItDownRunnerInterface;
-use App\Ingestion\Converter\ProcOpenMarkItDownRunner;
-use App\Ingestion\Handler\CsvIngestionHandler;
-use App\Ingestion\Handler\DocumentIngestionHandler;
-use App\Ingestion\Handler\HtmlIngestionHandler;
-use App\Ingestion\Handler\MarkdownIngestionHandler;
-use App\Ingestion\Handler\MediaIngestionHandler;
 use App\Ingestion\IngestionHandlerRegistry;
 use App\Ingestion\NorthCloud\NcHitToKnowledgeItemMapper;
-use App\Ingestion\Upload\UploadValidatorInterface;
-use App\Ingestion\Upload\UploadedFileValidator;
 use Waaseyaa\NorthCloud\Sync\MapperRegistry;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherContract;
@@ -33,10 +22,6 @@ use Waaseyaa\Database\DatabaseInterface;
 use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\Foundation\Log\LoggerInterface;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
-use Waaseyaa\Media\FileRepositoryInterface;
-use Waaseyaa\Media\LocalFileRepository;
-use Waaseyaa\Queue\QueueInterface;
-use Waaseyaa\Queue\SyncQueue;
 use Waaseyaa\Search\SearchIndexerInterface;
 
 final class AppServiceProvider extends ServiceProvider
@@ -52,20 +37,6 @@ final class AppServiceProvider extends ServiceProvider
             return $dispatcher;
         });
 
-        $this->singleton(UploadValidatorInterface::class, function (): UploadValidatorInterface {
-            /** @var mixed $maxBytes */
-            $maxBytes = $this->config['upload_max_bytes'] ?? 0;
-            /** @var mixed $allowedMimeTypes */
-            $allowedMimeTypes = $this->config['upload_allowed_mime_types'] ?? [];
-
-            return new UploadedFileValidator(
-                maxBytes: is_int($maxBytes) ? $maxBytes : 0,
-                allowedMimeTypes: is_array($allowedMimeTypes)
-                    ? array_values(array_filter($allowedMimeTypes, static fn (mixed $value): bool => is_string($value) && $value !== ''))
-                    : [],
-            );
-        });
-        $this->registerIngestionHandlers();
     }
 
     /**
@@ -111,58 +82,6 @@ final class AppServiceProvider extends ServiceProvider
         $registry->register(new NcHitToKnowledgeItemMapper(
             defaultCommunityId: $defaultCommunityId,
         ));
-    }
-
-    /**
-     * Wire the ingestion pipeline: a single {@see IngestionHandlerRegistry}
-     * containing all five file handlers, backed by a local-filesystem media
-     * repository and a synchronous queue. Production will swap the queue for
-     * a real backend (see waaseyaa/giiken#39 follow-ups); the file converter
-     * is a shell wrapper around the optional MarkItDown venv and is only
-     * invoked when a non-media upload arrives.
-     */
-    private function registerIngestionHandlers(): void
-    {
-        // Two levels up from src/Provider/ to the repo root — same
-        // computation as registerInertiaViteRenderer(); getting this
-        // wrong writes media files under src/storage/ instead of the
-        // real storage/ directory. See giiken#90 for the sister bug.
-        $projectRoot = dirname(__DIR__, 2);
-
-        $this->singleton(FileRepositoryInterface::class, static function () use ($projectRoot): FileRepositoryInterface {
-            return new LocalFileRepository($projectRoot . '/storage/media');
-        });
-
-        $this->singleton(QueueInterface::class, static fn (): QueueInterface => new SyncQueue());
-        $this->singleton(MarkItDownRunnerInterface::class, static fn (): MarkItDownRunnerInterface => new ProcOpenMarkItDownRunner());
-
-        $this->singleton(FileConverterInterface::class, function () use ($projectRoot): FileConverterInterface {
-            /** @var mixed $binaryPath */
-            $binaryPath = $this->config['ingestion']['markitdown_binary'] ?? ($projectRoot . '/storage/markitdown-venv/bin/markitdown');
-            /** @var mixed $timeoutSeconds */
-            $timeoutSeconds = $this->config['ingestion']['command_timeout_seconds'] ?? 30;
-
-            return new MarkItDownConverter(
-                binaryPath: is_string($binaryPath) ? $binaryPath : ($projectRoot . '/storage/markitdown-venv/bin/markitdown'),
-                runner: $this->resolve(MarkItDownRunnerInterface::class),
-                timeoutSeconds: is_int($timeoutSeconds) ? $timeoutSeconds : 30,
-            );
-        });
-
-        $this->singleton(IngestionHandlerRegistry::class, function (): IngestionHandlerRegistry {
-            $registry  = new IngestionHandlerRegistry();
-            $mediaRepo = $this->resolve(FileRepositoryInterface::class);
-            $queue     = $this->resolve(QueueInterface::class);
-            $converter = $this->resolve(FileConverterInterface::class);
-
-            $registry->register(new MarkdownIngestionHandler($mediaRepo));
-            $registry->register(new CsvIngestionHandler($converter, $mediaRepo));
-            $registry->register(new HtmlIngestionHandler($converter, $mediaRepo));
-            $registry->register(new DocumentIngestionHandler($converter, $mediaRepo));
-            $registry->register(new MediaIngestionHandler($mediaRepo, $queue));
-
-            return $registry;
-        });
     }
 
     public function boot(): void

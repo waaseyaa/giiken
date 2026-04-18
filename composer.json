@@ -79,6 +79,7 @@
         },
         "waaseyaa": {
             "providers": [
+                "App\\Provider\\IngestionProvider",
                 "App\\Provider\\QueryProvider",
                 "App\\Provider\\EntitiesProvider",
                 "App\\Provider\\AuthzProvider",
