@@ -89,7 +89,16 @@
       <button type="submit">Sign in</button>
     </form>
 
-    <p class="foot"><a href="/">Back to home</a> · <a href="/logout">Sign out</a></p>
+    <div class="foot">
+      <a href="/">Back to home</a>
+      {% if alreadySignedIn %}
+        ·
+        <form method="post" action="/logout" style="display:inline">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" style="display:inline;padding:0;background:none;border:none;color:#ca8a04;font:inherit">Sign out</button>
+        </form>
+      {% endif %}
+    </div>
   </main>
 </body>
 </html>

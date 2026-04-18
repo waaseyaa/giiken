@@ -467,7 +467,7 @@ final class AppServiceProvider extends ServiceProvider
             'giiken.logout',
             RouteBuilder::create('/logout')
                 ->controller(WebLogoutController::class . '::logout')
-                ->methods('GET')
+                ->methods('POST')
                 ->allowAll()
                 ->render()
                 ->build(),

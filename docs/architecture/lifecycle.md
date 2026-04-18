@@ -51,7 +51,7 @@ The first Giiken app-level class in normal boot is `App\AppServiceProvider`:
 - Frontend bundle: Vite entry `resources/js/app.ts`, production output under `public/build` (`npm run build`); set `VITE_DEV_SERVER` (e.g. `http://127.0.0.1:5173`) when using `npm run dev` for HMR
 - `register()` also binds `CompilationPipeline` as a singleton (built from the configured `LlmProviderInterface`, `EmbeddingProviderInterface`, and a raw `knowledge_item` `WaaseyaaEntityRepository`) so CLI and future HTTP ingestion surfaces share a single pipeline instance
 - `commands()` contributes CLI commands (`giiken:seed:test-community`, `giiken:ingest:file` — see giiken#94)
-- `routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `GET` `/logout`)
+- `routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `POST` `/logout`)
 - `HomeController::discover` (`GET /`) injects `CommunityRepositoryInterface` and ships the result of `findAll()` as the `communities` Inertia prop for `Pages/Discover.vue`, which renders a community card grid linking into `/{slug}` Discovery pages
 
 ### 1.4 Schema and local data
@@ -84,7 +84,7 @@ After boot, `HttpKernel::serveHttpRequest()` executes:
 App routes are added through `AppServiceProvider::routes(...)`, including:
 
 - Public landing (Inertia): `GET` `/` → `Discover` page (`HomeController::discover`)
-- Session HTML auth (public): `GET`/`POST` `/login`, `GET` `/logout`
+- Session HTML auth (public): `GET`/`POST` `/login`, `POST` `/logout`
 - Discovery:
   - `/{communitySlug}`
   - `/{communitySlug}/search`
