@@ -6,6 +6,7 @@ namespace App\Tests\Integration\Entity;
 
 use Carbon\CarbonImmutable;
 use App\Entity\Community\Community;
+use App\Entity\Community\CommunityRepositoryInterface;
 use App\Entity\Community\SovereigntyProfile;
 use App\Entity\KnowledgeItem\AccessTier;
 use App\Entity\KnowledgeItem\KnowledgeItem;
@@ -209,6 +210,32 @@ final class ContentEntitySqlIntegrationTest extends AppKernelIntegrationTestCase
         self::assertIsString($raw['updated_at'] ?? null);
         self::assertStringContainsString('2026-06-17', (string) $raw['updated_at']);
         self::assertInstanceOf(CarbonImmutable::class, $report->updatedAt());
+    }
+
+    #[Test]
+    public function community_slug_must_be_unique(): void
+    {
+        $repo = self::giikenProvider()->resolve(CommunityRepositoryInterface::class);
+        self::assertInstanceOf(CommunityRepositoryInterface::class, $repo);
+
+        $first = Community::make([
+            'uuid' => Uuid::v4()->toRfc4122(),
+            'name' => 'First Nation',
+            'slug' => 'unique-slug-test',
+        ]);
+        $first->enforceIsNew(true);
+        $repo->save($first);
+
+        $second = Community::make([
+            'uuid' => Uuid::v4()->toRfc4122(),
+            'name' => 'Second Nation',
+            'slug' => 'unique-slug-test',
+        ]);
+        $second->enforceIsNew(true);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Community slug must be unique');
+        $repo->save($second);
     }
 
     #[Test]

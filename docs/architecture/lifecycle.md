@@ -143,6 +143,7 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.144** and `nesbot/carbon` so datetim
 - **Hydration:** `Community` implements `HydratableFromStorageInterface`. Rows are rebuilt with `Community::fromStorage()` / `Community::make()`; do not hand-roll `new Community(...)` from storage rows.
 - **Constructor bag merge:** The domain constructor spreads `$extra` first, then overlays normalized `name`, `slug`, `locale`, `sovereignty_profile`, and timestamps so an import bag cannot overwrite coerced sovereignty or parsed dates with invalid raw strings.
 - **Casts:** `wiki_schema` → `array`; `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `sovereignty_profile` → `SovereigntyProfile` backed enum.
+- **Slug invariant:** `community.slug` is now unique at both the repository layer and the database layer (`community_slug_unique`). `CommunityRepository::save()` rejects duplicate slugs before persistence, and the migration refuses to add the index if preexisting duplicates are present.
 - **Reads:** `sovereigntyProfile()` uses `get('sovereignty_profile')` (enum cast) and `tryFrom` fallback to `Local`. Invalid strings in an import bag are normalized before they reach storage via `make()` / constructor overlay.
 
 ### 3.2.3 `KnowledgeItem` entity

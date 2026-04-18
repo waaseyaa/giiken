@@ -40,6 +40,18 @@ final class CommunityRepository implements CommunityRepositoryInterface
 
     public function save(Community $community): void
     {
+        $slug = trim($community->slug());
+        if ($slug !== '') {
+            $existing = $this->findBySlug($slug);
+            if (
+                $existing instanceof Community
+                && (string) $existing->id() !== ''
+                && (string) $existing->id() !== (string) $community->id()
+            ) {
+                throw new \RuntimeException("Community slug must be unique: {$slug}");
+            }
+        }
+
         $community->set('updated_at', CarbonImmutable::now()->toIso8601String());
 
         $this->repository->save($community);
