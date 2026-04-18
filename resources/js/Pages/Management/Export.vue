@@ -3,10 +3,6 @@ import ManagementLayout from '@/Layouts/ManagementLayout.vue'
 import type { Community } from '@/types'
 
 defineProps<{ community: Community }>()
-
-function requestExport() {
-  alert('Export will be wired in the next iteration.')
-}
 </script>
 
 <template>
@@ -23,12 +19,12 @@ function requestExport() {
         <strong>Community Sovereignty Guarantee:</strong> Your data is always exportable in open formats.
         You can move to any infrastructure at any time.
       </p>
-      <button
-        @click="requestExport"
-        class="px-6 py-2 bg-primary text-on-primary rounded-lg hover:bg-primary-hover font-medium"
+      <a
+        :href="`/${community.slug}/manage/export/download`"
+        class="inline-flex px-6 py-2 bg-primary text-on-primary rounded-lg hover:bg-primary-hover font-medium"
       >
         Export Community Data
-      </button>
+      </a>
     </div>
   </ManagementLayout>
 </template>

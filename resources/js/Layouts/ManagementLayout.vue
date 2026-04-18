@@ -14,9 +14,7 @@ defineProps<{ community: Community }>()
 
       <nav class="flex-1 px-2 py-4 space-y-1">
         <p class="px-3 text-xs text-white/50 uppercase tracking-wider mb-2">Management</p>
-        <Link :href="`/${community.slug}/manage`" class="block px-3 py-2 rounded text-sm hover:bg-white/10">📊 Dashboard</Link>
-        <Link :href="`/${community.slug}/manage/reports`" class="block px-3 py-2 rounded text-sm hover:bg-white/10">📋 Reports</Link>
-        <Link :href="`/${community.slug}/manage/users`" class="block px-3 py-2 rounded text-sm hover:bg-white/10">👥 Users</Link>
+        <Link :href="`/${community.slug}/manage`" class="block px-3 py-2 rounded text-sm hover:bg-white/10">Overview</Link>
         <Link :href="`/${community.slug}/manage/ingestion`" class="block px-3 py-2 rounded text-sm hover:bg-white/10">📥 Ingestion Queue</Link>
 
         <p class="px-3 text-xs text-white/50 uppercase tracking-wider mt-6 mb-2">System</p>
