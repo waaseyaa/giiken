@@ -1,7 +1,7 @@
 {
-  "event_count": 20,
-  "last_event_id": "01KQZ4D39N0MFMEB84BXVQ57G1",
-  "materialized_at": "2026-05-06T17:12:09.781211+00:00",
+  "event_count": 22,
+  "last_event_id": "01KQZ4DJ8SXNQKVYXTRBB7B45N",
+  "materialized_at": "2026-05-06T17:12:25.114013+00:00",
   "mission_number": "",
   "mission_slug": "upgrade-waaseyaa-to-alpha-173-01KQYY1N",
   "mission_type": "software-dev",
@@ -12,9 +12,9 @@
     "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 0,
+    "in_progress": 1,
     "in_review": 0,
-    "planned": 2
+    "planned": 1
   },
   "work_packages": {
     "WP01": {
@@ -53,11 +53,11 @@
       "last_transition_at": "2026-05-06T17:12:09.781211+00:00"
     },
     "WP06": {
-      "actor": "finalize-tasks",
+      "actor": "claude:opus-4-7:implementer:implementer",
       "force_count": 1,
-      "lane": "planned",
-      "last_event_id": "01KQZ1SGT0A9JY23R8GE4D18Y9",
-      "last_transition_at": "2026-05-06T16:26:31.104776+00:00"
+      "lane": "in_progress",
+      "last_event_id": "01KQZ4DJ8SXNQKVYXTRBB7B45N",
+      "last_transition_at": "2026-05-06T17:12:25.114013+00:00"
     },
     "WP07": {
       "actor": "finalize-tasks",

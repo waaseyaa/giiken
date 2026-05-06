@@ -16,7 +16,8 @@ subtasks:
 - T024
 phase: Phase 5 - Polish (residual drift)
 assignee: ''
-agent: ''
+agent: "claude:opus-4-7:implementer:implementer"
+shell_pid: "160112"
 history:
 - timestamp: '2026-05-06T16:14:17Z'
   agent: system
@@ -203,3 +204,7 @@ spec-kitty agent action implement WP06 --agent <agent-name>
 ```
 
 (Depends on WP03, WP04, WP05.)
+
+## Activity Log
+
+- 2026-05-06T17:12:25Z – claude:opus-4-7:implementer:implementer – shell_pid=160112 – Started implementation via action command
