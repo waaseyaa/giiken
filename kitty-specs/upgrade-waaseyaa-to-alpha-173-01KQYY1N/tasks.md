@@ -11,10 +11,10 @@
 
 | ID | Description | WP | Parallel |
 |---|---|---|---|
-| T001 | Capture PHPUnit baseline (test count, exit, wall time) | WP01 | [P] |
-| T002 | Capture PHPStan level 8 baseline finding count | WP01 | [P] |
-| T003 | Capture boot-to-browser smoke baseline (migrate, seed, serve, curl) | WP01 |  |
-| T004 | Commit `baseline.md` with all three captured baselines | WP01 |  |
+| T001 | Capture PHPUnit baseline (test count, exit, wall time) | WP01 | [P] | [D] |
+| T002 | Capture PHPStan level 8 baseline finding count | WP01 | [D] |
+| T003 | Capture boot-to-browser smoke baseline (migrate, seed, serve, curl) | WP01 |  | [D] |
+| T004 | Commit `baseline.md` with all three captured baselines | WP01 |  | [D] |
 | T005 | Edit `composer.json` — rewrite 38 `waaseyaa/*` constraints to `^0.1.0-alpha.173` | WP02 |  |
 | T006 | Run `composer update 'waaseyaa/*' --with-all-dependencies` to regenerate lockfile | WP02 |  |
 | T007 | Run PHPUnit + PHPStan post-bump; record failure surface in `baseline-postbump.md` | WP02 |  |
@@ -60,10 +60,10 @@
 
 **Tracking:**
 
-- [ ] T001 Capture PHPUnit baseline (WP01)
-- [ ] T002 Capture PHPStan level 8 baseline (WP01)
-- [ ] T003 Capture boot-to-browser smoke baseline (WP01)
-- [ ] T004 Commit `baseline.md` with all three captures (WP01)
+- [x] T001 Capture PHPUnit baseline (WP01)
+- [x] T002 Capture PHPStan level 8 baseline (WP01)
+- [x] T003 Capture boot-to-browser smoke baseline (WP01)
+- [x] T004 Commit `baseline.md` with all three captures (WP01)
 
 ---
 
