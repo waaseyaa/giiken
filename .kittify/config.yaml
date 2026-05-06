@@ -1,0 +1,11 @@
+vcs:
+  type: git
+agents:
+  available:
+  - claude
+  auto_commit: true
+project:
+  uuid: e9e9df4b-6bde-4973-a063-b69ba35bd114
+  slug: giiken
+  node_id: 3a6d4f2cea16
+  build_id: 578b051f-b921-42d0-87d2-57cbed598fb0
