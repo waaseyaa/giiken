@@ -35,12 +35,12 @@
 | T022 | Run full PHPUnit + PHPStan + smoke; identify residual failures not predicted in research.md | WP06 |  | [D] |
 | T023 | For each residual failure: apply upstream fix in `waaseyaa/framework`, push tag, bump alpha tag if needed | WP06 |  | [D] |
 | T024 | Document each upstream-fix action and any deferred upstream issues in `migration-notes.md` | WP06 |  | [D] |
-| T025 | Run final PHPUnit; verify zero failures, count ≥ baseline | WP07 |  |
-| T026 | Run final PHPStan level 8; verify zero new findings | WP07 |  |
-| T027 | Run final boot-to-browser smoke; verify 200/200 with seeded items, latency < 2s | WP07 |  |
-| T028 | Run `scripts/check-lifecycle-drift.sh`; update `docs/architecture/lifecycle.md` if drift detected | WP07 |  |
-| T029 | Finalize `migration-notes.md` per FR-014 / NFR-004 | WP07 |  |
-| T030 | Update `CLAUDE.md` § "Boot-to-browser status" with new alpha tag and migration date | WP07 |  |
+| T025 | Run final PHPUnit; verify zero failures, count ≥ baseline | WP07 |  | [D] |
+| T026 | Run final PHPStan level 8; verify zero new findings | WP07 |  | [D] |
+| T027 | Run final boot-to-browser smoke; verify 200/200 with seeded items, latency < 2s | WP07 |  | [D] |
+| T028 | Run `scripts/check-lifecycle-drift.sh`; update `docs/architecture/lifecycle.md` if drift detected | WP07 |  | [D] |
+| T029 | Finalize `migration-notes.md` per FR-014 / NFR-004 | WP07 |  | [D] |
+| T030 | Update `CLAUDE.md` § "Boot-to-browser status" with new alpha tag and migration date | WP07 |  | [D] |
 
 `[P]` in this index marks tasks that are file-independent within their work package (different files, different concerns) and can be executed concurrently if a multi-agent flow is desired. The Subtask Index is reference-only; per-WP progress is tracked via the checkboxes inside each WP section below.
 
@@ -184,12 +184,12 @@
 
 **Tracking:**
 
-- [ ] T025 Run final PHPUnit (zero failures, count ≥ baseline) (WP07)
-- [ ] T026 Run final PHPStan (zero new findings) (WP07)
-- [ ] T027 Run final smoke (200/200, latency < 2s) (WP07)
-- [ ] T028 Run lifecycle drift check; update `lifecycle.md` if needed (WP07)
-- [ ] T029 Finalize `migration-notes.md` (WP07)
-- [ ] T030 Update `CLAUDE.md` § "Boot-to-browser status" (WP07)
+- [x] T025 Run final PHPUnit (zero failures, count ≥ baseline) (WP07)
+- [x] T026 Run final PHPStan (zero new findings) (WP07)
+- [x] T027 Run final smoke (200/200, latency < 2s) (WP07)
+- [x] T028 Run lifecycle drift check; update `lifecycle.md` if needed (WP07)
+- [x] T029 Finalize `migration-notes.md` (WP07)
+- [x] T030 Update `CLAUDE.md` § "Boot-to-browser status" (WP07)
 
 ---
 
