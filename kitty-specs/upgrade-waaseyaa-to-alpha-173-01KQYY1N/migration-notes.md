@@ -86,6 +86,60 @@ These were observed during WP01 baseline / WP02 post-bump capture and are out of
 - **Empty `storage/giiken.sqlite` file** present alongside the active `storage/waaseyaa.sqlite`. Likely dead from a prior config; not referenced by current code. (Cleanup deferred.)
 - **45 pre-existing PHPStan level 8 findings** (e.g., `KnowledgeItemRepositoryInterface` parameter-type mismatches in `ExportService`/`SynthesisService`/`CompilationPipeline`, `object::save()` undefined-method in `ContentEntitySqlIntegrationTest.php:533`). Pre-date this mission; gate floor remains 45. (Future cleanup mission.)
 
-## Final verification (to be appended by WP07)
+## Final verification (WP07, 2026-05-06)
 
-_WP07 will append the final PHPUnit/PHPStan/smoke results, the lifecycle drift outcome, and the `CLAUDE.md` updates._
+### PHPUnit (T025 / post-fgetcsv-fix)
+
+- Tests: **258 / 258 passing** (807 assertions)
+- Failures: 0, Errors: 0
+- **Deprecations: 0** (was 2 pre-fix; the two `fgetcsv()` notices in `CsvIngestionHandler.php` are gone)
+- Wall time: ~1.6s
+- Exit: 0
+
+### PHPStan (T026)
+
+- Level 8, scope `src tests`
+- Findings: **45** (matches baseline exactly; gate floor preserved)
+- No new findings
+- Exit: 0
+
+### Boot-to-browser smoke (T027, real seeded community `sagamok-anishnawbek`)
+
+- `./vendor/bin/waaseyaa migrate` — 5 migrations applied, exit 0
+- Seed step: skipped (no `giiken:seed:test-community` command exists; existing 6 items in `storage/waaseyaa.sqlite` are reused)
+- `GET /` — HTTP **200**, 425 bytes, 0.126s
+- `GET /sagamok-anishnawbek` — HTTP **200**, 3245 bytes, 0.015s
+- `GET /sagamok-anishnawbek/item/30` — HTTP **200**, 1773 bytes, 0.008s
+- `GET /sagamok-anishnawbek/search?q=water` — `totalHits":2` (real-content search hit)
+- All latencies well under the 2s NFR-003 ceiling
+- Server log: zero deprecation notices
+
+### Lifecycle drift (T028)
+
+- `./scripts/check-lifecycle-drift.sh` — `OK: No changed files detected for lifecycle drift check.` Exit 0.
+- `docs/architecture/lifecycle.md` left untouched (no lifecycle-impacting source changed in this mission).
+
+### `CLAUDE.md` update (T030)
+
+Section "Boot-to-browser status" updated to reflect reality:
+- Heading date: `2026-04-11` → `2026-05-06`
+- Framework version reference: `^0.1.0-alpha.145` → `^0.1.0-alpha.173`
+- Smoke snippet now uses real slug `sagamok-anishnawbek` (was fictional `test-community`)
+- Removed the `giiken:seed:test-community` line (command does not exist)
+- Test count: `238/238` → `258/258`
+- "Resolved (closed)" sub-list left as-is (historical framework issues; no closures in this mission)
+
+### Adapted item added in WP07
+
+- **`fgetcsv()` PHP 8.4 deprecation fix** — `src/Ingestion/Handler/CsvIngestionHandler.php` lines 59 and 63 now pass all parameters explicitly (`length: 0, separator: ',', enclosure: '"', escape: ''`). Drives the deprecation count from 2 to 0 without behavioral change. PHP-native, unrelated to the alpha bump, but eliminated as part of mission sign-off.
+
+### Sign-off
+
+All Definition-of-Done gates pass:
+- PHPUnit 258/258, 0 failures, 0 deprecations
+- PHPStan 45 findings (= baseline)
+- Smoke 200/200/200 with real seeded content
+- Lifecycle drift check green
+- Mission documentation in sync with runtime reality
+
+Mission `upgrade-waaseyaa-to-alpha-173-01KQYY1N` ready for acceptance.
