@@ -188,3 +188,4 @@ spec-kitty agent action implement WP02 --agent <agent-name>
 ## Activity Log
 
 - 2026-05-06T16:58:10Z – claude:opus-4-7:implementer:implementer – shell_pid=156044 – Assigned agent via action command
+- 2026-05-06T17:03:01Z – claude:opus-4-7:implementer:implementer – shell_pid=156044 – Composer constraints at ^0.1.0-alpha.173 (33 in-scope packages, not 38 as estimated), lockfile regenerated (113 ops, 39 waaseyaa/* at v0.1.0-alpha.173). PHPUnit 258/258 (matches baseline), PHPStan 45 findings (matches baseline, 0 new), smoke 200/200/200 with totalHits=2 on water search. Predicted failure surface from research.md did NOT materialize - downstream WP03/WP04/WP05 may be no-ops; see baseline-postbump.md committed on main.
