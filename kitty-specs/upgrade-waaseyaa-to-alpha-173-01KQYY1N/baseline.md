@@ -28,6 +28,18 @@
 - `curl -i http://127.0.0.1:8080/`: HTTP 200, identified as `"component":"Discover"` Inertia page (props include the `Sagamok Anishnawbek` community), latency 0.123s — well under the 2s NFR-003 threshold.
 - `curl -i http://127.0.0.1:8080/test-community`: HTTP 200, identified as `"component":"Discovery\/Index"` Inertia page. Props show `community: null, recentItems: { items: [], totalHits: 0, totalPages: 0 }` — the slug `test-community` does not match any seeded community (because the seed command does not exist); the route resolves and renders the empty-state shell. Latency 0.014s — well under the 2s NFR-003 threshold.
 
+## Supplementary smoke (verified 2026-05-06T16:52Z)
+
+The T003 smoke as captured above used the slug `/test-community`, which does not match any seeded community in this database. That curl returned 200 with the empty-state shell (`community: null`, 0 items) — technically a 200, but not evidence that Giiken renders real content. A supplementary smoke against the actual seeded community confirms end-to-end runtime health:
+
+- **Database in use:** `storage/waaseyaa.sqlite` (not `storage/giiken.sqlite`, which is empty). Contents: 1 community (`sagamok-anishnawbek`), 6 knowledge items, 0 wiki lint reports.
+- `curl http://127.0.0.1:8080/`: HTTP 200, Inertia `Discover` page, props include the `sagamok-anishnawbek` community.
+- `curl http://127.0.0.1:8080/sagamok-anishnawbek`: HTTP 200, 1910 bytes, Inertia `Discovery/Index` with rendered content.
+- `curl http://127.0.0.1:8080/sagamok-anishnawbek/item/30`: HTTP 200, 1910 bytes — item detail dispatch works.
+- `curl 'http://127.0.0.1:8080/sagamok-anishnawbek/search?q=water'`: HTTP 200, props show `totalHits: 2` — search returns real hits, not empty results.
+
+**Note for WP07:** `CLAUDE.md` § "Boot-to-browser status" advertises a `giiken:seed:test-community` console command and a `/test-community` smoke route. Neither is functional in the current build (the command is not registered; the slug does not exist in the database). WP07 should either restore the seed command, or update `CLAUDE.md` to reflect the real seeded slug (`sagamok-anishnawbek`).
+
 ## Post-bump failure surface
 
 _To be recorded in `baseline-postbump.md` (sibling file) by WP02 T007 after the composer bump._
