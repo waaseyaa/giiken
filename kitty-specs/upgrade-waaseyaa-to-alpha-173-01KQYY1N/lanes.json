@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "mission_slug": "upgrade-waaseyaa-to-alpha-173-01KQYY1N",
+  "mission_id": "01KQYY1NT1BW6F7QKZA02969PB",
+  "mission_branch": "kitty/mission-upgrade-waaseyaa-to-alpha-173-01KQYY1N",
+  "target_branch": "main",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP02",
+        "WP03",
+        "WP04",
+        "WP05",
+        "WP06",
+        "WP07"
+      ],
+      "write_scope": [
+        "CLAUDE.md",
+        "composer.json",
+        "composer.lock",
+        "docs/architecture/lifecycle.md",
+        "kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline-postbump.md",
+        "kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/migration-notes.md",
+        "src/Entity/Community/Community.php",
+        "src/Entity/KnowledgeItem/KnowledgeItem.php",
+        "src/Http/Controller/DiscoveryController.php",
+        "src/Http/Controller/HomeController.php",
+        "src/Http/Controller/ManagementController.php",
+        "src/Http/Controller/QueryApiController.php",
+        "src/Http/Controller/WebLoginController.php",
+        "src/Http/Controller/WebLogoutController.php",
+        "src/Provider/AppServiceProvider.php",
+        "src/Provider/EntitiesProvider.php",
+        "src/Wiki/WikiLintReport.php",
+        "tests/Integration/Entity/**",
+        "tests/Integration/Http/**",
+        "tests/Unit/Entity/**",
+        "tests/Unit/Http/Controller/DiscoveryControllerTest.php",
+        "tests/Unit/Http/Controller/HomeControllerTest.php",
+        "tests/Unit/Http/Controller/ManagementControllerTest.php",
+        "tests/Unit/Http/Controller/QueryApiControllerTest.php",
+        "tests/Unit/Http/Controller/WebLoginControllerTest.php",
+        "tests/Unit/Http/Controller/WebLogoutControllerTest.php",
+        "tests/Unit/Wiki/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "dashboard",
+        "legacy-cleanup",
+        "tests",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline.md"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-05-06T16:26:31.151592+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01"
+  ],
+  "collapse_report": {
+    "events": [
+      {
+        "wp_a": "WP03",
+        "wp_b": "WP02",
+        "rule": "dependency",
+        "evidence": "WP03 depends on WP02"
+      },
+      {
+        "wp_a": "WP04",
+        "wp_b": "WP02",
+        "rule": "dependency",
+        "evidence": "WP04 depends on WP02"
+      },
+      {
+        "wp_a": "WP05",
+        "wp_b": "WP02",
+        "rule": "dependency",
+        "evidence": "WP05 depends on WP02"
+      },
+      {
+        "wp_a": "WP06",
+        "wp_b": "WP03",
+        "rule": "dependency",
+        "evidence": "WP06 depends on WP03"
+      },
+      {
+        "wp_a": "WP07",
+        "wp_b": "WP06",
+        "rule": "dependency",
+        "evidence": "WP07 depends on WP06"
+      }
+    ],
+    "total_merges": 5,
+    "independent_wps_collapsed": 0,
+    "by_rule": {
+      "dependency": 5
+    }
+  }
+}

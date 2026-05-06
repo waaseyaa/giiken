@@ -9,7 +9,7 @@ requirement_refs:
 - FR-003
 planning_base_branch: main
 merge_target_branch: main
-branch_strategy: Planning artifacts were generated on main; completed changes must merge back into main.
+branch_strategy: Planning artifacts for this feature were generated on main. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into main unless the human explicitly redirects the landing branch.
 subtasks:
 - T005
 - T006
@@ -27,7 +27,7 @@ execution_mode: code_change
 owned_files:
 - composer.json
 - composer.lock
-- kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline.md
+- kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline-postbump.md
 tags: []
 ---
 
@@ -114,19 +114,20 @@ Trunk-based on `main`. WP01 must be complete (baseline captured) before this WP 
    ```bash
    ./vendor/bin/phpstan analyse src tests --level=8 --no-progress 2>&1 | tail -100
    ```
-3. Append a "Post-bump failure surface" section to `kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline.md` with:
+3. Create `kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline-postbump.md` (sibling to `baseline.md` from WP01) with:
    - Captured timestamp.
    - PHPUnit: total tests, failures, errors, count by category.
    - PHPStan: total findings, distinct error classes.
    - Note any deviation from research.md predictions (e.g., a category that wasn't predicted).
+   - Reference `baseline.md` for the pre-upgrade values being compared against.
 
 **Files:**
 
-- `kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline.md` (append)
+- `kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline-postbump.md` (new)
 
 **Validation:**
 
-- `baseline.md` now contains both pre-upgrade and post-bump sections.
+- `baseline-postbump.md` exists and contains all required sections.
 - Failure categories sum to total failures (no uncategorized).
 
 ### T008 — Commit `composer.json`, `composer.lock`, baseline update
@@ -138,7 +139,7 @@ Trunk-based on `main`. WP01 must be complete (baseline captured) before this WP 
 1. Stage the three files:
    ```bash
    git add composer.json composer.lock \
-           kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline.md
+           kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/baseline-postbump.md
    ```
 2. Commit with conventional-commit message:
    ```bash
@@ -156,13 +157,13 @@ Trunk-based on `main`. WP01 must be complete (baseline captured) before this WP 
 - [ ] `composer.json` declares `^0.1.0-alpha.173` for all 38 in-scope packages.
 - [ ] `composer.lock` regenerated and committed.
 - [ ] `waaseyaa/northcloud` constraint unchanged at `@dev`.
-- [ ] `baseline.md` includes post-bump failure surface with category breakdown.
+- [ ] `baseline-postbump.md` records the post-bump failure surface with category breakdown.
 - [ ] One commit on `main`.
-- [ ] Failure categories observed match `research.md` predictions, OR deviation is documented in `baseline.md`.
+- [ ] Failure categories observed match `research.md` predictions, OR deviation is documented in `baseline-postbump.md`.
 
 ## Risks
 
-- **Resolution failure.** If composer cannot resolve, the most likely cause is a transitive constraint from `waaseyaa/northcloud@dev` against a now-tighter sibling. If this fires, capture the resolver output verbatim in `baseline.md` and stop the WP — escalate to a planning revision.
+- **Resolution failure.** If composer cannot resolve, the most likely cause is a transitive constraint from `waaseyaa/northcloud@dev` against a now-tighter sibling. If this fires, capture the resolver output verbatim in `baseline-postbump.md` and stop the WP — escalate to a planning revision.
 - **Path repo silently drops the new constraint.** `composer.local.json` may make the registry constraint cosmetic. Verify by examining `composer.lock` for the v0.1.0-alpha.173 commit ref. If the lockfile shows alpha.145's commit, the upstream symlink isn't on the right tag — `git -C ../waaseyaa checkout v0.1.0-alpha.173` first.
 - **Test count drops.** Should not happen — alpha tags rarely remove tests from the framework, and this WP doesn't touch Giiken's tests. If it does, investigate before proceeding.
 
