@@ -27,7 +27,8 @@ subtasks:
 - T030
 phase: Phase 6 - Polish (final verification)
 assignee: ''
-agent: ''
+agent: "claude:opus-4-7:implementer:implementer"
+shell_pid: "160630"
 history:
 - timestamp: '2026-05-06T16:14:17Z'
   agent: system
@@ -240,3 +241,7 @@ spec-kitty agent action implement WP07 --agent <agent-name>
 ```
 
 (Depends on WP06.)
+
+## Activity Log
+
+- 2026-05-06T17:14:27Z – claude:opus-4-7:implementer:implementer – shell_pid=160630 – Started implementation via action command
