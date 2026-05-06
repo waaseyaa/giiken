@@ -1,0 +1,13 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    stubFiles:
+        - stubs/ServiceProvider.stub
+    ignoreErrors:
+        # commands() inherits from vendor ServiceProvider; the iterable type is
+        # constrained by the parent contract, not specifiable here.
+        -
+            message: '#Method App\\Provider\\AppServiceProvider::commands\(\) return type has no value type specified in iterable type array\.#'
+            path: src/Provider/AppServiceProvider.php

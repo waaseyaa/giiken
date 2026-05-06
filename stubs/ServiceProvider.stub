@@ -1,0 +1,15 @@
+<?php
+
+namespace Waaseyaa\Foundation\ServiceProvider;
+
+abstract class ServiceProvider
+{
+    /**
+     * @template T of object
+     * @param class-string<T> $abstract
+     * @return T
+     */
+    public function resolve(string $abstract): object
+    {
+    }
+}
