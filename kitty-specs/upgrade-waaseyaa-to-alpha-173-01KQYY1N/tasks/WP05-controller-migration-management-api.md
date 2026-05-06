@@ -180,3 +180,7 @@ spec-kitty agent action implement WP05 --agent <agent-name>
 ```
 
 (Depends on WP02. May parallel WP03 and WP04.)
+
+## Activity Log
+
+- 2026-05-06T17:12:10Z – unknown – Force-approved: same empirical basis as WP04. Zero implicit_array_unbound notices for Management/QueryApi controllers in runtime logs. Source migration deferred to a future mission as future-proofing.
