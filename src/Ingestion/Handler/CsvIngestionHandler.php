@@ -56,11 +56,11 @@ final class CsvIngestionHandler implements FileIngestionHandlerInterface
             return ['row_count' => 0, 'column_names' => []];
         }
 
-        $header = fgetcsv($handle);
+        $header = fgetcsv($handle, length: 0, separator: ',', enclosure: '"', escape: '');
         $columnNames = is_array($header) ? array_map('strval', $header) : [];
         $rowCount = 0;
 
-        while (fgetcsv($handle) !== false) {
+        while (fgetcsv($handle, length: 0, separator: ',', enclosure: '"', escape: '') !== false) {
             $rowCount++;
         }
 

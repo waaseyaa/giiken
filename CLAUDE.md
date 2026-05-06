@@ -8,21 +8,20 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 
 **PHP:** 8.4+ | **License:** GPL-2.0-or-later | **Namespace:** `App\` (PSR-4)
 
-## Boot-to-browser status (as of 2026-04-11)
+## Boot-to-browser status (as of 2026-05-06)
 
-✅ **Phase A green.** Boot, migrations, seed, and SSR dispatch all work end-to-end on `waaseyaa/* ^0.1.0-alpha.145`.
+✅ **Phase A green.** Boot, migrations, and SSR dispatch all work end-to-end on `waaseyaa/* ^0.1.0-alpha.173`.
 
 Verified smoke path:
 
 ```
-./vendor/bin/waaseyaa migrate                     # 1 migration applied
-./vendor/bin/waaseyaa giiken:seed:test-community  # community + 3 knowledge items
+./vendor/bin/waaseyaa migrate                     # migrations applied
 ./vendor/bin/waaseyaa serve                       # or php -S 127.0.0.1:8080 -t public public/index.php
 curl http://127.0.0.1:8080/                       # 200, Inertia "Discover"
-curl http://127.0.0.1:8080/test-community         # 200, Inertia "Discovery/Index" with seeded items
+curl http://127.0.0.1:8080/sagamok-anishnawbek    # 200, Inertia "Discovery/Index" with 6 seeded items
 ```
 
-PHPUnit: 238/238 passing.
+PHPUnit: 258/258 passing.
 
 ### Resolved (closed)
 

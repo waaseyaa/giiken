@@ -2,11 +2,11 @@
   "created_at": "2026-05-06T15:21:04.244078+00:00",
   "friendly_name": "Upgrade Waaseyaa to alpha.173",
   "mission_id": "01KQYY1NT1BW6F7QKZA02969PB",
-  "mission_number": null,
+  "mission_number": 1,
   "mission_slug": "upgrade-waaseyaa-to-alpha-173-01KQYY1N",
   "mission_type": "software-dev",
   "slug": "upgrade-waaseyaa-to-alpha-173-01KQYY1N",
+  "source_description": "Upgrade Giiken from Waaseyaa ^0.1.0-alpha.145 to ^0.1.0-alpha.173 (today's latest tagged release). Includes contract reconciliation, controller migration, provider capability updates, and full test verification. PHP-only — frontend npm dependencies are out of scope. waaseyaa/northcloud@dev floats and is not re-pinned.",
   "target_branch": "main",
-  "vcs": "git",
-  "source_description": "Upgrade Giiken from Waaseyaa ^0.1.0-alpha.145 to ^0.1.0-alpha.173 (today's latest tagged release). Includes contract reconciliation, controller migration, provider capability updates, and full test verification. PHP-only — frontend npm dependencies are out of scope. waaseyaa/northcloud@dev floats and is not re-pinned."
+  "vcs": "git"
 }
