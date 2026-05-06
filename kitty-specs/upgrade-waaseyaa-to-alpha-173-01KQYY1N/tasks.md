@@ -32,9 +32,9 @@
 | T019 | Migrate `ManagementController` (7 methods) to typed parameter injection | WP05 |  |
 | T020 | Migrate `QueryApiController` (3 methods) to typed parameter injection | WP05 |  |
 | T021 | Run smoke + PHPUnit + log capture; verify zero `implicit_array_unbound` notices | WP05 |  |
-| T022 | Run full PHPUnit + PHPStan + smoke; identify residual failures not predicted in research.md | WP06 |  |
-| T023 | For each residual failure: apply upstream fix in `waaseyaa/framework`, push tag, bump alpha tag if needed | WP06 |  |
-| T024 | Document each upstream-fix action and any deferred upstream issues in `migration-notes.md` | WP06 |  |
+| T022 | Run full PHPUnit + PHPStan + smoke; identify residual failures not predicted in research.md | WP06 |  | [D] |
+| T023 | For each residual failure: apply upstream fix in `waaseyaa/framework`, push tag, bump alpha tag if needed | WP06 |  | [D] |
+| T024 | Document each upstream-fix action and any deferred upstream issues in `migration-notes.md` | WP06 |  | [D] |
 | T025 | Run final PHPUnit; verify zero failures, count ≥ baseline | WP07 |  |
 | T026 | Run final PHPStan level 8; verify zero new findings | WP07 |  |
 | T027 | Run final boot-to-browser smoke; verify 200/200 with seeded items, latency < 2s | WP07 |  |
@@ -164,9 +164,9 @@
 
 **Tracking:**
 
-- [ ] T022 Identify residual failures via PHPUnit + PHPStan + smoke (WP06)
-- [ ] T023 Apply upstream fixes for each residual; bump alpha tag if cut (WP06)
-- [ ] T024 Document upstream-fix actions and deferrals in `migration-notes.md` (WP06)
+- [x] T022 Identify residual failures via PHPUnit + PHPStan + smoke (WP06)
+- [x] T023 Apply upstream fixes for each residual; bump alpha tag if cut (WP06)
+- [x] T024 Document upstream-fix actions and deferrals in `migration-notes.md` (WP06)
 
 ---
 
