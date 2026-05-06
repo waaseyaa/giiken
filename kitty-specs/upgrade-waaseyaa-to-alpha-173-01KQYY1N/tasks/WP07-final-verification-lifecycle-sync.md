@@ -37,6 +37,7 @@ execution_mode: code_change
 owned_files:
 - docs/architecture/lifecycle.md
 - CLAUDE.md
+- src/Ingestion/Handler/CsvIngestionHandler.php
 tags: []
 ---
 
