@@ -206,3 +206,4 @@ spec-kitty agent action implement WP01 --agent <agent-name>
 
 - 2026-05-06T16:42:39Z – claude:opus-4-7:implementer:implementer – shell_pid=153580 – Started implementation via action command
 - 2026-05-06T16:45:54Z – claude:opus-4-7:implementer:implementer – shell_pid=153580 – Baseline captured: phpunit 258/258 green (807 assertions, 1.922s); phpstan level 8 has 45 pre-existing findings (acceptable per WP T002); smoke 200/200, latency 0.123s/0.014s. NOTE: giiken:seed:test-community command does not exist; /test-community renders empty Discovery/Index. NOTE: upstream symlink already at v0.1.0-alpha.173 — composer.json still pins ^0.1.0-alpha.145.
+- 2026-05-06T16:58:02Z – claude:opus-4-7:implementer:implementer – shell_pid=153580 – Approved: baseline + supplementary smoke confirms Giiken runs end-to-end (sagamok-anishnawbek community, 6 KIs, search returns hits). 258/258 PHPUnit, 45 pre-existing PHPStan findings as gate floor.
