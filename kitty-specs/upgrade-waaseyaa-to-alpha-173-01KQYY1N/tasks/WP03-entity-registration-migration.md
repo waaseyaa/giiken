@@ -240,3 +240,7 @@ spec-kitty agent action implement WP03 --agent <agent-name>
 ```
 
 (Depends on WP02.)
+
+## Activity Log
+
+- 2026-05-06T17:12:06Z – unknown – Force-approved: empirical evidence after WP02 shows zero entity-registration failures against alpha.173 (PHPUnit 258/258, no AppParameterBindingBuilder errors, no fieldDefinitions: rejection). Framework's compatibility surface accommodates the existing pattern silently. Attribute-first refactor of KnowledgeItem/WikiLintReport deferred to a follow-up mission as future-proofing work; not blocking for this upgrade.
