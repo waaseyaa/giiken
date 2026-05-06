@@ -15,10 +15,10 @@
 | T002 | Capture PHPStan level 8 baseline finding count | WP01 | [D] |
 | T003 | Capture boot-to-browser smoke baseline (migrate, seed, serve, curl) | WP01 |  | [D] |
 | T004 | Commit `baseline.md` with all three captured baselines | WP01 |  | [D] |
-| T005 | Edit `composer.json` — rewrite 38 `waaseyaa/*` constraints to `^0.1.0-alpha.173` | WP02 |  |
-| T006 | Run `composer update 'waaseyaa/*' --with-all-dependencies` to regenerate lockfile | WP02 |  |
-| T007 | Run PHPUnit + PHPStan post-bump; record failure surface in `baseline-postbump.md` | WP02 |  |
-| T008 | Commit `composer.json`, `composer.lock`, and `baseline-postbump.md` | WP02 |  |
+| T005 | Edit `composer.json` — rewrite 38 `waaseyaa/*` constraints to `^0.1.0-alpha.173` | WP02 |  | [D] |
+| T006 | Run `composer update 'waaseyaa/*' --with-all-dependencies` to regenerate lockfile | WP02 |  | [D] |
+| T007 | Run PHPUnit + PHPStan post-bump; record failure surface in `baseline-postbump.md` | WP02 |  | [D] |
+| T008 | Commit `composer.json`, `composer.lock`, and `baseline-postbump.md` | WP02 |  | [D] |
 | T009 | Migrate `KnowledgeItem.php` to `#[ContentEntityType]` + `#[Field]` attribute-first | WP03 | [P] |
 | T010 | Migrate `WikiLintReport.php` to attribute-first registration | WP03 | [P] |
 | T011 | Audit `Community.php` against post-bump errors; migrate if needed | WP03 |  |
@@ -81,10 +81,10 @@
 
 **Tracking:**
 
-- [ ] T005 Edit `composer.json` — rewrite 38 constraints (WP02)
-- [ ] T006 Run `composer update 'waaseyaa/*' --with-all-dependencies` (WP02)
-- [ ] T007 Capture post-bump failure surface (WP02)
-- [ ] T008 Commit `composer.json`, `composer.lock`, `baseline-postbump.md` (WP02)
+- [x] T005 Edit `composer.json` — rewrite 38 constraints (WP02)
+- [x] T006 Run `composer update 'waaseyaa/*' --with-all-dependencies` (WP02)
+- [x] T007 Capture post-bump failure surface (WP02)
+- [x] T008 Commit `composer.json`, `composer.lock`, `baseline-postbump.md` (WP02)
 
 ---
 
