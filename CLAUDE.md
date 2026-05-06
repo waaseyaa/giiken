@@ -29,7 +29,6 @@ PHPUnit: 258/258 passing.
 - waaseyaa/framework#1127 — foundation→ssr dependency.
 - giiken#42 — `AppServiceProvider` provider registrations.
 - giiken#43 — entity schema migrations (`community`, `knowledge_item`, `wiki_lint_report`).
-- giiken#44 — `giiken:seed:test-community` console command.
 
 ## Commands
 
