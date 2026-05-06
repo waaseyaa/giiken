@@ -17,7 +17,8 @@ subtasks:
 - T004
 phase: Phase 1 - Setup
 assignee: ''
-agent: ''
+agent: "claude:opus-4-7:implementer:implementer"
+shell_pid: "153580"
 history:
 - timestamp: '2026-05-06T16:14:17Z'
   agent: system
@@ -200,3 +201,7 @@ spec-kitty agent action implement WP01 --agent <agent-name>
 ```
 
 (No upstream dependencies — this is the first WP.)
+
+## Activity Log
+
+- 2026-05-06T16:42:39Z – claude:opus-4-7:implementer:implementer – shell_pid=153580 – Started implementation via action command
