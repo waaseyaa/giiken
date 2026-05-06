@@ -20,8 +20,8 @@ subtasks:
 - T008
 phase: Phase 2 - Foundational
 assignee: ''
-agent: ''
-shell_pid: '156044'
+agent: "claude:opus-4-7:implementer:implementer"
+shell_pid: "156044"
 history:
 - timestamp: '2026-05-06T16:14:17Z'
   agent: system
@@ -184,3 +184,7 @@ spec-kitty agent action implement WP02 --agent <agent-name>
 ```
 
 (Depends on WP01.)
+
+## Activity Log
+
+- 2026-05-06T16:58:10Z – claude:opus-4-7:implementer:implementer – shell_pid=156044 – Assigned agent via action command
