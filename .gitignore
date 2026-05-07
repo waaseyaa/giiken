@@ -17,3 +17,9 @@
 
 # Local Composer overlay: symlink waaseyaa monorepo packages (see composer.local.json.example)
 /composer.local.json
+
+# Local agent / IDE scratch (never ship in-repo)
+/.claude/
+/.claudeignore
+/.kittify/
+/.playwright-mcp/
