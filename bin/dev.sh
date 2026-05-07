@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-php bin/giiken serve &
+php -S "${GIIKEN_DEV_HOST:-127.0.0.1}:${GIIKEN_DEV_PORT:-8080}" -t public public/index.php &
 PHP_PID=$!
 
 npm run dev &

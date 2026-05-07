@@ -136,9 +136,11 @@ final class SeedTestCommunityCommand extends Command
             }
             if (!\in_array($role, $loaded->getRoles(), true)) {
                 $loaded->addRole($role);
-                $storage->save($loaded);
                 $output->writeln('<info>Added community staff role to user "giiken_staff".</info>');
             }
+            // Re-hash on every seed so local DBs recover from drift (matches default or GIIKEN_SEED_STAFF_PASSWORD).
+            $loaded->setRawPassword($password);
+            $storage->save($loaded);
 
             return;
         }

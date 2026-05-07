@@ -65,6 +65,11 @@ npm run test:js:watch
 # Run hooks manually
 lefthook run pre-commit
 lefthook run pre-push
+
+# Giiken CLI (registered via AppServiceProvider + HasCommandsInterface)
+./vendor/bin/waaseyaa giiken:seed:test-community   # demo test-community + giiken_staff (password: giiken-dev or GIIKEN_SEED_STAFF_PASSWORD)
+./vendor/bin/waaseyaa giiken:ingest:file <slug> <path-to-file>
+./vendor/bin/waaseyaa search:reindex
 ```
 
 ## Architecture

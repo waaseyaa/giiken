@@ -53,14 +53,14 @@ The first Giiken app-level classes in normal boot are the providers listed in `c
 - `App\Provider\IngestionProvider::register()` now owns file/media ingestion bootstrapping: upload validation, local media repository, synchronous queue, MarkItDown runner + converter bindings, and the assembled `IngestionHandlerRegistry`.
 - Frontend bundle: Vite entry `resources/js/app.ts`, production output under `public/build` (`npm run build`); set `VITE_DEV_SERVER` (e.g. `http://127.0.0.1:5173`) when using `npm run dev` for HMR. `vite.config.ts` now sets `publicDir: false` explicitly so Vite does not try to copy `public/` into `public/build`, eliminating the overlapping-directory warning while keeping the manifest path unchanged for `FrontendProvider`.
 - `register()` also binds `CompilationPipeline` as a singleton (built from the configured `LlmProviderInterface`, `EmbeddingProviderInterface`, and a raw `knowledge_item` `WaaseyaaEntityRepository`) so CLI and future HTTP ingestion surfaces share a single pipeline instance
-- `commands()` contributes CLI commands (`giiken:seed:test-community`, `giiken:ingest:file` — see giiken#94)
+- `App\Provider\AppServiceProvider` implements `HasCommandsInterface` and contributes CLI commands (`giiken:seed:test-community`, `giiken:ingest:file`, `search:reindex` — see giiken#94)
 - `App\Provider\RoutesProvider::routes()` contributes app HTTP routes (discovery, management, `GET`/`POST` `/login`, `POST` `/logout`)
 - `HomeController::discover` (`GET /`) injects `CommunityRepositoryInterface` and ships the result of `findAll()` as the `communities` Inertia prop for `Pages/Discover.vue`, which renders a community card grid linking into `/{slug}` Discovery pages
 
 ### 1.4 Schema and local data
 
-- App SQL migrations live in `migrations/` and run via `bin/giiken migrate` during bootstrap when pending.
-- Tables `community`, `knowledge_item`, and `wiki_lint_report` must exist before repository saves; optional demo data: `bin/giiken giiken:seed:test-community` after migrate (also ensures demo `giiken_staff` user and community staff role when `EntityTypeManager` is available).
+- App SQL migrations live in `migrations/` and run via `./vendor/bin/waaseyaa migrate` (or app bootstrap) when pending.
+- Tables `community`, `knowledge_item`, and `wiki_lint_report` must exist before repository saves; optional demo data: `./vendor/bin/waaseyaa giiken:seed:test-community` after migrate (ensures `test-community`, demo `giiken_staff` with password `giiken-dev` or `GIIKEN_SEED_STAFF_PASSWORD`, and that user’s staff role for that community when `EntityTypeManager` is available).
 
 ## 2. Request Lifecycle
 
@@ -221,10 +221,8 @@ No request path, routing, or boot sequence is affected by adding or swapping the
 
 Primary extension points for app work:
 
-- `src/AppServiceProvider.php`
-  - service registration
-  - entity type registration
-  - route registration
+- `src/Provider/AppServiceProvider.php`
+  - residual `register()` bindings (e.g. event dispatcher alias), `boot()` NorthCloud mapper registration, and `HasCommandsInterface::commands()` for Giiken console commands (`giiken:seed:test-community`, `giiken:ingest:file`, `search:reindex`)
 - `src/Http/Controller/*`
   - route handlers and UI response props
 - `src/Entity/*`, `src/Query/*`, `src/Pipeline/*`, `src/Export/*`
@@ -251,8 +249,8 @@ Keep these true during refactoring:
 | `src/Provider/EntitiesProvider.php` | entity type registration + app repository bindings | entity integration + repository-backed route tests |
 | `src/Provider/QueryProvider.php` | AI/query/pipeline bindings + ask API support seams | query + API controller tests |
 | `src/Provider/IngestionProvider.php` | upload validation + converter/media/handler bindings | ingestion controller + validator + converter tests |
-| `src/AppServiceProvider.php` | residual boot hooks + CLI commands | boot + `waaseyaa list` / migrate + seed |
-| `migrations/*.php` | SQLite schema for app entities | `bin/giiken migrate` + repository integration |
+| `src/Provider/AppServiceProvider.php` | residual boot hooks + CLI commands (`HasCommandsInterface`) | boot + `./vendor/bin/waaseyaa list` / migrate + seed |
+| `migrations/*.php` | SQLite schema for app entities | `./vendor/bin/waaseyaa migrate` + repository integration |
 | `src/Http/Controller/*` | SSR dispatch and Inertia props | unit tests + route smoke tests |
 | `src/Entity/*` and repositories | data shape, persistence behavior | unit tests + integration tests |
 | `src/Query/*`, `src/Pipeline/*` | search/qa/compile behavior | unit tests for services and steps |
@@ -281,7 +279,7 @@ After lifecycle-touching changes:
 - `AppServiceProvider::registerNorthCloudMappers()` overrides the package's `MapperRegistry` singleton factory, pre-populating it with `NcHitToKnowledgeItemMapper`.
 - Default community id for NC-sourced items reads from env `GIIKEN_NC_DEFAULT_COMMUNITY_ID`.
 - `NorthCloudServiceProvider` (auto-loaded from `extra.waaseyaa.providers`) contributes the `northcloud:sync` console command and the `NorthCloudClient`, `NcSyncService`, and `NorthCloudSearchProvider` services.
-- No HTTP route or SSR dispatch change. `bin/giiken list` now surfaces `northcloud:sync`; request-lifecycle behavior is unaffected.
+- No HTTP route or SSR dispatch change. `./vendor/bin/waaseyaa list` surfaces `northcloud:sync`; request-lifecycle behavior is unaffected.
 
 ### 2026-04-16 — NorthCloud mapper registration made fail-loud
 

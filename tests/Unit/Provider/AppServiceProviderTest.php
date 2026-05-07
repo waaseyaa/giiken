@@ -8,6 +8,7 @@ use App\Provider\AppServiceProvider;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Waaseyaa\Foundation\ServiceProvider\Capability\HasCommandsInterface;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
 
 #[CoversClass(AppServiceProvider::class)]
@@ -18,6 +19,15 @@ final class AppServiceProviderTest extends TestCase
     {
         $this->assertTrue(
             is_subclass_of(AppServiceProvider::class, ServiceProvider::class),
+        );
+    }
+
+    #[Test]
+    public function it_implements_has_commands_so_console_kernel_registers_cli_commands(): void
+    {
+        self::assertTrue(
+            is_subclass_of(AppServiceProvider::class, HasCommandsInterface::class),
+            'ConsoleKernel only calls commands() on providers that implement HasCommandsInterface.',
         );
     }
 

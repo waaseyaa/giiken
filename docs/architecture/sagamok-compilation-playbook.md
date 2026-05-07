@@ -8,7 +8,7 @@ Operational guide for the local Sagamok slice in Giiken (`community_id = 1`, slu
 
 ### NorthCloud
 
-- Ingestion command: `./bin/giiken northcloud:sync --limit=20`
+- Ingestion command: `./vendor/bin/waaseyaa northcloud:sync --limit=20`
 - Mapper: `App\Ingestion\NorthCloud\NcHitToKnowledgeItemMapper`
 - Provenance expectation:
   - `source_origin_type = northcloud`
@@ -24,7 +24,7 @@ Operational guide for the local Sagamok slice in Giiken (`community_id = 1`, slu
 Ingest command pattern:
 
 ```bash
-./bin/giiken giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/<file>.md
+./vendor/bin/waaseyaa giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/<file>.md
 ```
 
 Provenance expectation:

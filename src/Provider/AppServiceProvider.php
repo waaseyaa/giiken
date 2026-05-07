@@ -17,14 +17,17 @@ use App\Ingestion\IngestionHandlerRegistry;
 use App\Ingestion\NorthCloud\NcHitToKnowledgeItemMapper;
 use Waaseyaa\NorthCloud\Sync\MapperRegistry;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherContract;
 use Waaseyaa\Database\DatabaseInterface;
 use Waaseyaa\Entity\EntityTypeManager;
+use Waaseyaa\Foundation\Event\EventDispatcherInterface as WaaseyaaEventDispatcherInterface;
 use Waaseyaa\Foundation\Log\LoggerInterface;
+use Waaseyaa\Foundation\ServiceProvider\Capability\HasCommandsInterface;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
 use Waaseyaa\Search\SearchIndexerInterface;
 
-final class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider implements HasCommandsInterface
 {
     public function register(): void
     {
@@ -59,7 +62,7 @@ final class AppServiceProvider extends ServiceProvider
         } catch (\Throwable $exception) {
             $message = 'NorthCloud MapperRegistry could not be resolved during AppServiceProvider::boot(). '
                 . 'NcHitToKnowledgeItemMapper was not registered, so northcloud:sync cannot map hits into Giiken entities. '
-                . 'Ensure Waaseyaa\\NorthCloud\\Provider\\NorthCloudServiceProvider is present in the package manifest, then run ./bin/giiken optimize:manifest.';
+                . 'Ensure Waaseyaa\\NorthCloud\\Provider\\NorthCloudServiceProvider is present in the package manifest, then run ./vendor/bin/waaseyaa optimize:manifest.';
 
             try {
                 $logger = $this->resolve(LoggerInterface::class);
@@ -91,10 +94,13 @@ final class AppServiceProvider extends ServiceProvider
         $this->registerNorthCloudMappers();
     }
 
+    /**
+     * @return list<Command>
+     */
     public function commands(
         EntityTypeManager $entityTypeManager,
-        DatabaseInterface $database,
-        SymfonyEventDispatcherContract $dispatcher,
+        DatabaseInterface $_database,
+        WaaseyaaEventDispatcherInterface $_dispatcher,
     ): array {
         return [
             new SeedTestCommunityCommand(
