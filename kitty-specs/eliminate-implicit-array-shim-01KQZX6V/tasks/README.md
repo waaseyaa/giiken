@@ -2,6 +2,8 @@
 
 This directory contains work package (WP) prompt files.
 
+For this mission, the **retroactive task index** lives one level up in [`../tasks.md`](../tasks.md) (all items complete; implementation landed on `main` before WP prompts were generated).
+
 ## Directory Structure (v0.9.0+)
 
 ```

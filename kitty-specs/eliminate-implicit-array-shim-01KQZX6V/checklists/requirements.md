@@ -42,6 +42,7 @@
 - [x] `change_mode: bulk_edit` set in `meta.json`
 - [x] Spec explicitly names the rename target (see "What's being renamed" table)
 - [x] Spec acknowledges that `occurrence_map.yaml` will be produced during plan and that the map is the contract the implement-time/review-time gates enforce
+- [x] `occurrence_map.yaml` present in mission directory, all 8 categories populated, schema-validated (`spec-kitty-cli` / `specify_cli` 2026-05-08)
 
 ## Notes
 

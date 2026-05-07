@@ -1,0 +1,42 @@
+# Occurrence map — eliminate-implicit-array-shim-01KQZX6V
+#
+# DIRECTIVE_035 bulk-edit classification. Validated against occurrence-map.schema.yaml
+# via specify_cli.bulk_edit.occurrence_map.validate_against_schema (spec-kitty-cli pipx env).
+#
+# Structural migration (explicit SSR binding + attribute-first entity registration), not a
+# single-token rename. Category actions govern follow-up edits under this mission slug at review gates.
+
+target:
+  term: >-
+    Legacy Waaseyaa patterns: (1) unannotated array $params / array $query on SSR controller
+    entry methods relying on the alpha.173 implicit-array shim; (2) constructor-time
+    fieldDefinitions forwarding and manual EntityType(...) registration for KnowledgeItem /
+    WikiLintReport.
+  replacement: >-
+    (1) Explicit #[MapRoute] / #[MapQuery] on controller route/query parameters with
+    Waaseyaa\SSR\Attribute imports; (2) #[ContentEntityType] + #[ContentEntityKeys] on entity
+    classes, EntityType::fromClass() in EntitiesProvider, and three-argument ContentEntityBase
+    construction only.
+  operation: deprecate
+
+categories:
+  code_symbols: { action: manual_review }
+  import_paths: { action: manual_review }
+  filesystem_paths: { action: do_not_change }
+  serialized_keys: { action: do_not_change }
+  cli_commands: { action: do_not_change }
+  user_facing_strings: { action: do_not_change }
+  tests_fixtures: { action: do_not_change }
+  logs_telemetry: { action: do_not_change }
+
+exceptions:
+  - path: "kitty-specs/**"
+    action: do_not_change
+    reason: "Mission documentation and inventories; not part of runtime migration surface."
+
+status:
+  filed: "2026-05-08"
+  note: >-
+    Filed post-implementation for DIRECTIVE_035 compliance. Application code landed on main
+    in commit 030f9ec. Packagist still lists v0.1.0-alpha.173 as latest tagged waaseyaa/core;
+    composer constraints remain ^0.1.0-alpha.173 until alpha.174 is published.

@@ -17,6 +17,8 @@
 - `npm run test:js` — 39 tests, exit 0  
 - `docs/architecture/lifecycle.md` updated for entity registration + controller dispatch contract
 
-## Deferred (Spec-Kitty housekeeping)
+## Housekeeping (2026-05-08)
 
-- `occurrence_map.yaml` (bulk-edit C-006) was not generated here; add during formal `/spec-kitty.plan` if the mission lane is resumed in Spec Kitty.
+- [`occurrence_map.yaml`](./occurrence_map.yaml) — filed and validated with `specify_cli.bulk_edit.occurrence_map.validate_against_schema` (DIRECTIVE_035 / C-006).
+- [`tasks.md`](./tasks.md) — retroactive task index (all complete).
+- [`artifacts/migrations-resolved.md`](./artifacts/migrations-resolved.md) — inventory vs. migration-notes / SC-3.

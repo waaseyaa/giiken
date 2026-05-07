@@ -5,8 +5,8 @@
 **Mission Type**: `software-dev`
 **Change Mode**: `bulk_edit`
 **Target Branch**: `main`
-**Created**: 2026-05-07
-**Status**: Draft (specify phase)
+**Created**: 2026-05-07  
+**Status**: Complete (implementation on `main` commit `030f9ec`; bulk-edit `occurrence_map.yaml` + `tasks.md` filed 2026-05-08)
 
 ---
 
@@ -16,7 +16,7 @@ Waaseyaa alpha.171/172 added a hard rejection for unannotated `array` parameters
 
 This mission migrates Giiken off the shim. The work is bounded and inventoried: file/method list lives in `kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/migration-notes.md`, generated during the alpha.173 upgrade mission and explicitly deferred there as RISK-2.
 
-**This mission is a bulk edit.** It changes the same identifier patterns (`array $params`, `array $query`, deprecated `fieldDefinitions:` form) across many files. Per the spec-kitty bulk-edit guardrail (DIRECTIVE_035), an `occurrence_map.yaml` covering all 8 standard categories will be produced during `/spec-kitty.plan` and approved before any code changes.
+**This mission is a bulk edit.** It changes the same identifier patterns (`array $params`, `array $query`, deprecated `fieldDefinitions:` form) across many files. Per the spec-kitty bulk-edit guardrail (DIRECTIVE_035), [`occurrence_map.yaml`](./occurrence_map.yaml) covering all 8 standard categories is filed and schema-validated (post-implementation housekeeping, 2026-05-08).
 
 ---
 
@@ -96,12 +96,12 @@ As the maintainer of Giiken, I want every controller method to bind its `array` 
 
 | ID | Constraint | Status |
 |---|---|---|
-| C-001 | Giiken's pre-mission `composer.local.json` path-repos to a deleted worktree (cleaned up by the prior mission's merge). The first work package MUST normalize that state — bump the `waaseyaa/*` constraint to `^0.1.0-alpha.174` (the published version that includes the CSRF fix) OR remove the path-repo entry — before any controller migration begins. | Required |
+| C-001 | Giiken's pre-mission `composer.local.json` path-repos to a deleted worktree (cleaned up by the prior mission's merge). The first work package MUST normalize that state — bump the `waaseyaa/*` constraint to `^0.1.0-alpha.174` (the published version that includes the CSRF fix) OR remove the path-repo entry — before any controller migration begins. | Satisfied: path-repo repointed to `../waaseyaa/packages/*` (local). `^0.1.0-alpha.174` not on Packagist yet; constraints remain `^0.1.0-alpha.173`. |
 | C-002 | Out of scope: any migration debt in `migration-notes.md` that is NOT related to the implicit-array shim or the deprecated `fieldDefinitions:` form. | Required |
 | C-003 | Out of scope: refactoring of controller method bodies beyond the import additions required by FR-005. | Required |
 | C-004 | Out of scope: composer constraint bumps beyond C-001 (no opportunistic upgrades). | Required |
 | C-005 | All work merges into the `main` branch on `/home/jones/dev/giiken`. No work in `/home/jones/dev/waaseyaa` (the framework repo) is part of this mission. | Required |
-| C-006 | Per the bulk-edit guardrail (DIRECTIVE_035), an `occurrence_map.yaml` covering all 8 standard categories MUST be produced during `/spec-kitty.plan` and validated before implementation begins. | Required |
+| C-006 | Per the bulk-edit guardrail (DIRECTIVE_035), an `occurrence_map.yaml` covering all 8 standard categories MUST be produced during `/spec-kitty.plan` and validated before implementation begins. | Satisfied: [`occurrence_map.yaml`](./occurrence_map.yaml) filed 2026-05-08; validated via `specify_cli` schema (post-implementation). |
 | C-007 | The framework's structured-notice channel (`Waaseyaa\Foundation\Log\...`, `LoggerInterface::notice`) MUST NOT be modified. The mission only consumes the notice channel as a verification signal (counting notices); it does not change the channel itself. | Required |
 
 ---
@@ -189,4 +189,4 @@ None at end of specify. The deprecated `fieldDefinitions:` migration target shap
 
 ## Bulk-edit notice
 
-Per DIRECTIVE_035 and the spec-kitty bulk-edit classification skill, this mission's `meta.json` carries `change_mode: bulk_edit`. During `/spec-kitty.plan`, an `occurrence_map.yaml` will be produced classifying all 8 standard categories (code_symbols, import_paths, filesystem_paths, serialized_keys, cli_commands, user_facing_strings, tests_fixtures, logs_telemetry) and validated against the schema in `src/doctrine/schemas/occurrence-map.schema.yaml`. The map is the contract the implement-time and review-time gates enforce.
+Per DIRECTIVE_035 and the spec-kitty bulk-edit classification skill, this mission's `meta.json` carries `change_mode: bulk_edit`. [`occurrence_map.yaml`](./occurrence_map.yaml) classifies all 8 standard categories (code_symbols, import_paths, filesystem_paths, serialized_keys, cli_commands, user_facing_strings, tests_fixtures, logs_telemetry) and was validated against the schema shipped in spec-kitty (`doctrine/schemas/occurrence-map.schema.yaml` via `specify_cli.bulk_edit.occurrence_map.validate_against_schema`). The map is the contract the implement-time and review-time gates enforce.
