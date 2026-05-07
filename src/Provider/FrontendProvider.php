@@ -43,6 +43,15 @@ final class FrontendProvider extends ServiceProvider
         $template = static function (string $scriptTag) use ($assetManager): string {
             $scriptTag = str_replace('data-page="true"', 'data-page="app"', $scriptTag);
             $assetTags = $assetManager->assetTags();
+            $csrfMeta = '';
+            if (class_exists(\Waaseyaa\User\Middleware\CsrfMiddleware::class)) {
+                $token = \Waaseyaa\User\Middleware\CsrfMiddleware::token();
+                if ($token !== '') {
+                    $csrfMeta = '<meta name="csrf-token" content="'
+                        . htmlspecialchars($token, ENT_QUOTES | ENT_HTML5, 'UTF-8')
+                        . '">';
+                }
+            }
 
             return <<<HTML
             <!DOCTYPE html>
@@ -50,6 +59,7 @@ final class FrontendProvider extends ServiceProvider
             <head>
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
+                {$csrfMeta}
                 {$assetTags}
             </head>
             <body>

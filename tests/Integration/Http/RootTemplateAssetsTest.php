@@ -71,6 +71,12 @@ final class RootTemplateAssetsTest extends TestCase
         $content = (string) $response->getContent();
 
         self::assertMatchesRegularExpression(
+            '#<meta\s+name="csrf-token"\s+content="[0-9a-f]{64}"\s*>#',
+            $content,
+            'Inertia root template must expose a csrf-token meta so multipart Inertia visits can send X-CSRF-Token.',
+        );
+
+        self::assertMatchesRegularExpression(
             '#<script[^>]+src="[^"]*/build/assets/app-[^"]+\.js"#',
             $content,
             'Inertia root template must emit a <script src="/build/assets/app-*.js"> tag. '
