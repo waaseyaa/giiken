@@ -1,10 +1,13 @@
 {
+  "change_mode": "bulk_edit",
   "created_at": "2026-05-07T00:25:40.903992+00:00",
-  "friendly_name": "eliminate implicit array shim",
+  "friendly_name": "Eliminate alpha.173 Implicit-Array Shim",
   "mission_id": "01KQZX6VXH99R3SEKWAEG87RKT",
   "mission_number": null,
   "mission_slug": "eliminate-implicit-array-shim-01KQZX6V",
   "mission_type": "software-dev",
   "slug": "eliminate-implicit-array-shim-01KQZX6V",
-  "target_branch": "main"
+  "source_description": "Migrate Giiken controller signatures from unannotated `array $params` / `array $query` parameters to explicitly-attributed `#[MapRoute]` / `#[MapQuery]` parameters before Waaseyaa removes the alpha.173 compatibility shim, plus a small set of entity field-definition migrations. Inventory in kitty-specs/upgrade-waaseyaa-to-alpha-173-01KQYY1N/migration-notes.md. Surfaced as RISK-2 in the upgrade mission's review.",
+  "target_branch": "main",
+  "vcs": "git"
 }
