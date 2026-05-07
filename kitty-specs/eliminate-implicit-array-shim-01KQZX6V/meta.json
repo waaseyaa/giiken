@@ -1,0 +1,10 @@
+{
+  "created_at": "2026-05-07T00:25:40.903992+00:00",
+  "friendly_name": "eliminate implicit array shim",
+  "mission_id": "01KQZX6VXH99R3SEKWAEG87RKT",
+  "mission_number": null,
+  "mission_slug": "eliminate-implicit-array-shim-01KQZX6V",
+  "mission_type": "software-dev",
+  "slug": "eliminate-implicit-array-shim-01KQZX6V",
+  "target_branch": "main"
+}
