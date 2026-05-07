@@ -45,7 +45,7 @@ Inside `HttpKernel::handle()` -> `AbstractKernel::boot()`:
 
 The first Giiken app-level classes in normal boot are the providers listed in `composer.json > extra.waaseyaa.providers`. `App\Provider\AppServiceProvider` still owns residual boot + command wiring, while specialized providers now own focused concerns such as entities, authz, routes, frontend bootstrapping, query wiring, and ingestion bootstrapping:
 
-- `App\Provider\EntitiesProvider::register()` contributes app entity types (`community`, `knowledge_item`, `wiki_lint_report`) and the app repository bindings for `CommunityRepositoryInterface` / `KnowledgeItemRepositoryInterface`
+- `App\Provider\EntitiesProvider::register()` registers the three app entity types via `EntityType::fromClass()` (class-level `#[ContentEntityType]` + `#[ContentEntityKeys]` on `Community`, `KnowledgeItem`, `WikiLintReport`) and binds the app repositories for `CommunityRepositoryInterface` / `KnowledgeItemRepositoryInterface`
 - `register()` binds app services resolved by SSR `serviceResolver`: `CommunityRepositoryInterface`, `KnowledgeItemRepositoryInterface`, `SearchService`, `QaServiceInterface`, `ReportServiceInterface`, `ExportServiceInterface`, `SynthesisService`, `NullEmbeddingProvider`; `LlmProviderInterface` is wired conditionally — if `WAASEYAA_LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set at boot time, the singleton resolves to `AnthropicLlmProvider` (wrapping `Waaseyaa\AI\Agent\Provider\AnthropicProvider`), otherwise falls back to `NullLlmProvider`; and a PSR-14 `EventDispatcherInterface` alias to the kernel dispatcher (for `EntityRepository` construction); registers `App\Http\Inertia\InertiaHttpResponder` (full-page renderer from DI when present)
 - `App\Provider\FrontendProvider::register()` binds `InertiaHttpResponder`, re-binds `InertiaFullPageRendererInterface` with a project-root-based `ViteAssetManager` (`public/build` manifest or `VITE_DEV_SERVER`), sets `Inertia::setVersion('giiken')`, and refreshes `Inertia::setRenderer(...)` with a custom template closure that rewrites the data-page attribute from `data-page="true"` to `data-page="app"` so Inertia v2's client-side reader (`script[data-page="app"]`) actually finds the initial page object — workaround for waaseyaa/framework#1227. The project root is computed as `dirname(__DIR__, 2)` from `src/Provider/`; getting that wrong (e.g. `dirname(__DIR__)`) silently disables asset emission, producing a blank `<head>` and an empty `#app` on every route — regression-guarded by `tests/Integration/Http/RootTemplateAssetsTest.php` (giiken#90).
 - `App\Provider\AuthzProvider::register()` binds the shared `CommunityRoleResolverInterface` and `KnowledgeItemAccessPolicy`, so community-role parsing and item access checks boot independently from repository/query wiring.
@@ -108,10 +108,10 @@ App routes are added through `RoutesProvider::routes(...)`, including:
 
 ### 2.3 Controller Dispatch Contract
 
-SSR app controllers use the four-argument dispatch shape; they return **`Symfony\Component\HttpFoundation\Response`**, not raw `InertiaResponse`, so `SsrPageHandler` can emit HTML or JSON. Internally they call `Inertia::render(...)` and pass the result through `InertiaHttpResponder::toResponse()`.
+SSR app controllers use the four-argument dispatch shape; they return **`Symfony\Component\HttpFoundation\Response`**, not raw `InertiaResponse`, so `SsrPageHandler` can emit HTML or JSON. Internally they call `Inertia::render(...)` and pass the result through `InertiaHttpResponder::toResponse()`. Route and query-string bags use explicit `Waaseyaa\SSR\Attribute\MapRoute` / `MapQuery` so dispatch does not rely on the framework’s implicit-array compatibility shim.
 
 ```php
-public function action(array $params, array $query, AccountInterface $account, HttpRequest $request): Response
+public function action(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $request): Response
 ```
 
 Symfony `HttpRequest` remains the dispatcher’s fourth argument. Inside the handler, build
@@ -143,6 +143,7 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.144** and `nesbot/carbon` so datetim
 
 ### 3.2.2 `Community` entity
 
+- **Registration metadata:** The class declares `#[ContentEntityType(id: 'community', …)]` and `#[ContentEntityKeys]` so `EntityType::fromClass(Community::class)` matches the historical `EntityType` keys (`id` / `uuid` / `name` label column).
 - **Hydration:** `Community` implements `HydratableFromStorageInterface`. Rows are rebuilt with `Community::fromStorage()` / `Community::make()`; do not hand-roll `new Community(...)` from storage rows.
 - **Constructor bag merge:** The domain constructor spreads `$extra` first, then overlays normalized `name`, `slug`, `locale`, `sovereignty_profile`, and timestamps so an import bag cannot overwrite coerced sovereignty or parsed dates with invalid raw strings.
 - **Casts:** `wiki_schema` → `array`; `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `sovereignty_profile` → `SovereigntyProfile` backed enum.
@@ -151,14 +152,16 @@ Giiken requires **`waaseyaa/*` ^0.1.0-alpha.144** and `nesbot/carbon` so datetim
 
 ### 3.2.3 `KnowledgeItem` entity
 
-- **Hydration:** Implements `HydratableFromStorageInterface` with `fromStorage()`, `make()`, and `duplicateInstance()` delegating to `fromStorage()` + `HydrationContext` (matches `ContentEntityBase` four-argument construction and avoids `ArgumentCountError` on `duplicate()` / `with()`).
-- **Constructor:** Widened to `(array $values = [], string $entityTypeId = '', array $entityKeys = [], array $fieldDefinitions = [])` and forwards to `parent::__construct`.
+- **Registration metadata:** `#[ContentEntityType(id: 'knowledge_item', …)]` and `#[ContentEntityKeys]` align with `EntityType::fromClass(KnowledgeItem::class)`.
+- **Hydration:** Implements `HydratableFromStorageInterface` with `fromStorage()`, `make()`, and `duplicateInstance()` delegating to `fromStorage()` + `HydrationContext` (matches `ContentEntityBase` three-argument construction and avoids `ArgumentCountError` on `duplicate()` / `with()`).
+- **Constructor:** `(array $values = [], string $entityTypeId = '', array $entityKeys = [])` forwards to `parent::__construct($values, $entityTypeId, $entityKeys)` (no legacy `fieldDefinitions` bag).
 - **Casts:** `created_at`, `updated_at`, `compiled_at` → `datetime_immutable` + `carbon_immutable`; `knowledge_type` → `KnowledgeType`; `access_tier` → `AccessTier`; JSON-backed lists → `array`. **Sanitization** in `make`/constructor coerces unknown `access_tier` to members, drops invalid `knowledge_type` strings, replaces corrupt JSON list strings with `[]` so `array` casts do not throw on legacy rows.
 - **Call sites:** Application and test code should construct instances with `KnowledgeItem::make([...])`, not `new KnowledgeItem([...])`. Use `fromStorage()` only where integration tests simulate `EntityInstantiator` / DB hydration.
 
 ### 3.2.4 `WikiLintReport` entity
 
-- Same hydratable pattern as `KnowledgeItem`: widened constructor, `make()`, `fromStorage()`, `duplicateInstance()` via `HydrationContext`.
+- **Registration metadata:** `#[ContentEntityType(id: 'wiki_lint_report', …)]` and `#[ContentEntityKeys]` for `EntityType::fromClass(WikiLintReport::class)`.
+- Same hydratable pattern as `KnowledgeItem`: `make()`, `fromStorage()`, `duplicateInstance()` via `HydrationContext`; constructor forwards three arguments to `ContentEntityBase`.
 - **Casts:** `created_at` / `updated_at` → `datetime_immutable` + `carbon_immutable`; `findings` → `array`. Jobs and callers build rows with `WikiLintReport::make([...])`. Only fields with real SQL columns are persisted; there is no `knowledge_type` column on `wiki_lint_report` (do not put stray keys into `toArray()` for save).
 
 ### 3.2.5 `EntityRepository` + Giiken SQLite tables
@@ -232,7 +235,7 @@ Primary extension points for app work:
 Keep these true during refactoring:
 
 1. `public/index.php` always sends the response (`$response->send()`).
-2. Controllers keep the active SSR dispatch signature (`array $params`, `array $query`, `AccountInterface`, `HttpRequest`) and return `Response`.
+2. Controllers keep the active SSR dispatch signature (`#[MapRoute] array $params`, `#[MapQuery] array $query`, `AccountInterface`, `HttpRequest`) and return `Response`.
 3. Optional service dependencies are handled with explicit guard returns (no implicit null behavior).
 4. Route registration stays centralized in `RoutesProvider`, and entity registration stays centralized in its dedicated provider rather than drifting back into mixed-responsibility providers.
 5. Boot-time failures remain deterministic and observable (log + stable error response path).

@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Inertia\Inertia;
+use Waaseyaa\SSR\Attribute\MapQuery;
+use Waaseyaa\SSR\Attribute\MapRoute;
 
 /**
  * Public landing route: Inertia Discover page listing communities.
@@ -27,8 +29,8 @@ final class HomeController
      * @param array<string, mixed> $query
      */
     public function discover(
-        array $params,
-        array $query,
+        #[MapRoute] array $params,
+        #[MapQuery] array $query,
         AccountInterface $account,
         HttpRequest $httpRequest,
     ): Response {

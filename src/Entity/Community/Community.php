@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Entity\Community;
 
 use Carbon\CarbonImmutable;
+use Waaseyaa\Entity\Attribute\ContentEntityKeys;
+use Waaseyaa\Entity\Attribute\ContentEntityType;
 use Waaseyaa\Entity\ContentEntityBase;
 use Waaseyaa\Entity\Hydration\HydratableFromStorageInterface;
 use Waaseyaa\Entity\Hydration\HydrationContext;
 
+#[ContentEntityType(id: 'community', label: 'Community')]
+#[ContentEntityKeys(id: 'id', uuid: 'uuid', label: 'name')]
 final class Community extends ContentEntityBase implements HydratableFromStorageInterface
 {
     protected string $entityTypeId = 'community';

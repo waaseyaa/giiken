@@ -1,108 +1,22 @@
-# Implementation Plan: [FEATURE]
-*Path: [templates/plan-template.md](templates/plan-template.md)*
+# Implementation Plan: Eliminate alpha.173 Implicit-Array Shim
 
-
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/kitty-specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/spec-kitty.plan` command. See `src/specify_cli/missions/software-dev/command-templates/plan.md` for the execution workflow.
-
-The planner will not begin until all planning questions have been answered—capture those answers in this document before progressing to later phases.
+**Mission**: `eliminate-implicit-array-shim-01KQZX6V` (mid8 `01KQZX6V`)  
+**Spec**: [spec.md](./spec.md)  
+**Status**: Implementation executed in Cursor (2026-05-07) after the Claude Code plan agent hit usage limits; the prior template placeholder was never filled by `/spec-kitty.plan`.
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+1. **Controllers** — Add `#[MapRoute]` / `#[MapQuery]` (`Waaseyaa\SSR\Attribute\*`) to every SSR dispatch method that used unannotated `array $params` / `array $query` (six controllers, nineteen methods). Private helpers that accept `$params`/`$query` as ordinary PHP parameters are unchanged; they are not dispatcher entry points.
+2. **Entities** — Add `#[ContentEntityType]` + `#[ContentEntityKeys]` on `Community`, `KnowledgeItem`, and `WikiLintReport`. Remove the fourth `fieldDefinitions` constructor argument; call `parent::__construct` with three arguments only. Register types via `EntityType::fromClass()` in `EntitiesProvider`.
+3. **Composer local** — Broken path-repo in `composer.local.json` (deleted worktree) was corrected locally to `../waaseyaa/packages/*` so `composer` commands work. `alpha.174` is not published on Packagist yet; published constraints remain `^0.1.0-alpha.173`.
 
-## Technical Context
+## Verification
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+- `./vendor/bin/phpunit` — 258 tests, 807 assertions, exit 0  
+- `./vendor/bin/phpstan analyse src/` — no errors  
+- `npm run test:js` — 39 tests, exit 0  
+- `docs/architecture/lifecycle.md` updated for entity registration + controller dispatch contract
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [Project-specific test approach or NEEDS CLARIFICATION]
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+## Deferred (Spec-Kitty housekeeping)
 
-## Charter Check
-
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-[Gates determined based on charter file]
-
-## Project Structure
-
-### Documentation (this feature)
-
-```
-kitty-specs/[###-feature]/
-├── plan.md              # This file (/spec-kitty.plan command output)
-├── research.md          # Phase 0 output (/spec-kitty.plan command)
-├── data-model.md        # Phase 1 output (/spec-kitty.plan command)
-├── quickstart.md        # Phase 1 output (/spec-kitty.plan command)
-├── contracts/           # Phase 1 output (/spec-kitty.plan command)
-└── tasks.md             # Phase 2 output (/spec-kitty.tasks command - NOT created by /spec-kitty.plan)
-```
-
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
-
-```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
-```
-
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
-
-## Complexity Tracking
-
-*Fill ONLY if Charter Check has violations that must be justified*
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+- `occurrence_map.yaml` (bulk-edit C-006) was not generated here; add during formal `/spec-kitty.plan` if the mission lane is resumed in Spec Kitty.

@@ -19,6 +19,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Foundation\Http\Inbound\InboundHttpRequest;
 use Waaseyaa\Inertia\Inertia;
+use Waaseyaa\SSR\Attribute\MapQuery;
+use Waaseyaa\SSR\Attribute\MapRoute;
 
 final class DiscoveryController
 {
@@ -35,7 +37,7 @@ final class DiscoveryController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function index(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function index(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         $inbound = InboundHttpRequest::fromSymfonyRequest($httpRequest, $params, $query);
         $communitySlug = (string) $inbound->routeParam('communitySlug', '');
@@ -83,8 +85,8 @@ final class DiscoveryController
      * @param array<string, mixed> $query
      */
     public function search(
-        array $params,
-        array $query,
+        #[MapRoute] array $params,
+        #[MapQuery] array $query,
         AccountInterface $account,
         HttpRequest $httpRequest,
     ): Response {
@@ -144,7 +146,7 @@ final class DiscoveryController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function ask(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function ask(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->searchService === null || $this->qaService === null || $this->communityRepo === null) {
             $question = (string) ($query['q'] ?? '');
@@ -216,7 +218,7 @@ final class DiscoveryController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function show(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function show(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->communityRepo === null || $this->itemRepo === null) {
             return $this->page('Discovery/Show', [

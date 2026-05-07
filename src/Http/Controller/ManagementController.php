@@ -21,6 +21,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Foundation\Http\Inbound\InboundHttpRequest;
 use Waaseyaa\Inertia\Inertia;
+use Waaseyaa\SSR\Attribute\MapQuery;
+use Waaseyaa\SSR\Attribute\MapRoute;
 
 final class ManagementController
 {
@@ -37,7 +39,7 @@ final class ManagementController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function dashboard(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function dashboard(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->communityRepo === null) {
             return $this->page('Management/Dashboard', [
@@ -64,7 +66,7 @@ final class ManagementController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function reports(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function reports(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->communityRepo === null) {
             return $this->page('Management/Reports', [
@@ -93,7 +95,7 @@ final class ManagementController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function users(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function users(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->communityRepo === null) {
             return $this->page('Management/Users', [
@@ -120,7 +122,7 @@ final class ManagementController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function ingestion(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function ingestion(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->communityRepo === null) {
             return $this->page('Management/Ingestion', [
@@ -153,7 +155,7 @@ final class ManagementController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function ingestUpload(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function ingestUpload(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->communityRepo === null || $this->handlerRegistry === null || $this->uploadValidator === null) {
             return $this->page('Management/Ingestion', [
@@ -217,7 +219,7 @@ final class ManagementController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function exportPage(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function exportPage(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if ($this->communityRepo === null) {
             return $this->page('Management/Export', [
@@ -245,8 +247,8 @@ final class ManagementController
      * @param array<string, mixed> $query
      */
     public function exportDownload(
-        array $params,
-        array $query,
+        #[MapRoute] array $params,
+        #[MapQuery] array $query,
         AccountInterface $account,
         HttpRequest $httpRequest,
     ): Response {

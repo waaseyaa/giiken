@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
+use Waaseyaa\SSR\Attribute\MapQuery;
+use Waaseyaa\SSR\Attribute\MapRoute;
 
 /**
  * JSON endpoints for Phase 3 query layer (Q&A, reports, synthesis).
@@ -35,8 +37,8 @@ final class QueryApiController
      * @param array<string, mixed> $query
      */
     public function ask(
-        array $params,
-        array $query,
+        #[MapRoute] array $params,
+        #[MapQuery] array $query,
         AccountInterface $account,
         HttpRequest $httpRequest,
     ): Response {
@@ -99,8 +101,8 @@ final class QueryApiController
      * @param array<string, mixed> $query
      */
     public function report(
-        array $params,
-        array $query,
+        #[MapRoute] array $params,
+        #[MapQuery] array $query,
         AccountInterface $account,
         HttpRequest $httpRequest,
     ): Response {
@@ -164,8 +166,8 @@ final class QueryApiController
      * @param array<string, mixed> $query
      */
     public function saveSynthesis(
-        array $params,
-        array $query,
+        #[MapRoute] array $params,
+        #[MapQuery] array $query,
         AccountInterface $account,
         HttpRequest $httpRequest,
     ): Response {

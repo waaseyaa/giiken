@@ -78,7 +78,7 @@ As the maintainer of Giiken, I want every controller method to bind its `array` 
 | FR-002 | Every controller method that currently has an unannotated `array $query` parameter MUST be migrated to carry the `#[MapQuery]` attribute on that parameter. | Proposed |
 | FR-003 | Every other controller-method `array $X` parameter currently flagged by the framework's `implicit_array_unbound` notice MUST be migrated to have an explicit binding (a concrete attribute, a different parameter type, or removed if confirmed unused — case-by-case decision recorded in the per-WP commit body). | Proposed |
 | FR-004 | Every entity flagged in `migration-notes.md` as using the deprecated `fieldDefinitions:` form MUST be migrated to the current API shape. | Proposed |
-| FR-005 | The migration MUST add `use Waaseyaa\SSR\Http\AppController\MapRoute;` (or equivalent canonical import) to any file that gains a `#[MapRoute]` reference. Same for `MapQuery`. | Proposed |
+| FR-005 | The migration MUST add `use Waaseyaa\SSR\Attribute\MapRoute;` (canonical import) to any file that gains a `#[MapRoute]` reference. Same for `MapQuery` from `Waaseyaa\SSR\Attribute\MapQuery`. | Proposed |
 | FR-006 | The migration MUST preserve every controller method's parameter order and default values. Only the attribute list before the type changes. | Proposed |
 | FR-007 | The migration MUST NOT remove or modify the body of any controller method, except to repair imports introduced by FR-005. | Proposed |
 

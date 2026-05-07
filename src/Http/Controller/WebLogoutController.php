@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Waaseyaa\Access\AccountInterface;
+use Waaseyaa\SSR\Attribute\MapQuery;
+use Waaseyaa\SSR\Attribute\MapRoute;
 
 final class WebLogoutController
 {
@@ -15,7 +17,7 @@ final class WebLogoutController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function logout(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function logout(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         if (session_status() === \PHP_SESSION_ACTIVE) {
             $_SESSION = [];

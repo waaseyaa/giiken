@@ -7,11 +7,15 @@ namespace App\Entity\KnowledgeItem;
 use Carbon\CarbonImmutable;
 use App\Entity\HasCommunity;
 use App\Entity\KnowledgeItem\Source\KnowledgeItemSource;
+use Waaseyaa\Entity\Attribute\ContentEntityKeys;
+use Waaseyaa\Entity\Attribute\ContentEntityType;
 use Waaseyaa\Entity\ContentEntityBase;
 use Waaseyaa\Entity\Hydration\HydratableFromStorageInterface;
 use Waaseyaa\Entity\Hydration\HydrationContext;
 use Waaseyaa\Search\SearchIndexableInterface;
 
+#[ContentEntityType(id: 'knowledge_item', label: 'Knowledge Item')]
+#[ContentEntityKeys(id: 'id', uuid: 'uuid', label: 'title')]
 final class KnowledgeItem extends ContentEntityBase implements HasCommunity, HydratableFromStorageInterface, SearchIndexableInterface
 {
     protected string $entityTypeId = 'knowledge_item';
@@ -43,7 +47,6 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
         array $values = [],
         string $entityTypeId = '',
         array $entityKeys = [],
-        array $fieldDefinitions = [],
     ) {
         $values = self::sanitizeValues($values);
 
@@ -58,7 +61,7 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
         $entityTypeId = $entityTypeId !== '' ? $entityTypeId : $this->entityTypeId;
         $entityKeys = $entityKeys !== [] ? $entityKeys : $this->entityKeys;
 
-        parent::__construct($values, $entityTypeId, $entityKeys, $fieldDefinitions);
+        parent::__construct($values, $entityTypeId, $entityKeys);
     }
 
     public static function fromStorage(array $values, HydrationContext $context): static
@@ -67,7 +70,6 @@ final class KnowledgeItem extends ContentEntityBase implements HasCommunity, Hyd
             values: $values,
             entityTypeId: $context->entityTypeId,
             entityKeys: $context->entityKeys,
-            fieldDefinitions: [],
         );
         self::reifyJsonListCastsForStorage($entity);
 

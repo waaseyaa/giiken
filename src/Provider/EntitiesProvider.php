@@ -24,38 +24,9 @@ final class EntitiesProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->entityType(new EntityType(
-            id: 'community',
-            label: 'Community',
-            class: Community::class,
-            keys: [
-                'id' => 'id',
-                'uuid' => 'uuid',
-                'label' => 'name',
-            ],
-        ));
-
-        $this->entityType(new EntityType(
-            id: 'knowledge_item',
-            label: 'Knowledge Item',
-            class: KnowledgeItem::class,
-            keys: [
-                'id' => 'id',
-                'uuid' => 'uuid',
-                'label' => 'title',
-            ],
-        ));
-
-        $this->entityType(new EntityType(
-            id: 'wiki_lint_report',
-            label: 'Wiki Lint Report',
-            class: WikiLintReport::class,
-            keys: [
-                'id' => 'id',
-                'uuid' => 'uuid',
-                'label' => 'title',
-            ],
-        ));
+        $this->entityType(EntityType::fromClass(Community::class));
+        $this->entityType(EntityType::fromClass(KnowledgeItem::class));
+        $this->entityType(EntityType::fromClass(WikiLintReport::class));
 
         $this->singleton(CommunityRepositoryInterface::class, function (): CommunityRepositoryInterface {
             $etm = $this->resolve(EntityTypeManager::class);

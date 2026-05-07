@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 use Waaseyaa\Access\AccountInterface;
 use Waaseyaa\Entity\EntityTypeManager;
+use Waaseyaa\SSR\Attribute\MapQuery;
+use Waaseyaa\SSR\Attribute\MapRoute;
 use Waaseyaa\User\Http\AuthController;
 use Waaseyaa\User\Middleware\CsrfMiddleware;
 
@@ -24,7 +26,7 @@ final class WebLoginController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function showForm(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function showForm(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         $redirectRaw = $query['redirect'] ?? '';
         $redirect = \is_string($redirectRaw) ? $redirectRaw : '';
@@ -44,7 +46,7 @@ final class WebLoginController
      * @param array<string, mixed> $params
      * @param array<string, mixed> $query
      */
-    public function submit(array $params, array $query, AccountInterface $account, HttpRequest $httpRequest): Response
+    public function submit(#[MapRoute] array $params, #[MapQuery] array $query, AccountInterface $account, HttpRequest $httpRequest): Response
     {
         $username = trim((string) $httpRequest->request->get('username', ''));
         $password = (string) $httpRequest->request->get('password', '');

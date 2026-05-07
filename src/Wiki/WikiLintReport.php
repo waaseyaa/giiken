@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Wiki;
 
 use Carbon\CarbonImmutable;
+use Waaseyaa\Entity\Attribute\ContentEntityKeys;
+use Waaseyaa\Entity\Attribute\ContentEntityType;
 use Waaseyaa\Entity\ContentEntityBase;
 use Waaseyaa\Entity\Hydration\HydratableFromStorageInterface;
 use Waaseyaa\Entity\Hydration\HydrationContext;
 
+#[ContentEntityType(id: 'wiki_lint_report', label: 'Wiki Lint Report')]
+#[ContentEntityKeys(id: 'id', uuid: 'uuid', label: 'title')]
 final class WikiLintReport extends ContentEntityBase implements HydratableFromStorageInterface
 {
     protected string $entityTypeId = 'wiki_lint_report';
@@ -35,7 +39,6 @@ final class WikiLintReport extends ContentEntityBase implements HydratableFromSt
         array $values = [],
         string $entityTypeId = '',
         array $entityKeys = [],
-        array $fieldDefinitions = [],
     ) {
         $values = self::sanitizeFindingsForCasts($values);
 
@@ -46,7 +49,7 @@ final class WikiLintReport extends ContentEntityBase implements HydratableFromSt
         $entityTypeId = $entityTypeId !== '' ? $entityTypeId : $this->entityTypeId;
         $entityKeys = $entityKeys !== [] ? $entityKeys : $this->entityKeys;
 
-        parent::__construct($values, $entityTypeId, $entityKeys, $fieldDefinitions);
+        parent::__construct($values, $entityTypeId, $entityKeys);
     }
 
     public static function fromStorage(array $values, HydrationContext $context): static
@@ -55,7 +58,6 @@ final class WikiLintReport extends ContentEntityBase implements HydratableFromSt
             values: $values,
             entityTypeId: $context->entityTypeId,
             entityKeys: $context->entityKeys,
-            fieldDefinitions: [],
         );
         self::reifyFindingsCastForStorage($entity);
 
