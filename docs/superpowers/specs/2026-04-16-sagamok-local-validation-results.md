@@ -17,11 +17,11 @@ Environment: local (`/home/jones/dev/giiken`, SQLite `storage/waaseyaa.sqlite`)
 ## Command checkpoints
 
 ```bash
-./bin/giiken northcloud:sync --limit=20
-./bin/giiken giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/governance-and-leadership.md
-./bin/giiken giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/land-and-territory.md
-./bin/giiken giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/programs-and-services.md
-./bin/giiken giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/language-and-culture.md
+./vendor/bin/waaseyaa northcloud:sync --limit=20
+./vendor/bin/waaseyaa giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/governance-and-leadership.md
+./vendor/bin/waaseyaa giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/land-and-territory.md
+./vendor/bin/waaseyaa giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/programs-and-services.md
+./vendor/bin/waaseyaa giiken:ingest:file sagamok-anishnawbek storage/ingest/sagamok/language-and-culture.md
 ```
 
 ## Current dataset snapshot (community_id=1)
