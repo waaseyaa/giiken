@@ -1,0 +1,10 @@
+{
+  "created_at": "2026-05-08T01:00:45.385651+00:00",
+  "friendly_name": "giiken domain modeling",
+  "mission_id": "01KR2HKT7J73P2TK4XP9J0D9S0",
+  "mission_number": null,
+  "mission_slug": "giiken-domain-modeling-01KR2HKT",
+  "mission_type": "software-dev",
+  "slug": "giiken-domain-modeling-01KR2HKT",
+  "target_branch": "main"
+}
