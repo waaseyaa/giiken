@@ -59,6 +59,9 @@ npm run test:js
 # Run frontend tests in watch mode
 npm run test:js:watch
 
+# Browser smoke (Playwright): ephemeral DB, migrate, seed, PHP built-in server, then GET / and /test-community
+npm run test:e2e
+
 # Static analysis
 ./vendor/bin/phpstan analyse src/
 

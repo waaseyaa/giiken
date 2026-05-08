@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Playwright smoke:** `npm run test:e2e` boots an ephemeral SQLite DB (`/tmp/giiken-playwright-smoke.sqlite`), runs `migrate` + `giiken:seed:test-community`, serves `public/` on port 9323, and asserts `GET /` and `GET /test-community` return Inertia payloads.
+
 ### Changed
 
 - **Waaseyaa native CLI:** Giiken registers **`giiken:ingest:file`** and **`giiken:seed:test-community`** via `AppServiceProvider::nativeCommands()` (**`HasNativeCommandsInterface`**, `CommandDefinition`, `GiikenIngestFileHandler`, `GiikenSeedTestCommunityHandler`) with Waaseyaa **`Waaseyaa\CLI\CliKernel`** (no Symfony Console in the framework runtime after waaseyaa `native-cli-kernel-01KR2NR7`). **`search:reindex`** is framework-owned only — removed Giiken’s duplicate wrapper.
