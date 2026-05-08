@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Pipeline;
 
 use App\Entity\KnowledgeItem\AccessTier;
@@ -15,6 +17,7 @@ use App\Pipeline\Step\StructureStep;
 use App\Pipeline\Step\TranscribeStep;
 use Waaseyaa\AI\Pipeline\PipelineContext;
 use Waaseyaa\AI\Pipeline\PipelineStepInterface;
+
 final class CompilationPipeline
 {
     public function __construct(

@@ -8,7 +8,6 @@ use App\Entity\Community\Community;
 use App\Ingestion\FileIngestionHandlerInterface;
 use App\Ingestion\IngestionException;
 use App\Ingestion\RawDocument;
-use Symfony\Component\Yaml\Yaml;
 use Waaseyaa\Media\File;
 use Waaseyaa\Media\FileRepositoryInterface;
 
@@ -71,12 +70,86 @@ final class MarkdownIngestionHandler implements FileIngestionHandlerInterface
         );
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Minimal YAML subset for markdown frontmatter (scalars + indented lists).
+     * Avoids Symfony Yaml so the ingest CLI path stays free of `Symfony\` imports.
+     *
+     * @return array<string, mixed>
+     */
     private function parseYamlFrontmatter(string $yaml): array
     {
-        $parsed = Yaml::parse($yaml);
+        $lines = preg_split('/\R/', $yaml) ?: [];
+        $result = [];
+        $n = count($lines);
 
-        return is_array($parsed) ? $parsed : [];
+        for ($i = 0; $i < $n; ++$i) {
+            $trim = trim($lines[$i]);
+            if ($trim === '' || str_starts_with($trim, '#')) {
+                continue;
+            }
+
+            if (!preg_match('/^([A-Za-z0-9_-]+)\s*:\s*(.*)$/', $trim, $m)) {
+                continue;
+            }
+
+            $key = $m[1];
+            $rest = trim($m[2]);
+
+            if ($rest === '') {
+                $items = [];
+                for ($j = $i + 1; $j < $n; ++$j) {
+                    $lineJ = rtrim($lines[$j]);
+                    if ($lineJ === '') {
+                        continue;
+                    }
+                    if (preg_match('/^\s+-\s+(.+)$/', $lineJ, $mm)) {
+                        $items[] = $this->parseYamlScalar(trim($mm[1]));
+                        $i = $j;
+
+                        continue;
+                    }
+
+                    break;
+                }
+
+                if ($items !== []) {
+                    $result[$key] = $items;
+                }
+
+                continue;
+            }
+
+            $result[$key] = $this->parseYamlScalar($rest);
+        }
+
+        return $result;
+    }
+
+    private function parseYamlScalar(string $value): string|int|float|bool
+    {
+        $value = trim($value);
+
+        if ($value === 'true') {
+            return true;
+        }
+
+        if ($value === 'false') {
+            return false;
+        }
+
+        if (preg_match('/^"(.*)"$/s', $value, $m) || preg_match('/^\'(.*)\'$/s', $value, $m)) {
+            return $m[1];
+        }
+
+        if (preg_match('/^-?\d+$/', $value)) {
+            return (int) $value;
+        }
+
+        if (preg_match('/^-?\d+\.\d+$/', $value)) {
+            return (float) $value;
+        }
+
+        return $value;
     }
 
     private function convertObsidianCallouts(string $content): string

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Provider;
 
-use App\Access\CommunityRoleResolver;
-use App\Access\CommunityRoleResolverInterface;
-use App\Access\KnowledgeItemAccessPolicy;
 use App\Console\IngestFileCommand;
 use App\Console\SearchReindexCommand;
 use App\Console\SeedTestCommunityCommand;
@@ -18,6 +15,9 @@ use App\Ingestion\NorthCloud\NcHitToKnowledgeItemMapper;
 use Waaseyaa\NorthCloud\Sync\MapperRegistry;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherContract;
 use Waaseyaa\Database\DatabaseInterface;
 use Waaseyaa\Entity\EntityTypeManager;
@@ -112,12 +112,54 @@ final class AppServiceProvider extends ServiceProvider implements HasCommandsInt
                 $this->resolve(SearchIndexerInterface::class),
                 $entityTypeManager,
             ),
-            new IngestFileCommand(
-                $this->resolve(CommunityRepositoryInterface::class),
-                $this->resolve(IngestionHandlerRegistry::class),
-                $this->resolve(CompilationPipeline::class),
+            self::newGiikenIngestFileConsoleCommand(
+                new IngestFileCommand(
+                    $this->resolve(CommunityRepositoryInterface::class),
+                    $this->resolve(IngestionHandlerRegistry::class),
+                    $this->resolve(CompilationPipeline::class),
+                ),
             ),
         ];
+    }
+
+    /**
+     * Waaseyaa {@see HasCommandsInterface} registers Symfony Console commands only;
+     * ingest orchestration lives in {@see IngestFileCommand} (zero Symfony imports).
+     */
+    private static function newGiikenIngestFileConsoleCommand(IngestFileCommand $ingest): Command
+    {
+        return new class($ingest) extends Command {
+            public function __construct(private readonly IngestFileCommand $ingestFile)
+            {
+                parent::__construct('giiken:ingest:file');
+                $this->setDescription('Ingest a file into a community via the full compilation pipeline');
+            }
+
+            protected function configure(): void
+            {
+                $this->addArgument(
+                    'community-slug',
+                    InputArgument::REQUIRED,
+                    'Slug of the target community (must already exist).',
+                );
+                $this->addArgument(
+                    'file',
+                    InputArgument::REQUIRED,
+                    'Absolute or relative path to the file to ingest.',
+                );
+            }
+
+            protected function execute(InputInterface $input, OutputInterface $output): int
+            {
+                return $this->ingestFile->run(
+                    (string) $input->getArgument('community-slug'),
+                    (string) $input->getArgument('file'),
+                    static function (string $line) use ($output): void {
+                        $output->writeln($line);
+                    },
+                );
+            }
+        };
     }
 
 }

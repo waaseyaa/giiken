@@ -1,10 +1,12 @@
 {
   "created_at": "2026-05-08T01:24:06.305417+00:00",
-  "friendly_name": "eliminate symfony ingestion cli path",
+  "friendly_name": "Eliminate Symfony-shaped behavior in Giiken ingestion + compilation CLI path",
   "mission_id": "01KR2JYJ0PHKCN2VEHV0QQSBA5",
   "mission_number": null,
   "mission_slug": "eliminate-symfony-ingestion-cli-path-01KR2JYJ",
   "mission_type": "software-dev",
   "slug": "eliminate-symfony-ingestion-cli-path-01KR2JYJ",
-  "target_branch": "main"
+  "source_description": "Remove Symfony fallback patterns (array callables, Symfony exception types, Symfony resolver/console coupling) from giiken:ingest:file → IngestionHandlerRegistry → file handlers → CompilationPipeline → persistence, aligning with Waaseyaa foundation contracts on waaseyaa/* ^0.1.0-alpha.174+. Out of scope: other Giiken console commands, HTTP upload validators, and third-party library uses (e.g. symfony/yaml in Markdown frontmatter) unless they introduce dispatch/resolver-shaped behavior.",
+  "target_branch": "main",
+  "vcs": "git"
 }

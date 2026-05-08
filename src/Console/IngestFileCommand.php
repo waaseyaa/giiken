@@ -9,78 +9,60 @@ use App\Ingestion\IngestionException;
 use App\Ingestion\IngestionHandlerRegistry;
 use App\Pipeline\CompilationPipeline;
 use App\Pipeline\PipelineException;
-use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Run a real file end-to-end through the ingestion + compilation pipeline
- * and persist a `KnowledgeItem` in the given community.
+ * Symfony-free orchestration for `giiken:ingest:file`. The CLI kernel still
+ * registers a waaseyaa {@see \Symfony\Component\Console\Command\Command} adapter
+ * in {@see \App\Provider\AppServiceProvider::commands()} that forwards argv and
+ * output into {@see self::run()}.
  *
- * v1 scope (giiken#94): synchronous, no overrides. Pipeline now returns a
- * `CompilationPayload` (giiken#95); operator-facing overrides
- * (`--type`, `--access`, `--dry-run`) are a follow-up PR.
+ * v1 scope (giiken#94): synchronous, no overrides. Pipeline returns
+ * {@see \App\Pipeline\CompilationPayload} (giiken#95).
  */
-#[AsCommand(
-    name: 'giiken:ingest:file',
-    description: 'Ingest a file into a community via the full compilation pipeline',
-)]
-final class IngestFileCommand extends Command
+final class IngestFileCommand
 {
+    public const EXIT_SUCCESS = 0;
+
+    public const EXIT_FAILURE = 1;
+
     public function __construct(
         private readonly CommunityRepositoryInterface $communityRepo,
         private readonly IngestionHandlerRegistry $registry,
         private readonly CompilationPipeline $pipeline,
-    ) {
-        parent::__construct();
-    }
+    ) {}
 
-    protected function configure(): void
-    {
-        $this
-            ->addArgument(
-                'community-slug',
-                InputArgument::REQUIRED,
-                'Slug of the target community (must already exist).',
-            )
-            ->addArgument(
-                'file',
-                InputArgument::REQUIRED,
-                'Absolute or relative path to the file to ingest.',
-            );
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $slug = (string) $input->getArgument('community-slug');
-        $filePath = (string) $input->getArgument('file');
-
+    /**
+     * @param \Closure(string): void $writeln
+     */
+    public function run(
+        string $communitySlug,
+        string $filePath,
+        \Closure $writeln,
+    ): int {
         if (!is_file($filePath)) {
-            $output->writeln(sprintf('<error>File not found: %s</error>', $filePath));
+            $writeln(sprintf('File not found: %s', $filePath));
 
-            return Command::FAILURE;
+            return self::EXIT_FAILURE;
         }
         if (!is_readable($filePath)) {
-            $output->writeln(sprintf('<error>File not readable: %s</error>', $filePath));
+            $writeln(sprintf('File not readable: %s', $filePath));
 
-            return Command::FAILURE;
+            return self::EXIT_FAILURE;
         }
 
-        $community = $this->communityRepo->findBySlug($slug);
+        $community = $this->communityRepo->findBySlug($communitySlug);
         if ($community === null) {
-            $output->writeln(sprintf(
-                '<error>Community not found for slug: %s</error>',
-                $slug,
+            $writeln(sprintf(
+                'Community not found for slug: %s',
+                $communitySlug,
             ));
 
-            return Command::FAILURE;
+            return self::EXIT_FAILURE;
         }
 
         $mimeType = $this->detectMimeType($filePath);
-        $output->writeln(sprintf(
-            '<comment>→ %s (%s)</comment>',
+        $writeln(sprintf(
+            '→ %s (%s)',
             basename($filePath),
             $mimeType,
         ));
@@ -93,40 +75,40 @@ final class IngestFileCommand extends Command
                 community: $community,
             );
         } catch (IngestionException $e) {
-            $output->writeln(sprintf('<error>✗ Ingestion handler failed: %s</error>', $e->getMessage()));
+            $writeln(sprintf('✗ Ingestion handler failed: %s', $e->getMessage()));
 
-            return Command::FAILURE;
+            return self::EXIT_FAILURE;
         }
 
-        $output->writeln('<info>✓ Handler produced RawDocument</info>');
+        $writeln('✓ Handler produced RawDocument');
 
         try {
-            $output->writeln('<comment>→ Running compilation pipeline (5 steps)…</comment>');
+            $writeln('→ Running compilation pipeline (5 steps)…');
             $payload = $this->pipeline->compile($rawDocument, (string) $community->get('id'));
         } catch (PipelineException $e) {
-            $output->writeln(sprintf('<error>✗ Pipeline failed: %s</error>', $e->getMessage()));
+            $writeln(sprintf('✗ Pipeline failed: %s', $e->getMessage()));
 
-            return Command::FAILURE;
+            return self::EXIT_FAILURE;
         }
 
-        $output->writeln(sprintf(
-            '<info>✓ KnowledgeItem persisted into community "%s".</info>',
-            $slug,
+        $writeln(sprintf(
+            '✓ KnowledgeItem persisted into community "%s".',
+            $communitySlug,
         ));
-        $output->writeln(sprintf(
-            '  id:    <info>%s</info>',
+        $writeln(sprintf(
+            '  id:    %s',
             $payload->entityUuid ?? '(not assigned)',
         ));
-        $output->writeln(sprintf(
-            '  type:  <info>%s</info>',
+        $writeln(sprintf(
+            '  type:  %s',
             $payload->knowledgeType?->value ?? '(unknown)',
         ));
-        $output->writeln(sprintf(
-            '  tier:  <info>%s</info>',
+        $writeln(sprintf(
+            '  tier:  %s',
             $payload->accessTier->value,
         ));
 
-        return Command::SUCCESS;
+        return self::EXIT_SUCCESS;
     }
 
     /**
@@ -153,8 +135,12 @@ final class IngestFileCommand extends Command
             return 'application/octet-stream';
         }
 
-        $detected = finfo_file($finfo, $filePath);
+        try {
+            $detected = finfo_file($finfo, $filePath);
 
-        return is_string($detected) && $detected !== '' ? $detected : 'application/octet-stream';
+            return is_string($detected) && $detected !== '' ? $detected : 'application/octet-stream';
+        } finally {
+            finfo_close($finfo);
+        }
     }
 }

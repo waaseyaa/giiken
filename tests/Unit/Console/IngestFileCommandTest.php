@@ -15,15 +15,13 @@ use App\Pipeline\Provider\LlmProviderInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * Unit tests for the failure paths of {@see IngestFileCommand}. The happy
- * path (markdown → persisted KnowledgeItem) runs the real pipeline end-
- * to-end and is exercised manually; giiken#95 will add a seam that lets
- * us automate it without hitting a real LLM.
+ * Unit tests for the failure paths of {@see IngestFileCommand::run()}.
+ *
+ * Symfony Console is only used by Waaseyaa to register the thin adapter from
+ * {@see \App\Provider\AppServiceProvider::commands()}; orchestration is tested
+ * directly via a capturing {@see \Closure(string):void}.
  */
 #[CoversClass(IngestFileCommand::class)]
 final class IngestFileCommandTest extends TestCase
@@ -31,15 +29,15 @@ final class IngestFileCommandTest extends TestCase
     #[Test]
     public function it_fails_when_file_does_not_exist(): void
     {
-        $tester = $this->makeTester($this->buildCommand());
+        $capture = new IngestFileCommandOutputCapture();
+        $exit = $this->buildCommand()->run(
+            'test-community',
+            '/tmp/this-file-does-not-exist-' . bin2hex(random_bytes(8)),
+            $capture->writelnFn(),
+        );
 
-        $exit = $tester->execute([
-            'community-slug' => 'test-community',
-            'file'           => '/tmp/this-file-does-not-exist-' . bin2hex(random_bytes(8)),
-        ]);
-
-        self::assertSame(Command::FAILURE, $exit);
-        self::assertStringContainsString('File not found', $tester->getDisplay());
+        self::assertSame(IngestFileCommand::EXIT_FAILURE, $exit);
+        self::assertStringContainsString('File not found', $capture->buffer);
     }
 
     #[Test]
@@ -48,15 +46,15 @@ final class IngestFileCommandTest extends TestCase
         $file = $this->writeTempFile('.md', '# Sample');
 
         try {
-            $tester = $this->makeTester($this->buildCommand(community: null));
+            $capture = new IngestFileCommandOutputCapture();
+            $exit = $this->buildCommand(community: null)->run(
+                'no-such-community',
+                $file,
+                $capture->writelnFn(),
+            );
 
-            $exit = $tester->execute([
-                'community-slug' => 'no-such-community',
-                'file'           => $file,
-            ]);
-
-            self::assertSame(Command::FAILURE, $exit);
-            self::assertStringContainsString('Community not found', $tester->getDisplay());
+            self::assertSame(IngestFileCommand::EXIT_FAILURE, $exit);
+            self::assertStringContainsString('Community not found', $capture->buffer);
         } finally {
             @unlink($file);
         }
@@ -65,22 +63,18 @@ final class IngestFileCommandTest extends TestCase
     #[Test]
     public function it_fails_with_helpful_message_when_no_handler_supports_the_file(): void
     {
-        // `.xyzbogusext` maps to nothing in the extension map and no
-        // handler is registered, so `IngestionHandlerRegistry::handle`
-        // will throw IngestionException which we expect the command to
-        // surface cleanly.
         $file = $this->writeTempFile('.xyzbogusext', 'binary-ish content');
 
         try {
-            $tester = $this->makeTester($this->buildCommand());
+            $capture = new IngestFileCommandOutputCapture();
+            $exit = $this->buildCommand()->run(
+                'test-community',
+                $file,
+                $capture->writelnFn(),
+            );
 
-            $exit = $tester->execute([
-                'community-slug' => 'test-community',
-                'file'           => $file,
-            ]);
-
-            self::assertSame(Command::FAILURE, $exit);
-            self::assertStringContainsString('Ingestion handler failed', $tester->getDisplay());
+            self::assertSame(IngestFileCommand::EXIT_FAILURE, $exit);
+            self::assertStringContainsString('Ingestion handler failed', $capture->buffer);
         } finally {
             @unlink($file);
         }
@@ -97,9 +91,6 @@ final class IngestFileCommandTest extends TestCase
                 : null,
         );
 
-        // Empty registry — the command should fail at `handle()` before
-        // ever reaching the pipeline, so the pipeline's providers are
-        // never exercised.
         $registry = new IngestionHandlerRegistry();
 
         $pipeline = new CompilationPipeline(
@@ -132,12 +123,19 @@ final class IngestFileCommandTest extends TestCase
 
         return $final;
     }
+}
 
-    private function makeTester(IngestFileCommand $command): CommandTester
+final class IngestFileCommandOutputCapture
+{
+    public string $buffer = '';
+
+    /**
+     * @return \Closure(string): void
+     */
+    public function writelnFn(): \Closure
     {
-        $app = new Application();
-        $app->addCommands([$command]);
-
-        return new CommandTester($app->find('giiken:ingest:file'));
+        return function (string $line): void {
+            $this->buffer .= $line . "\n";
+        };
     }
 }
