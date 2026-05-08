@@ -22,5 +22,4 @@ Strict `spec-kitty accept` expects a mission branch and `acceptance-matrix.json`
 ## Follow-ups (not in scope)
 
 - Deeper domain services (compilation vs entity invariants) — future mission.  
-- Waaseyaa consumer bump when pinning a new framework tag — separate PR.  
-- Framework queue failures — [waaseyaa/framework#1397](https://github.com/waaseyaa/framework/issues/1397).
+- Waaseyaa consumer bump when pinning a new framework tag — separate PR (queue/\`Worker::run()\` memory guard fixed on framework `main` in [b57c00aa1](https://github.com/waaseyaa/framework/commit/b57c00aa1); pick up via the next `waaseyaa/*` release you adopt).

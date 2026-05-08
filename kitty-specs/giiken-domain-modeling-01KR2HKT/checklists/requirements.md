@@ -9,7 +9,7 @@
 
 - [x] Focused on maintainer value and bounded scope (documentation + optional aligned code)
 - [x] Mandatory spec sections present (overview, scenarios, requirements, success criteria, entities, assumptions)
-- [x] Scope separated from unrelated framework queue failures (see Waaseyaa #1397)
+- [x] Scope separated from historical framework queue test noise (#1397 / #1389 — fixed upstream [b57c00aa1](https://github.com/waaseyaa/framework/commit/b57c00aa1))
 
 ## Requirement Completeness
 
