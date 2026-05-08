@@ -1,0 +1,10 @@
+{
+  "created_at": "2026-05-08T01:24:06.305417+00:00",
+  "friendly_name": "eliminate symfony ingestion cli path",
+  "mission_id": "01KR2JYJ0PHKCN2VEHV0QQSBA5",
+  "mission_number": null,
+  "mission_slug": "eliminate-symfony-ingestion-cli-path-01KR2JYJ",
+  "mission_type": "software-dev",
+  "slug": "eliminate-symfony-ingestion-cli-path-01KR2JYJ",
+  "target_branch": "main"
+}
