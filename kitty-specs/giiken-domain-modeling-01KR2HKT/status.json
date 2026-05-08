@@ -1,7 +1,7 @@
 {
-  "event_count": 2,
-  "last_event_id": "01KR2HRZ3665AQG6VB6HHHEG76",
-  "materialized_at": "2026-05-08T01:03:33.478085+00:00",
+  "event_count": 12,
+  "last_event_id": "01KR2HWH9JBX3EJ94NXWT1NAHZ",
+  "materialized_at": "2026-05-08T01:05:30.418808+00:00",
   "mission_number": "",
   "mission_slug": "giiken-domain-modeling-01KR2HKT",
   "mission_type": "software-dev",
@@ -10,26 +10,26 @@
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
-    "done": 0,
+    "done": 2,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 2
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
-      "force_count": 1,
-      "lane": "planned",
-      "last_event_id": "01KR2HRYCM36NC6P780VHF7FRT",
-      "last_transition_at": "2026-05-08T01:03:32.756819+00:00"
+      "actor": "claude",
+      "force_count": 2,
+      "lane": "done",
+      "last_event_id": "01KR2HV30X3N6KAHJG7BN35KTJ",
+      "last_transition_at": "2026-05-08T01:04:43.037173+00:00"
     },
     "WP02": {
-      "actor": "finalize-tasks",
-      "force_count": 1,
-      "lane": "planned",
-      "last_event_id": "01KR2HRZ3665AQG6VB6HHHEG76",
-      "last_transition_at": "2026-05-08T01:03:33.478085+00:00"
+      "actor": "claude",
+      "force_count": 2,
+      "lane": "done",
+      "last_event_id": "01KR2HWH9JBX3EJ94NXWT1NAHZ",
+      "last_transition_at": "2026-05-08T01:05:30.418808+00:00"
     }
   }
 }

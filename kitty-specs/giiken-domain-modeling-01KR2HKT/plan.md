@@ -1,108 +1,68 @@
-# Implementation Plan: [FEATURE]
-*Path: [templates/plan-template.md](templates/plan-template.md)*
+# Implementation Plan: Giiken domain modeling
 
-
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/kitty-specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/spec-kitty.plan` command. See `src/specify_cli/missions/software-dev/command-templates/plan.md` for the execution workflow.
-
-The planner will not begin until all planning questions have been answered—capture those answers in this document before progressing to later phases.
+**Branch**: `main` (planning on main; optional mission branch later)  
+**Date**: 2026-05-08  
+**Spec**: [spec.md](./spec.md)  
+**Research**: [research.md](./research.md) · **Data model**: [data-model.md](./data-model.md)
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Canonize Giiken’s three-entity domain (Community, KnowledgeItem, WikiLintReport), tenancy via `community_id`, and provenance (`KnowledgeItemSource`) so future missions (ingestion, compilation, governance UI) extend from one **architecture-level** description. First increment: mission-local docs are authoritative; optional follow-up adds `docs/architecture/domain-model.md` and links from `lifecycle.md` without changing RBAC semantics.
 
-## Technical Context
+## Technical context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+**Language/Version**: PHP 8.4+ (Giiken), TypeScript/Vue for frontend (unchanged by doc-only WPs)  
+**Primary Dependencies**: `waaseyaa/*` framework (entity, access, foundation, ssr)  
+**Storage**: SQLite (dev/test); content entities with column + `_data` split  
+**Testing**: PHPUnit + Vitest; access policy tests guard RBAC  
+**Target Platform**: Linux / WSL2 dev; PHP built-in or FPM in prod  
+**Project Type**: Waaseyaa consumer app (`src/`, `migrations/`, `docs/architecture/`)  
+**Performance goals**: N/A for documentation phase  
+**Constraints**: C-001–C-003 in spec (merge to Giiken `main`; no RBAC change without explicit WP)  
+**Scale/scope**: Three entity types; bounded documentation + optional thin code/doc links
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [Project-specific test approach or NEEDS CLARIFICATION]
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+## Charter check
 
-## Charter Check
+- No charter violations identified for documentation-first scope.
+- Re-check if a WP introduces new persisted fields or routes (lifecycle drift script applies).
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-[Gates determined based on charter file]
-
-## Project Structure
+## Project structure
 
 ### Documentation (this feature)
 
 ```
-kitty-specs/[###-feature]/
-├── plan.md              # This file (/spec-kitty.plan command output)
-├── research.md          # Phase 0 output (/spec-kitty.plan command)
-├── data-model.md        # Phase 1 output (/spec-kitty.plan command)
-├── quickstart.md        # Phase 1 output (/spec-kitty.plan command)
-├── contracts/           # Phase 1 output (/spec-kitty.plan command)
-└── tasks.md             # Phase 2 output (/spec-kitty.tasks command - NOT created by /spec-kitty.plan)
+kitty-specs/giiken-domain-modeling-01KR2HKT/
+├── spec.md
+├── plan.md
+├── research.md
+├── data-model.md
+├── checklists/requirements.md
+├── research/evidence-log.csv
+├── research/source-register.csv
+└── tasks.md            # produced by `spec-kitty tasks`
 ```
 
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+### Source code (repository root)
 
 ```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+src/Entity/Community/
+src/Entity/KnowledgeItem/
+src/Wiki/WikiLintReport.php
+migrations/
+docs/architecture/
+tests/Unit/Access/
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure decision:** Domain types live under `src/Entity/**` and `src/Wiki/`; migrations remain canonical for columns; architecture narrative under `docs/architecture/`.
 
-## Complexity Tracking
+## Phased work (for tasks.md generation)
 
-*Fill ONLY if Charter Check has violations that must be justified*
+| Phase | Intent |
+| --- | --- |
+| P0 | Mission artifacts complete (discovery + specify) — **done in-session** |
+| P1 | Optional: add `docs/architecture/domain-model.md` summarizing aggregates + link from `lifecycle.md` §1.3 |
+| P2 | Optional: lightweight audit (script or checklist) comparing migration column set to documented fields |
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+## Complexity tracking
+
+*None — no charter violations.*

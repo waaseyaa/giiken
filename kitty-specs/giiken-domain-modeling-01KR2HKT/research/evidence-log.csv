@@ -1,0 +1,4 @@
+evidence_id,claim,source_uri,finding_summary,recorded_utc
+E-001,Three content entities registered via EntitiesProvider,internal:src/Provider/EntitiesProvider.php,Confirms runtime registration path for domain types,2026-05-08T01:05:00Z
+E-002,Knowledge items store community_id as VARCHAR(128),internal:migrations/20260409_121000_add_giiken_entity_field_columns.php,Tenancy column definition for items,2026-05-08T01:05:00Z
+E-003,Structured source on knowledge_item,internal:migrations/20260415_140000_add_knowledge_item_source_columns.php,JSON source + indexed mirror columns,2026-05-08T01:05:00Z

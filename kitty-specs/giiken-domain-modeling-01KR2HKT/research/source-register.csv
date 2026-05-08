@@ -1,0 +1,4 @@
+source_id,title,kind,uri,notes
+S-001,Giiken lifecycle doc,internal,docs/architecture/lifecycle.md,Provider and boot boundaries
+S-002,Knowledge item source architecture,internal,docs/architecture/knowledge-item-source.md,Provenance rationale
+S-003,Giiken agent guidance,internal,CLAUDE.md,Entity list and RBAC summary
