@@ -8,9 +8,9 @@ Giiken is a sovereign indigenous knowledge management platform built on the **Wa
 
 **PHP:** 8.4+ | **License:** GPL-2.0-or-later | **Namespace:** `App\` (PSR-4)
 
-## Boot-to-browser status (as of 2026-05-06)
+## Boot-to-browser status (as of 2026-05-08)
 
-✅ **Phase A green.** Boot, migrations, and SSR dispatch all work end-to-end on `waaseyaa/* ^0.1.0-alpha.173`.
+✅ **Phase A green.** Boot, migrations, and SSR dispatch work end-to-end on path-linked **`waaseyaa/*` main** (native **`Waaseyaa\CLI\CliKernel`**; Symfony Console is not a framework runtime dependency after waaseyaa `native-cli-kernel-01KR2NR7`). Composer still constrains `waaseyaa/*` to `^0.1.0-alpha.173` until the next tagged bump.
 
 Verified smoke path:
 
@@ -21,7 +21,7 @@ curl http://127.0.0.1:8080/                       # 200, Inertia "Discover"
 curl http://127.0.0.1:8080/sagamok-anishnawbek    # 200, Inertia "Discovery/Index" with 6 seeded items
 ```
 
-PHPUnit: 258/258 passing.
+PHPUnit: 284/284 passing.
 
 ### Resolved (closed)
 
@@ -66,7 +66,7 @@ npm run test:js:watch
 lefthook run pre-commit
 lefthook run pre-push
 
-# Giiken CLI (registered via AppServiceProvider + HasCommandsInterface)
+# Giiken CLI (`HasNativeCommandsInterface` on AppServiceProvider; `Waaseyaa\CLI\CliKernel`; see `docs/specs/giiken-ingestion-cli-contract.md`)
 ./vendor/bin/waaseyaa giiken:seed:test-community   # demo test-community + giiken_staff (password: giiken-dev or GIIKEN_SEED_STAFF_PASSWORD)
 ./vendor/bin/waaseyaa giiken:ingest:file <slug> <path-to-file>
 ./vendor/bin/waaseyaa search:reindex

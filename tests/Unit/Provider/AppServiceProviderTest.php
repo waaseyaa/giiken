@@ -8,7 +8,7 @@ use App\Provider\AppServiceProvider;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Waaseyaa\Foundation\ServiceProvider\Capability\HasCommandsInterface;
+use Waaseyaa\Foundation\ServiceProvider\Capability\HasNativeCommandsInterface;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
 
 #[CoversClass(AppServiceProvider::class)]
@@ -23,11 +23,11 @@ final class AppServiceProviderTest extends TestCase
     }
 
     #[Test]
-    public function it_implements_has_commands_so_console_kernel_registers_cli_commands(): void
+    public function it_implements_has_native_commands_for_cli_kernel_registration(): void
     {
         self::assertTrue(
-            is_subclass_of(AppServiceProvider::class, HasCommandsInterface::class),
-            'ConsoleKernel only calls commands() on providers that implement HasCommandsInterface.',
+            is_subclass_of(AppServiceProvider::class, HasNativeCommandsInterface::class),
+            'ConsoleKernel gathers Giiken CLI via HasNativeCommandsInterface::nativeCommands().',
         );
     }
 

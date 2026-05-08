@@ -9,13 +9,13 @@
 | Property | Value |
 |----------|--------|
 | Name | `giiken:ingest:file` |
-| Arguments | `community-slug` (string), `file` (path) |
+| Arguments | `community_slug`, `file` (positional strings; Waaseyaa-native names use underscores) |
 | Success exit | `0` (`App\Console\IngestFileCommand::EXIT_SUCCESS`) |
 | Failure exit | `1` (`App\Console\IngestFileCommand::EXIT_FAILURE`) |
 
-**Registration:** `App\Provider\AppServiceProvider::commands()` returns a thin anonymous `Symfony\Component\Console\Command\Command` whose `execute()` forwards to `App\Console\IngestFileCommand::run($slug, $path, writeln Closure)`. Orchestration and MIME detection have **no** Symfony imports.
+**Registration:** `App\Provider\AppServiceProvider::nativeCommands()` yields a **CommandDefinition** for `giiken:ingest:file` with handler **GiikenIngestFileHandler::execute** (Waaseyaa **HasNativeCommandsInterface**). The handler forwards to **IngestFileCommand::run**. Kernel: `Waaseyaa\CLI\CliKernel` (Symfony Console absent from Waaseyaa runtime after waaseyaa/native-cli-kernel mission).
 
-**Output:** Operator lines are plain text (no Symfony console markup). The console adapter may still apply terminal formatting when writing through `OutputInterface`.
+**Output:** Plain text lines via **`CliIO::writeln` / stderr via `CliIO::error`**.
 
 ## Pipeline identity
 
@@ -55,12 +55,14 @@ Ingest-roster classes (Giiken):
 **Enforced** by `tests/Unit/Architecture/IngestionCliPathNoSymfonyTest.php` for these paths:
 
 - `src/Console/IngestFileCommand.php`
+- `src/Console/Handler/GiikenIngestFileHandler.php`
+- `src/Console/Handler/GiikenSeedTestCommunityHandler.php`
 - `src/Ingestion/IngestionHandlerRegistry.php`
 - `src/Ingestion/IngestionException.php`
 - `src/Ingestion/Handler/{Csv,Html,Document,Markdown,Media}IngestionHandler.php`
 - `src/Pipeline/**/*.php` (as listed in the test provider)
 
-**Allowed elsewhere:** `AppServiceProvider` and other commands may import Symfony Console for Waaseyaa `HasCommandsInterface` registration; that is **outside** this guard list.
+**AppServiceProvider:** must not register Giiken commands via Symfony Console; **`HasNativeCommandsInterface` only**.
 
 ## Tests
 
@@ -73,11 +75,16 @@ Ingest-roster classes (Giiken):
 |----------|--------|--------|
 | `IngestFileCommand.php` | Extended Symfony `Command`, `InputInterface` / `OutputInterface` | Plain service; `run(..., Closure $writeln)` |
 | `MarkdownIngestionHandler.php` | `Symfony\Component\Yaml\Yaml` | Inline minimal YAML frontmatter parser |
-| `AppServiceProvider.php` | `new IngestFileCommand(...)` as command | Anonymous Symfony `Command` delegating to `IngestFileCommand::run()` |
+| `AppServiceProvider.php` | Symfony `HasCommandsInterface` shim | **`HasNativeCommandsInterface`** → **CommandDefinition** + DI for handlers |
 
 No Symfony imports remain in pipeline package code or ingest roster handlers.
+
+## Git note (2026-05 follow-up after Waaseyaa native-cli-kernel)
+
+- **`search:reindex`** remains available from **`Waaseyaa\CLI`** (`SearchReindexHandler`); Giiken no longer duplicates it.
 
 ## Changelog
 
 - 2026-05-08 — Initial draft for Spec Kitty mission WP01.
 - 2026-05-08 — Mission implementation: Symfony-free orchestration, markdown frontmatter parser, arch test, lifecycle note.
+- 2026-05-08 — Follow-up: **`HasNativeCommandsInterface`**, `GiikenIngestFileHandler`, `GiikenSeedTestCommunityHandler`; duplicate Giiken **`search:reindex`** removed (framework command only).

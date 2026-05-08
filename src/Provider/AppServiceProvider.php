@@ -4,33 +4,51 @@ declare(strict_types=1);
 
 namespace App\Provider;
 
+use App\Console\Handler\GiikenIngestFileHandler;
+use App\Console\Handler\GiikenSeedTestCommunityHandler;
 use App\Console\IngestFileCommand;
-use App\Console\SearchReindexCommand;
-use App\Console\SeedTestCommunityCommand;
-use App\Pipeline\CompilationPipeline;
 use App\Entity\Community\CommunityRepositoryInterface;
 use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use App\Ingestion\IngestionHandlerRegistry;
 use App\Ingestion\NorthCloud\NcHitToKnowledgeItemMapper;
-use Waaseyaa\NorthCloud\Sync\MapperRegistry;
+use App\Pipeline\CompilationPipeline;
 use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherContract;
-use Waaseyaa\Database\DatabaseInterface;
+use Waaseyaa\CLI\ArgumentDefinition;
+use Waaseyaa\CLI\ArgumentMode;
+use Waaseyaa\CLI\CommandDefinition;
 use Waaseyaa\Entity\EntityTypeManager;
-use Waaseyaa\Foundation\Event\EventDispatcherInterface as WaaseyaaEventDispatcherInterface;
 use Waaseyaa\Foundation\Log\LoggerInterface;
-use Waaseyaa\Foundation\ServiceProvider\Capability\HasCommandsInterface;
+use Waaseyaa\Foundation\ServiceProvider\Capability\HasNativeCommandsInterface;
 use Waaseyaa\Foundation\ServiceProvider\ServiceProvider;
-use Waaseyaa\Search\SearchIndexerInterface;
+use Waaseyaa\NorthCloud\Sync\MapperRegistry;
 
-final class AppServiceProvider extends ServiceProvider implements HasCommandsInterface
+final class AppServiceProvider extends ServiceProvider implements HasNativeCommandsInterface
 {
     public function register(): void
     {
+        $this->singleton(IngestFileCommand::class, function (): IngestFileCommand {
+            return new IngestFileCommand(
+                $this->resolve(CommunityRepositoryInterface::class),
+                $this->resolve(IngestionHandlerRegistry::class),
+                $this->resolve(CompilationPipeline::class),
+            );
+        });
+
+        $this->singleton(GiikenIngestFileHandler::class, function (): GiikenIngestFileHandler {
+            return new GiikenIngestFileHandler(
+                $this->resolve(IngestFileCommand::class),
+            );
+        });
+
+        $this->singleton(GiikenSeedTestCommunityHandler::class, function (): GiikenSeedTestCommunityHandler {
+            return new GiikenSeedTestCommunityHandler(
+                $this->resolve(CommunityRepositoryInterface::class),
+                $this->resolve(KnowledgeItemRepositoryInterface::class),
+                $this->resolve(EntityTypeManager::class),
+            );
+        });
+
         $this->singleton(PsrEventDispatcherInterface::class, function (): PsrEventDispatcherInterface {
             $dispatcher = $this->resolve(SymfonyEventDispatcherContract::class);
             if (!$dispatcher instanceof PsrEventDispatcherInterface) {
@@ -39,7 +57,6 @@ final class AppServiceProvider extends ServiceProvider implements HasCommandsInt
 
             return $dispatcher;
         });
-
     }
 
     /**
@@ -94,72 +111,22 @@ final class AppServiceProvider extends ServiceProvider implements HasCommandsInt
         $this->registerNorthCloudMappers();
     }
 
-    /**
-     * @return list<Command>
-     */
-    public function commands(
-        EntityTypeManager $entityTypeManager,
-        DatabaseInterface $_database,
-        WaaseyaaEventDispatcherInterface $_dispatcher,
-    ): array {
-        return [
-            new SeedTestCommunityCommand(
-                $this->resolve(CommunityRepositoryInterface::class),
-                $this->resolve(KnowledgeItemRepositoryInterface::class),
-                $entityTypeManager,
-            ),
-            new SearchReindexCommand(
-                $this->resolve(SearchIndexerInterface::class),
-                $entityTypeManager,
-            ),
-            self::newGiikenIngestFileConsoleCommand(
-                new IngestFileCommand(
-                    $this->resolve(CommunityRepositoryInterface::class),
-                    $this->resolve(IngestionHandlerRegistry::class),
-                    $this->resolve(CompilationPipeline::class),
-                ),
-            ),
-        ];
-    }
-
-    /**
-     * Waaseyaa {@see HasCommandsInterface} registers Symfony Console commands only;
-     * ingest orchestration lives in {@see IngestFileCommand} (zero Symfony imports).
-     */
-    private static function newGiikenIngestFileConsoleCommand(IngestFileCommand $ingest): Command
+    public function nativeCommands(): iterable
     {
-        return new class($ingest) extends Command {
-            public function __construct(private readonly IngestFileCommand $ingestFile)
-            {
-                parent::__construct('giiken:ingest:file');
-                $this->setDescription('Ingest a file into a community via the full compilation pipeline');
-            }
+        yield new CommandDefinition(
+            name: 'giiken:ingest:file',
+            description: 'Ingest a file into a community via the full compilation pipeline',
+            arguments: [
+                new ArgumentDefinition('community_slug', ArgumentMode::Required, 'Slug of the target community (must already exist).'),
+                new ArgumentDefinition('file', ArgumentMode::Required, 'Absolute or relative path to the file to ingest.'),
+            ],
+            handler: [GiikenIngestFileHandler::class, 'execute'],
+        );
 
-            protected function configure(): void
-            {
-                $this->addArgument(
-                    'community-slug',
-                    InputArgument::REQUIRED,
-                    'Slug of the target community (must already exist).',
-                );
-                $this->addArgument(
-                    'file',
-                    InputArgument::REQUIRED,
-                    'Absolute or relative path to the file to ingest.',
-                );
-            }
-
-            protected function execute(InputInterface $input, OutputInterface $output): int
-            {
-                return $this->ingestFile->run(
-                    (string) $input->getArgument('community-slug'),
-                    (string) $input->getArgument('file'),
-                    static function (string $line) use ($output): void {
-                        $output->writeln($line);
-                    },
-                );
-            }
-        };
+        yield new CommandDefinition(
+            name: 'giiken:seed:test-community',
+            description: 'Seed a demo community (slug test-community) with sample public knowledge items',
+            handler: [GiikenSeedTestCommunityHandler::class, 'execute'],
+        );
     }
-
 }

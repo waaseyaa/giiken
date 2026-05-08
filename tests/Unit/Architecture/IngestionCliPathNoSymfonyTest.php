@@ -30,6 +30,8 @@ final class IngestionCliPathNoSymfonyTest extends TestCase
         $root = dirname(__DIR__, 3);
         $relative = [
             'src/Console/IngestFileCommand.php',
+            'src/Console/Handler/GiikenIngestFileHandler.php',
+            'src/Console/Handler/GiikenSeedTestCommunityHandler.php',
             'src/Ingestion/IngestionHandlerRegistry.php',
             'src/Ingestion/IngestionException.php',
             'src/Ingestion/Handler/CsvIngestionHandler.php',

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Console;
+namespace App\Console\Handler;
 
 use App\Entity\Community\Community;
 use App\Entity\Community\CommunityRepositoryInterface;
@@ -11,33 +11,23 @@ use App\Entity\KnowledgeItem\AccessTier;
 use App\Entity\KnowledgeItem\KnowledgeItem;
 use App\Entity\KnowledgeItem\KnowledgeItemRepositoryInterface;
 use App\Entity\KnowledgeItem\KnowledgeType;
-use Symfony\Component\Console\Attribute\AsCommand;
+use Waaseyaa\CLI\CliIO;
 use Waaseyaa\Entity\EntityTypeManager;
 use Waaseyaa\User\User;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Uid\Uuid;
 
-#[AsCommand(
-    name: 'giiken:seed:test-community',
-    description: 'Seed a demo community (slug test-community) with sample public knowledge items',
-)]
-final class SeedTestCommunityCommand extends Command
+final class GiikenSeedTestCommunityHandler
 {
     public function __construct(
         private readonly CommunityRepositoryInterface $communityRepo,
         private readonly KnowledgeItemRepositoryInterface $itemRepo,
         private readonly EntityTypeManager $entityTypeManager,
-    ) {
-        parent::__construct();
-    }
+    ) {}
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function execute(CliIO $io): int
     {
         $existing = $this->communityRepo->findBySlug('test-community');
         if ($existing !== null) {
-            $output->writeln('<comment>Community "test-community" already exists. Ensuring sample items only.</comment>');
+            $io->writeln('Community "test-community" already exists. Ensuring sample items only.');
             $community = $existing;
         } else {
             $wiki = new WikiSchema(
@@ -50,7 +40,7 @@ final class SeedTestCommunityCommand extends Command
             );
 
             $community = Community::make([
-                'uuid'        => Uuid::v4()->toRfc4122(),
+                'uuid'        => self::uuidV4(),
                 'name'        => 'Test Community',
                 'bundle'      => 'community',
                 'slug'        => 'test-community',
@@ -61,21 +51,21 @@ final class SeedTestCommunityCommand extends Command
 
             $community = $this->communityRepo->findBySlug('test-community');
             if ($community === null) {
-                $output->writeln('<error>Failed to load community after save.</error>');
+                $io->error('Failed to load community after save.');
 
-                return Command::FAILURE;
+                return 1;
             }
-            $output->writeln('<info>Created community "test-community".</info>');
+            $io->writeln('Created community "test-community".');
         }
 
         $communityId = (string) $community->get('id');
-        $this->ensureStaffUser($communityId, $output);
+        $this->ensureStaffUser($communityId, $io);
 
         $items = $this->itemRepo->findByCommunity($communityId);
         if ($items !== []) {
-            $output->writeln(sprintf('<comment>Community already has %d knowledge items. Skip seeding items.</comment>', count($items)));
+            $io->writeln(sprintf('Community already has %d knowledge items. Skip seeding items.', \count($items)));
 
-            return Command::SUCCESS;
+            return 0;
         }
 
         $samples = [
@@ -98,24 +88,24 @@ final class SeedTestCommunityCommand extends Command
 
         foreach ($samples as $row) {
             $item = KnowledgeItem::make([
-                'uuid'          => Uuid::v4()->toRfc4122(),
-                'title'         => $row['title'],
-                'bundle'        => 'knowledge_item',
-                'content'       => $row['content'],
-                'community_id'  => $communityId,
-                'knowledge_type'=> $row['type']->value,
-                'access_tier'   => AccessTier::Public->value,
+                'uuid'           => self::uuidV4(),
+                'title'          => $row['title'],
+                'bundle'         => 'knowledge_item',
+                'content'        => $row['content'],
+                'community_id'   => $communityId,
+                'knowledge_type' => $row['type']->value,
+                'access_tier'    => AccessTier::Public->value,
             ]);
             $item->enforceIsNew(true);
             $this->itemRepo->save($item);
         }
 
-        $output->writeln(sprintf('<info>Seeded %d sample knowledge items.</info>', count($samples)));
+        $io->writeln(sprintf('Seeded %d sample knowledge items.', \count($samples)));
 
-        return Command::SUCCESS;
+        return 0;
     }
 
-    private function ensureStaffUser(string $communityId, OutputInterface $output): void
+    private function ensureStaffUser(string $communityId, CliIO $io): void
     {
         $storage = $this->entityTypeManager->getStorage('user');
         $role = 'giiken.community.' . $communityId . '.staff';
@@ -136,9 +126,8 @@ final class SeedTestCommunityCommand extends Command
             }
             if (!\in_array($role, $loaded->getRoles(), true)) {
                 $loaded->addRole($role);
-                $output->writeln('<info>Added community staff role to user "giiken_staff".</info>');
+                $io->writeln('Added community staff role to user "giiken_staff".');
             }
-            // Re-hash on every seed so local DBs recover from drift (matches default or GIIKEN_SEED_STAFF_PASSWORD).
             $loaded->setRawPassword($password);
             $storage->save($loaded);
 
@@ -156,7 +145,24 @@ final class SeedTestCommunityCommand extends Command
         $user->enforceIsNew();
         $storage->save($user);
 
-        $output->writeln('<info>Created user "giiken_staff" with community staff role.</info>');
-        $output->writeln('<comment>Password: GIIKEN_SEED_STAFF_PASSWORD env or default "giiken-dev".</comment>');
+        $io->writeln('Created user "giiken_staff" with community staff role.');
+        $io->writeln('Password: GIIKEN_SEED_STAFF_PASSWORD env or default "giiken-dev".');
+    }
+
+    /** RFC 4122 version 4 (random); avoids Symfony UID in CLI handler path */
+    private static function uuidV4(): string
+    {
+        $b = random_bytes(16);
+        $b[6] = chr(ord($b[6]) & 0x0f | 0x40);
+        $b[8] = chr(ord($b[8]) & 0x3f | 0x80);
+
+        return strtolower(sprintf(
+            '%s-%s-%s-%s-%s',
+            bin2hex(substr($b, 0, 4)),
+            bin2hex(substr($b, 4, 2)),
+            bin2hex(substr($b, 6, 2)),
+            bin2hex(substr($b, 8, 2)),
+            bin2hex(substr($b, 10)),
+        ));
     }
 }

@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **CLI ingest:** `giiken:ingest:file` orchestration is now `App\Console\IngestFileCommand::run()` with a `Closure` writer — no Symfony Console types in the ingest path. `AppServiceProvider::commands()` registers a thin Symfony `Command` adapter that forwards argv and `OutputInterface` into that runner (Spec Kitty mission `eliminate-symfony-ingestion-cli-path-01KR2JYJ`).
+- **Waaseyaa native CLI:** Giiken registers **`giiken:ingest:file`** and **`giiken:seed:test-community`** via `AppServiceProvider::nativeCommands()` (**`HasNativeCommandsInterface`**, `CommandDefinition`, `GiikenIngestFileHandler`, `GiikenSeedTestCommunityHandler`) with Waaseyaa **`Waaseyaa\CLI\CliKernel`** (no Symfony Console in the framework runtime after waaseyaa `native-cli-kernel-01KR2NR7`). **`search:reindex`** is framework-owned only — removed Giiken’s duplicate wrapper.
+- **CLI ingest:** Orchestration remains **`IngestFileCommand::run(..., Closure $writeln)`** with zero Symfony types in domain/ingest/pipeline code (Spec Kitty mission `eliminate-symfony-ingestion-cli-path-01KR2JYJ`).
 - **Markdown ingestion:** Frontmatter is parsed with a small PHP YAML subset instead of `Symfony\Component\Yaml\Yaml`, keeping the ingest CLI/handler path free of `use Symfony\` imports.
-- **Docs:** `docs/specs/giiken-ingestion-cli-contract.md` and `docs/architecture/lifecycle.md` updated for the split between the console adapter and Symfony-free ingest logic.
-- **Tests:** `IngestFileCommandTest` targets `run()` directly; `IngestionCliPathNoSymfonyTest` forbids `use Symfony\` in listed production sources for the ingest → pipeline path.
+- **Docs:** `docs/specs/giiken-ingestion-cli-contract.md`, lifecycle, and `CLAUDE.md` updated for **`HasNativeCommandsInterface`** and handler-based registration.
+- **Tests:** `IngestFileCommandTest` targets `run()` directly; `IngestionCliPathNoSymfonyTest` forbids `use Symfony\` in listed production sources for the ingest → pipeline path; **`AppServiceProviderTest`** asserts **`HasNativeCommandsInterface`**.
