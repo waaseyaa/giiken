@@ -18,13 +18,13 @@
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "@tailwindcss/vite": "^4.0",
-    "@vitejs/plugin-vue": "^5.0",
+    "@vitejs/plugin-vue": "^6.0",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^20.8.9",
     "tailwindcss": "^4.0",
     "typescript": "^5.7",
-    "vite": "^6.0",
-    "vitest": "^3.2.4",
+    "vite": "^8.0",
+    "vitest": "^4.1.8",
     "vue-tsc": "^2.0"
   }
 }
